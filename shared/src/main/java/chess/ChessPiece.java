@@ -56,9 +56,34 @@ public class ChessPiece {
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         ChessPiece piece = board.getPiece(myPosition);
         if (piece.getPieceType() == PieceType.BISHOP) {
-            /* create a list of all possible moves assuming an empty board*/
+            // create a list of all possible moves assuming an empty board
             List<ChessMove> moves = new ArrayList<>();
-            moves.add(new ChessMove(myPosition, new ChessPosition(1, 8), null));
+            int x_start = myPosition.getRow();
+            int y_start = myPosition.getColumn();
+            // down right
+            int x = x_start;
+            int y = y_start;
+            while (x++ < 8 && y-- > 1) {
+                moves.add(new ChessMove(myPosition, new ChessPosition(x, y), null));
+            }
+            // up right
+            x = x_start;
+            y = y_start;
+            while (x++ < 8 && y++ < 8) {
+                moves.add(new ChessMove(myPosition, new ChessPosition(x, y), null));
+            }
+            // up left
+            x = x_start;
+            y = y_start;
+            while (x-- > 1 && y++ < 8) {
+                moves.add(new ChessMove(myPosition, new ChessPosition(x, y), null));
+            }
+            // down left
+            x = x_start;
+            y = y_start;
+            while (x-- > 1 && y-- > 1) {
+                moves.add(new ChessMove(myPosition, new ChessPosition(x, y), null));
+            }
             return moves;
         }
         return List.of();
