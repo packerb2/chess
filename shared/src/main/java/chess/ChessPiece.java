@@ -55,6 +55,7 @@ public class ChessPiece {
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         ChessPiece piece = board.getPiece(myPosition);
         if (piece.getPieceType() == PieceType.BISHOP) {
+            /* create a list of all possible moves assuming an empty board*/
             return List.of(new ChessMove(new ChessPosition(5, 4), new ChessPosition(1, 8), null));
         }
         return List.of();
