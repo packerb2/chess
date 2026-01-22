@@ -1,5 +1,6 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -56,7 +57,9 @@ public class ChessPiece {
         ChessPiece piece = board.getPiece(myPosition);
         if (piece.getPieceType() == PieceType.BISHOP) {
             /* create a list of all possible moves assuming an empty board*/
-            return List.of(new ChessMove(new ChessPosition(5, 4), new ChessPosition(1, 8), null));
+            List<ChessMove> moves = new ArrayList<>();
+            moves.add(new ChessMove(myPosition, new ChessPosition(1, 8), null));
+            return moves;
         }
         return List.of();
     }
