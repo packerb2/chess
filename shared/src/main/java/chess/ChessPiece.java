@@ -60,7 +60,7 @@ public class ChessPiece {
             List<ChessMove> moves = new ArrayList<>();
             int x_start = myPosition.getRow();
             int y_start = myPosition.getColumn();
-            // down right
+            // up left
             int x = x_start;
             int y = y_start;
             boolean b = false;
@@ -94,7 +94,7 @@ public class ChessPiece {
                     b = true;
                 }
             }
-            // up left
+            // down right
             x = x_start;
             y = y_start;
             b = false;
