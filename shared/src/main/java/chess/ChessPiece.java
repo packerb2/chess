@@ -559,14 +559,30 @@ public class ChessPiece {
                 if (y < 8) {
                     ChessPiece diagonal_right_encounter = board.getPiece(new ChessPosition(x + 1, y + 1));
                     if (diagonal_right_encounter != null && diagonal_right_encounter.getTeamColor() != piece.getTeamColor()) {
-                        moves.add(new ChessMove(myPosition, new ChessPosition(x + 1, y + 1), null));
+                        if (x + 1 == 8) {
+                            moves.add(new ChessMove(myPosition, new ChessPosition(x + 1, y + 1), PieceType.QUEEN));
+                            moves.add(new ChessMove(myPosition, new ChessPosition(x + 1, y + 1), PieceType.ROOK));
+                            moves.add(new ChessMove(myPosition, new ChessPosition(x + 1, y + 1), PieceType.BISHOP));
+                            moves.add(new ChessMove(myPosition, new ChessPosition(x + 1, y + 1), PieceType.KNIGHT));
+                        }
+                        else {
+                            moves.add(new ChessMove(myPosition, new ChessPosition(x + 1, y + 1), null));
+                        }
                     }
                 }
                 // left capture
                 if (y > 1) {
                     ChessPiece diagonal_left_encounter = board.getPiece(new ChessPosition(x + 1, y - 1));
                     if (diagonal_left_encounter != null && diagonal_left_encounter.getTeamColor() != piece.getTeamColor()) {
-                        moves.add(new ChessMove(myPosition, new ChessPosition(x + 1, y - 1), null));
+                        if (x + 1 == 8) {
+                            moves.add(new ChessMove(myPosition, new ChessPosition(x + 1, y - 1), PieceType.QUEEN));
+                            moves.add(new ChessMove(myPosition, new ChessPosition(x + 1, y - 1), PieceType.ROOK));
+                            moves.add(new ChessMove(myPosition, new ChessPosition(x + 1, y - 1), PieceType.BISHOP));
+                            moves.add(new ChessMove(myPosition, new ChessPosition(x + 1, y - 1), PieceType.KNIGHT));
+                        }
+                        else {
+                            moves.add(new ChessMove(myPosition, new ChessPosition(x + 1, y - 1), null));
+                        }
                     }
                 }
                 // initial
