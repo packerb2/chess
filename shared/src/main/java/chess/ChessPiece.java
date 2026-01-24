@@ -534,6 +534,52 @@ public class ChessPiece {
             return moves;
         }
 
+
+        /** list of all PAWN moves */
+        if (piece.getPieceType() == PieceType.PAWN) {
+            List<ChessMove> moves = new ArrayList<>();
+            int x = myPosition.getRow();
+            int y = myPosition.getColumn();
+            // white
+            if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
+                // up
+                ChessPiece encounter = board.getPiece(new ChessPosition(x + 1, y));
+                if (encounter == null) {
+                    if (x + 1 == 8) {
+                        moves.add(new ChessMove(myPosition, new ChessPosition(x + 1, y), PieceType.QUEEN));
+                        moves.add(new ChessMove(myPosition, new ChessPosition(x + 1, y), PieceType.ROOK));
+                        moves.add(new ChessMove(myPosition, new ChessPosition(x + 1, y), PieceType.BISHOP));
+                        moves.add(new ChessMove(myPosition, new ChessPosition(x + 1, y), PieceType.KNIGHT));
+                    }
+                    else {
+                        moves.add(new ChessMove(myPosition, new ChessPosition(x + 1, y), null));
+                    }
+                }
+                // right capture
+                if (y < 8) {
+                    ChessPiece diagonal_right_encounter = board.getPiece(new ChessPosition(x + 1, y + 1));
+                    if (diagonal_right_encounter != null && diagonal_right_encounter.getTeamColor() != piece.getTeamColor()) {
+                        moves.add(new ChessMove(myPosition, new ChessPosition(x + 1, y + 1), null));
+                    }
+                }
+                // left capture
+                if (y > 1) {
+                    ChessPiece diagonal_left_encounter = board.getPiece(new ChessPosition(x + 1, y - 1));
+                    if (diagonal_left_encounter != null && diagonal_left_encounter.getTeamColor() != piece.getTeamColor()) {
+                        moves.add(new ChessMove(myPosition, new ChessPosition(x + 1, y - 1), null));
+                    }
+                }
+                // initial
+                if (x == 2) {
+                    ChessPiece encounter_2 = board.getPiece(new ChessPosition(x + 2, y));
+                    if (encounter_2 == null) {
+                        moves.add(new ChessMove(myPosition, new ChessPosition(x + 2, y), null));
+                    }
+                }
+            }
+            return moves;
+        }
+
         return List.of();
     }
 
