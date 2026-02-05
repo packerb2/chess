@@ -73,7 +73,18 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        ChessPosition spot;
+        ChessPiece piece;
+        int x = 1;
+        while (x++ <= 8) {
+            int y = 1;
+            while (y++ <= 8) {
+                spot = new ChessPosition(x, y);
+                piece = current_board.getPiece(spot);
+                // looping through board, check to see if color is opposite and, if so, if it is threatening king
+            }
+        }
+        return false;
     }
 
     /**
