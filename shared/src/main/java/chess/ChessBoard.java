@@ -16,6 +16,12 @@ public class ChessBoard {
         
     }
 
+    public ChessBoard(ChessBoard board) {
+        for (int i=0; i < squares.length; i++) {
+            squares[i] = Arrays.copyOf(board.squares[i], board.squares[i].length);
+        }
+    }
+
     /**
      * Adds a chess piece to the chessboard
      *

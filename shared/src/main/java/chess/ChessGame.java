@@ -57,10 +57,10 @@ public class ChessGame {
         Collection<ChessMove> moves = piece.pieceMoves(current_board, startPosition);
         Collection<ChessMove> to_remove = new ArrayList<>();
         for (ChessMove move : moves) {
-            ChessBoard test_board = current_board;
+            ChessBoard test_board = new ChessBoard(current_board);
             test_board.addPiece(move.getEndPosition(), piece);
             test_board.addPiece(move.getStartPosition(), null);
-            if (isInCheck(piece.getTeamColor())) {
+            if (isMoveIntoCheck(piece.getTeamColor(), test_board)) {
                 to_remove.add(move);
             }
         }
@@ -69,6 +69,31 @@ public class ChessGame {
         }
         return moves;
     }
+
+    public boolean isMoveIntoCheck(TeamColor teamColor, ChessBoard test_board) {
+        ChessPosition spot;
+        ChessPiece piece;
+        int x = 0;
+        while (x++ < 8) {
+            int y = 0;
+            while (y++ < 8) {
+                spot = new ChessPosition(x, y);
+                piece = test_board.getPiece(spot);
+                if (piece != null && piece.getTeamColor() != teamColor) {
+                    Collection<ChessMove> moves = piece.pieceMoves(test_board, spot);
+                    for (ChessMove move : moves) {
+                        ChessPosition square = move.getEndPosition();
+                        ChessPiece target = test_board.getPiece(square);
+                        if (target != null && target.getPieceType() == ChessPiece.PieceType.KING && target.getTeamColor() == teamColor) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
 
     /**
      * Makes a move in a chess game
@@ -89,9 +114,9 @@ public class ChessGame {
     public boolean isInCheck(TeamColor teamColor) {
         ChessPosition spot;
         ChessPiece piece;
-        int x = 1;
+        int x = 0;
         while (x++ < 8) {
-            int y = 1;
+            int y = 0;
             while (y++ < 8) {
                 spot = new ChessPosition(x, y);
                 piece = current_board.getPiece(spot);
@@ -159,4 +184,6 @@ public class ChessGame {
     public boolean equals(Object obj) {
         return super.equals(obj);
     }
+
+
 }
