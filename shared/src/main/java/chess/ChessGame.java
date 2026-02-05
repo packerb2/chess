@@ -67,7 +67,6 @@ public class ChessGame {
         for (ChessMove wrong : to_remove) {
             moves.remove(wrong);
         }
-        boolean b = isInCheck(piece.getTeamColor());
         return moves;
     }
 
@@ -96,7 +95,6 @@ public class ChessGame {
             while (y++ < 8) {
                 spot = new ChessPosition(x, y);
                 piece = current_board.getPiece(spot);
-                // looping through board, check to see if color is opposite and, if so, if it is threatening king
                 if (piece != null && piece.getTeamColor() != teamColor) {
                     Collection<ChessMove> moves = piece.pieceMoves(current_board, spot);
                     for (ChessMove move : moves) {
