@@ -22,7 +22,7 @@ public class ChessGame {
      * @return Which team's turn it is
      */
     public TeamColor getTeamTurn() {
-        throw new RuntimeException("Not implemented");
+        return team_turn;
     }
 
     /**
@@ -103,6 +103,7 @@ public class ChessGame {
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
         throw new RuntimeException("Not implemented");
+        // get move start, check valid moves. if move is valid, move. If not, throw exception
     }
 
     /**
