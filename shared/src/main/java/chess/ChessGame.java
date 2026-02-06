@@ -113,6 +113,14 @@ public class ChessGame {
         if (!moves.contains(move)) {
             throw new InvalidMoveException();
         }
+        if (piece.getPieceType() == ChessPiece.PieceType.PAWN) {
+            if (piece.getTeamColor() == TeamColor.BLACK && move.getEndPosition().getRow() == 1) {
+                piece = new ChessPiece(TeamColor.BLACK, move.getPromotionPiece());
+            }
+            else if (piece.getTeamColor() == TeamColor.WHITE && move.getEndPosition().getRow() == 8) {
+                piece = new ChessPiece(TeamColor.WHITE, move.getPromotionPiece());
+            }
+        }
         current_board.addPiece(move.getEndPosition(), piece);
         current_board.addPiece(move.getStartPosition(), null);
         if (turn == TeamColor.WHITE) {
