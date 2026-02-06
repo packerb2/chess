@@ -115,6 +115,12 @@ public class ChessGame {
         }
         current_board.addPiece(move.getEndPosition(), piece);
         current_board.addPiece(move.getStartPosition(), null);
+        if (turn == TeamColor.WHITE) {
+            setTeamTurn(TeamColor.BLACK);
+        }
+        else {
+            setTeamTurn(TeamColor.WHITE);
+        }
     }
 
     /**
