@@ -2,9 +2,15 @@ package server;
 
 import io.javalin.*;
 
+import java.util.UUID;
+
 public class Server {
 
     private final Javalin javalin;
+
+    public static String generateAuthToken() {
+        return UUID.randomUUID().toString();
+    }
 
     public Server() {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
