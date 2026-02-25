@@ -1,17 +1,34 @@
 package service;
 
-import dataaccess.DataAccess;
-import dataaccess.UserDataAccess;
+import dataaccess.UserDAO;
+import dataaccess.MemoryUserDAO;
+import dataaccess.*;
+import model.UserData;
 
 public class Service {
 
-    private DataAccess data = new UserDataAccess();
+    private UserDAO userData = new MemoryUserDAO();
+    private GameDAO gameData = new MemoryGameDAO();
+    private AuthDAO authData = new MemoryAuthDAO();
 
-    public Service(DataAccess data) {
-        this.data = data;
+    public Service(UserDAO userData, GameDAO gameData, AuthDAO authData) {
+        this.userData = userData;
+        this.gameData = gameData;
+        this.authData = authData;
     }
 
     public void clear() {
-        data.deleteUsers();
+        userData.deleteUsers();
+        gameData.deleteGames();
+        authData.deleteAuths();
+    }
+
+    public void register(UserData user) throws DataAccessException{
+        UserData data = userData.getUser(user);
+        if (data != null) {
+            throw new DataAccessException("Error: Username is already taken");
+        }
+        userData.addUser(user);
+        userData.deleteUsers();
     }
 }

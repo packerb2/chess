@@ -1,8 +1,10 @@
 package server;
 
 import com.google.gson.Gson;
-import dataaccess.DataAccess;
-import dataaccess.UserDataAccess;
+import dataaccess.DataAccessException;
+import dataaccess.MemoryAuthDAO;
+import dataaccess.MemoryGameDAO;
+import dataaccess.MemoryUserDAO;
 import io.javalin.*;
 
 import io.javalin.http.Context;
@@ -10,6 +12,7 @@ import io.javalin.http.Context;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
 import model.UserData;
 import service.*;
 
@@ -17,7 +20,7 @@ import service.*;
 public class Server {
 
     private final Javalin javalin;
-    private Service service = new Service(new UserDataAccess());
+    private Service service = new Service(new MemoryUserDAO(), new MemoryGameDAO(), new MemoryAuthDAO());
     final private HashSet<String> validTokens = new HashSet<>(Set.of("secret1", "secret2"));
 
     private boolean authorized(Context ctx) {
@@ -35,8 +38,9 @@ public class Server {
         service.clear();
     }
 
-    private void register(Context context) {
-
+    private void register(Context context) throws DataAccessException {
+        UserData user = new Gson().fromJson(context.body(), UserData.class);
+        service.register(user);
     }
 
     private void login(Context context) {
