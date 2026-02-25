@@ -23,12 +23,13 @@ public class Service {
         authData.deleteAuths();
     }
 
-    public void register(UserData user) throws DataAccessException{
+    public String register(UserData user) throws DataAccessException{
         UserData data = userData.getUser(user);
         if (data != null) {
             throw new DataAccessException("Error: Username is already taken");
         }
         userData.addUser(user);
-        userData.deleteUsers();
+        String token = authData.addAuth();
+        return user.username() + " " + token;
     }
 }
