@@ -8,6 +8,8 @@ import io.javalin.http.Context;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import model.UserData;
+import service.*;
 
 
 public class Server {
@@ -28,11 +30,11 @@ public class Server {
     }
 
     private void clear(Context context) {
-        return;
+        service.clear();
     }
 
     private void register(Context context) {
-        return;
+
     }
 
     private void login(Context context) {
