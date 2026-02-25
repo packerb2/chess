@@ -1,6 +1,8 @@
 package server;
 
 import com.google.gson.Gson;
+import dataaccess.DataAccess;
+import dataaccess.UserDataAccess;
 import io.javalin.*;
 
 import io.javalin.http.Context;
@@ -15,7 +17,7 @@ import service.*;
 public class Server {
 
     private final Javalin javalin;
-
+    private Service service = new Service(new UserDataAccess());
     final private HashSet<String> validTokens = new HashSet<>(Set.of("secret1", "secret2"));
 
     private boolean authorized(Context ctx) {
