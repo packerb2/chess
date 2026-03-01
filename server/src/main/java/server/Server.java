@@ -73,12 +73,12 @@ public class Server {
         return;
     }
 
-    private void createGame(Context context) throws DataAccessException {
+    private int createGame(Context context) throws DataAccessException {
         if (!authorized(context)) {
             throw new DataAccessException("Error: Not Authorized");
         }
         String gameName = new Gson().fromJson(context.body(), String.class);
-        service.createGame(gameName, currentKey);
+        return service.createGame(gameName, currentKey);
     }
 
     private void joinGame(Context context) throws DataAccessException {

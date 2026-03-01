@@ -51,10 +51,10 @@ public class Service {
         authData.removeKey(authKey);
     }
 
-    public void createGame(String gameName, AuthData authKey) throws DataAccessException {
+    public int createGame(String gameName, AuthData authKey) throws DataAccessException {
         if (!authData.findKey(authKey)) {
             throw new DataAccessException("Error: Not Authorized");
         }
-        gameData.createGame(gameName);
+        return gameData.createGame(gameName);
     }
 }
