@@ -1,6 +1,7 @@
 package dataaccess;
 
 import model.AuthData;
+import model.UserData;
 
 import java.util.ArrayList;
 import java.util.UUID;
@@ -14,11 +15,11 @@ public class MemoryAuthDAO implements AuthDAO {
     private ArrayList<AuthData> data;
 
     @Override
-    public String addAuth() {
+    public AuthData addAuth(UserData userData) {
         String token = generateToken();
-        AuthData authKey = new AuthData(token);
+        AuthData authKey = new AuthData(token, userData);
         data.add(authKey);
-        return token;
+        return authKey;
     }
 
     @Override

@@ -24,17 +24,16 @@ public class Service {
         authData.deleteAuths();
     }
 
-    public String register(UserData user) throws DataAccessException{
+    public AuthData register(UserData user) throws DataAccessException{
         UserData data = userData.getUser(user);
         if (data != null) {
             throw new DataAccessException("Error: Username is already taken");
         }
         userData.addUser(user);
-        String token = authData.addAuth();
-        return user.username() + " " + token;
+        return authData.addAuth(user);
     }
 
-    public String login(UserData user) throws DataAccessException {
+    public AuthData login(UserData user) throws DataAccessException {
         UserData data = userData.getUser(user);
         if (data == null) {
             throw new DataAccessException("Error: Credentials are Incorrect");
@@ -42,8 +41,7 @@ public class Service {
         if (!data.password().equals(user.password())) {
             throw new DataAccessException("Error: Credentials are Incorrect");
         }
-        String token = authData.addAuth();
-        return user.username() + " " + token;
+        return authData.addAuth(user);
     }
 
     public void logout(AuthData authKey) throws DataAccessException {
@@ -51,5 +49,12 @@ public class Service {
             throw new DataAccessException("Error: Not Authorized");
         }
         authData.removeKey(authKey);
+    }
+
+    public void createGame(String gameName, AuthData authKey) throws DataAccessException {
+        if (!authData.findKey(authKey)) {
+            throw new DataAccessException("Error: Not Authorized");
+        }
+        gameData.createGame(gameName);
     }
 }
