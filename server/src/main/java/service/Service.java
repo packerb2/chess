@@ -3,6 +3,7 @@ package service;
 import dataaccess.UserDAO;
 import dataaccess.MemoryUserDAO;
 import dataaccess.*;
+import model.AuthData;
 import model.UserData;
 
 public class Service {
@@ -33,7 +34,7 @@ public class Service {
         return user.username() + " " + token;
     }
 
-    public String login(UserData user) throws DataAccessException{
+    public String login(UserData user) throws DataAccessException {
         UserData data = userData.getUser(user);
         if (data == null) {
             throw new DataAccessException("Error: Credentials are Incorrect");
@@ -43,5 +44,12 @@ public class Service {
         }
         String token = authData.addAuth();
         return user.username() + " " + token;
+    }
+
+    public void logout(AuthData authKey) throws DataAccessException {
+        if (!authData.findKey(authKey)) {
+            throw new DataAccessException("Error: Not Authorized");
+        }
+        authData.removeKey(authKey);
     }
 }

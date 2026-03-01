@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import model.AuthData;
 import model.UserData;
 import service.*;
 
@@ -48,11 +49,12 @@ public class Server {
         service.login(user);
     }
 
-    private void logout(Context context) {
-        if (authorized(context)) {
-            return;
+    private void logout(Context context) throws DataAccessException {
+        if (!authorized(context)) {
+            throw new DataAccessException("Error: Not Authorized");
         }
-        return;
+        AuthData authKey = new Gson().fromJson(context.body(), AuthData.class);
+        service.logout(authKey);
     }
 
     private void listGames(Context context) {
