@@ -43,8 +43,9 @@ public class Server {
         service.register(user);
     }
 
-    private void login(Context context) {
-        return;
+    private void login(Context context) throws DataAccessException {
+        UserData user = new Gson().fromJson(context.body(), UserData.class);
+        service.login(user);
     }
 
     private void logout(Context context) {

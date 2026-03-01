@@ -32,4 +32,16 @@ public class Service {
         String token = authData.addAuth();
         return user.username() + " " + token;
     }
+
+    public String login(UserData user) throws DataAccessException{
+        UserData data = userData.getUser(user);
+        if (data == null) {
+            throw new DataAccessException("Error: Credentials are Incorrect");
+        }
+        if (!data.password().equals(user.password())) {
+            throw new DataAccessException("Error: Credentials are Incorrect");
+        }
+        String token = authData.addAuth();
+        return user.username() + " " + token;
+    }
 }
