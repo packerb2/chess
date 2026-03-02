@@ -32,7 +32,8 @@ public class Service {
         }
         userData.addUser(user);
         AuthData a = authData.addAuth(user);
-        return new Gson().toJson({"username": data.username(), "authToken": a.token()});
+        return "{username: " + user.username() + ", authToken: " + a.token() + "}";
+        //return new Gson().toJson({"username": data.username(), "authToken": a.token()});
     }
 
     public String login(UserData user) throws DataAccessException {
@@ -45,7 +46,8 @@ public class Service {
         }
         AuthData a = authData.addAuth(user);
         // format: "{"key": "value"}"
-        return new Gson().toJson({"username": data.username(), "authToken": a.token()});
+        return "{username: " + data.username() + ", authToken: " + a.token() + "}";
+        //return new Gson().toJson({"username": data.username(), "authToken": a.token()});
     }
 
     public void logout(AuthData authKey) throws DataAccessException {
@@ -55,10 +57,14 @@ public class Service {
         authData.removeKey(authKey);
     }
 
-    public int createGame(String gameName, AuthData authKey) throws DataAccessException {
+    public String createGame(String gameName, String token) throws DataAccessException {
+        AuthData authKey = new AuthData(token);
         if (!authData.findKey(authKey)) {
             throw new DataAccessException("Error: Not Authorized");
         }
-        return gameData.createGame(gameName);
+        int id = gameData.createGame(gameName);
+        return "{gameID: " + id + "}";
+        //return new Gson().toJson({"gameID": id});
+        //return "{"gameID": id}";
     }
 }

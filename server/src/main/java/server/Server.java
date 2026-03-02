@@ -41,12 +41,14 @@ public class Server {
 
     private String register(Context context) throws DataAccessException {
         UserData user = new Gson().fromJson(context.body(), UserData.class);
-        return service.register(user);
+        String response = service.register(user);
+        return response;
     }
 
     private String login(Context context) throws DataAccessException {
         UserData user = new Gson().fromJson(context.body(), UserData.class);
-        return service.login(user);
+        String response = service.login(user);
+        return response;
     }
 
     private void logout(Context context) throws DataAccessException {
@@ -64,7 +66,7 @@ public class Server {
         return;
     }
 
-    private int createGame(Context context) throws DataAccessException {
+    private String createGame(Context context) throws DataAccessException {
         if (!authorized(context)) {
             throw new DataAccessException("Error: Not Authorized");
         }
@@ -72,7 +74,8 @@ public class Server {
         String token = context.header("Authorization");
         // authorization capitalized?
         // check that token exists in authData
-        return service.createGame(gameName.get("gameName"), ___);
+        String response = service.createGame(gameName.get("gameName"), token);
+        return response;
     }
 
     private void joinGame(Context context) throws DataAccessException {
