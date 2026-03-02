@@ -21,4 +21,14 @@ public class MemoryGameDAO implements GameDAO {
         data.add(game);
         return highestID;
     }
+
+    @Override
+    public GameData getGame(String gameID) {
+        for (GameData game : data) {
+            if (game.gameID() == Integer.parseInt(gameID)) {
+                return game;
+            }
+        }
+        return null;
+    }
 }

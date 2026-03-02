@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Set;
 
 import model.AuthData;
+import model.JoinGameData;
 import model.UserData;
 import service.*;
 
@@ -82,7 +83,9 @@ public class Server {
         if (!authorized(context)) {
             throw new DataAccessException("Error: Not Authorized");
         }
-        return;
+        JoinGameData setUpInfo = new Gson().fromJson(context.body(), JoinGameData.class);
+        String token = context.header("Authorization");
+        service.joinGame(setUpInfo.gameID(), setUpInfo.color(), token, setUpInfo.user());
     }
 
     public Server() {

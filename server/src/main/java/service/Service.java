@@ -1,10 +1,12 @@
 package service;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import dataaccess.UserDAO;
 import dataaccess.MemoryUserDAO;
 import dataaccess.*;
 import model.AuthData;
+import model.GameData;
 import model.UserData;
 
 public class Service {
@@ -66,5 +68,32 @@ public class Service {
         return "{gameID: " + id + "}";
         //return new Gson().toJson({"gameID": id});
         //return "{"gameID": id}";
+    }
+
+    public void joinGame(String gameID, ChessGame.TeamColor color, String token, UserData user) throws DataAccessException {
+        AuthData authKey = new AuthData(token);
+        if (!authData.findKey(authKey)) {
+            throw new DataAccessException("Error: Not Authorized");
+        }
+        GameData game = gameData.getGame(gameID);
+        if (game == null) {
+            throw new DataAccessException("Error: No Game Found");
+        }
+        if (color == ChessGame.TeamColor.WHITE) {
+            if (game.player_white() == null) {
+                game.player_white = user.username();
+            }
+            else {
+                throw new DataAccessException("Error: White is Taken");
+            }
+        }
+        else if (color == ChessGame.TeamColor.BLACK) {
+            if (game.player_black() == null) {
+                game.player_black = user.username();
+            }
+            else {
+                throw new DataAccessException("Error: White is Taken");
+            }
+        }
     }
 }
