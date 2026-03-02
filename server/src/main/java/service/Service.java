@@ -1,5 +1,6 @@
 package service;
 
+import com.google.gson.Gson;
 import dataaccess.UserDAO;
 import dataaccess.MemoryUserDAO;
 import dataaccess.*;
@@ -24,16 +25,17 @@ public class Service {
         authData.deleteAuths();
     }
 
-    public AuthData register(UserData user) throws DataAccessException{
+    public String register(UserData user) throws DataAccessException{
         UserData data = userData.getUser(user);
         if (data != null) {
             throw new DataAccessException("Error: Username is already taken");
         }
         userData.addUser(user);
-        return authData.addAuth(user);
+        AuthData a = authData.addAuth(user);
+        return new Gson().toJson({"username": data.username(), "authToken": a.token()});
     }
 
-    public AuthData login(UserData user) throws DataAccessException {
+    public String login(UserData user) throws DataAccessException {
         UserData data = userData.getUser(user);
         if (data == null) {
             throw new DataAccessException("Error: Credentials are Incorrect");
@@ -41,7 +43,9 @@ public class Service {
         if (!data.password().equals(user.password())) {
             throw new DataAccessException("Error: Credentials are Incorrect");
         }
-        return authData.addAuth(user);
+        AuthData a = authData.addAuth(user);
+        // format: "{"key": "value"}"
+        return new Gson().toJson({"username": data.username(), "authToken": a.token()});
     }
 
     public void logout(AuthData authKey) throws DataAccessException {

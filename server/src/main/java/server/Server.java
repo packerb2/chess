@@ -23,7 +23,6 @@ public class Server {
     private final Javalin javalin;
     private final Service service = new Service(new MemoryUserDAO(), new MemoryGameDAO(), new MemoryAuthDAO());
     final private HashSet<String> validTokens = new HashSet<>(Set.of("secret1", "secret2"));
-    private AuthData currentKey = null;
 
     private boolean authorized(Context ctx) {
         String authToken = ctx.header("authorization");
@@ -38,23 +37,16 @@ public class Server {
 
     private void clear(Context context) {
         service.clear();
-        currentKey = null;
     }
 
     private String register(Context context) throws DataAccessException {
         UserData user = new Gson().fromJson(context.body(), UserData.class);
-        AuthData a;
-        a = service.register(user);
-        currentKey = a;
-        return a.userData().username() + " " + a.token();
+        return service.register(user);
     }
 
     private String login(Context context) throws DataAccessException {
         UserData user = new Gson().fromJson(context.body(), UserData.class);
-        AuthData a;
-        a = service.login(user);
-        currentKey = a;
-        return a.userData().username() + " " + a.token();
+        return service.login(user);
     }
 
     private void logout(Context context) throws DataAccessException {
@@ -62,7 +54,6 @@ public class Server {
             throw new DataAccessException("Error: Not Authorized");
         }
         AuthData authKey = new Gson().fromJson(context.body(), AuthData.class);
-        currentKey = null;
         service.logout(authKey);
     }
 
@@ -77,8 +68,11 @@ public class Server {
         if (!authorized(context)) {
             throw new DataAccessException("Error: Not Authorized");
         }
-        String gameName = new Gson().fromJson(context.body(), String.class);
-        return service.createGame(gameName, currentKey);
+        Map <String, String> gameName = new Gson().fromJson(context.body(), Map.class);
+        String token = context.header("Authorization");
+        // authorization capitalized?
+        // check that token exists in authData
+        return service.createGame(gameName.get("gameName"), ___);
     }
 
     private void joinGame(Context context) throws DataAccessException {
@@ -92,13 +86,13 @@ public class Server {
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
 
                 // Register your endpoints and exception handlers here.
-                .post("/name{name}", this::register)
-                .post("/name{name}", this::login)
-                .delete("/name{name}", this::logout)
-                .get("/name{name}", this::listGames)
-                .post("/name{name}", this::createGame)
-                .put("/name{name}", this::joinGame)
-                .delete("/name{name}", this::clear);
+                .post("/user", this::register)
+                .post("/session", this::login)
+                .delete("/session", this::logout)
+                .get("/game", this::listGames)
+                .post("/game", this::createGame)
+                .put("/game", this::joinGame)
+                .delete("/db", this::clear);
     }
 
     public int run(int desiredPort) {
