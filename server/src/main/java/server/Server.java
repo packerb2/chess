@@ -61,7 +61,7 @@ public class Server {
         }
     }
 
-    private String logout(Context context) throws DataAccessException {
+    private String logout(Context context) {
         try {
             if (!authorized(context)) {
                 throw new DataAccessException("Error: Not Authorized");
@@ -74,15 +74,20 @@ public class Server {
         }
     }
 
-    private void listGames(Context context) throws DataAccessException {
-        if (!authorized(context)) {
-            throw new DataAccessException("Error: Not Authorized");
+    private String listGames(Context context) {
+        try {
+            if (!authorized(context)) {
+                throw new DataAccessException("Error: Not Authorized");
+            }
+            String token = context.header("Authorization");
+            return service.listGames(token);
+        } catch (DataAccessException e) {
+            context.status(401);
+            return new Gson().toJson("~ error object ~");
         }
-        //TODO return list of ALL games
-        return;
     }
 
-    private String createGame(Context context) throws DataAccessException {
+    private String createGame(Context context) {
         try {
             if (!authorized(context)) {
                 throw new DataAccessException("Error: Not Authorized");
@@ -98,7 +103,7 @@ public class Server {
         }
     }
 
-    private String joinGame(Context context) throws DataAccessException {
+    private String joinGame(Context context) {
         try {
             if (!authorized(context)) {
                 throw new DataAccessException("Error: Not Authorized");

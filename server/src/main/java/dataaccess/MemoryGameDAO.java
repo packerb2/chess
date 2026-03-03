@@ -7,25 +7,25 @@ import java.util.ArrayList;
 
 public class MemoryGameDAO implements GameDAO {
 
-    private ArrayList<GameData> data;
-    private Integer highestID = 0;
+    public ArrayList<GameData> games;
+    public Integer highestID = 0;
 
     @Override
     public void deleteGames() {
-        data.clear();
+        games.clear();
     }
 
     @Override
     public Integer createGame(String gameName) {
         highestID = highestID + 1;
         GameData game = new GameData(highestID, null, null, gameName);
-        data.add(game);
+        games.add(game);
         return highestID;
     }
 
     @Override
     public GameData getGame(int gameID) {
-        for (GameData game : data) {
+        for (GameData game : games) {
             if (game.gameID() == gameID) {
                 return game;
             }
@@ -38,12 +38,17 @@ public class MemoryGameDAO implements GameDAO {
         GameData game = getGame(gameID);
         if (color == ChessGame.TeamColor.WHITE) {
             GameData gameUpdated = new GameData(gameID, username, null, game.gameName());
-            data.add(gameUpdated);
+            games.add(gameUpdated);
         }
         else if (color == ChessGame.TeamColor.BLACK) {
             GameData gameUpdated = new GameData(gameID, null, username, game.gameName());
-            data.add(gameUpdated);
+            games.add(gameUpdated);
         }
-        data.remove(game);
+        games.remove(game);
+    }
+
+    @Override
+    public ArrayList<GameData> getGamesList() {
+        return games;
     }
 }

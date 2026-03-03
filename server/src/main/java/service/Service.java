@@ -96,4 +96,12 @@ public class Service {
         }
         return new Gson().toJson("");
     }
+
+    public String listGames(String token) throws DataAccessException {
+        AuthData authKey = new AuthData(token);
+        if (!authData.findKey(authKey)) {
+            throw new DataAccessException("Error: Not Authorized");
+        }
+        return new Gson().toJson(gameData.getGamesList());
+    }
 }
