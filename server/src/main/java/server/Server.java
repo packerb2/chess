@@ -47,7 +47,7 @@ public class Server {
             UserData user = new Gson().fromJson(context.body(), UserData.class);
             context.result(service.register(user));
         } catch (DataAccessException e) {
-            context.status(401);
+            context.status(403);
             context.result(new Gson().toJson(new ErrorObject("Error: username already exists")));
         }
     }
