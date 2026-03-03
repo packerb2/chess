@@ -77,9 +77,9 @@ public class Server {
     private void logout(Context context) {
         try {
             String token = context.header("authorization");
-            AuthData authKey = new AuthData(token);
+//            AuthData authKey = new AuthData(token);
             context.status(200);
-            service.logout(authKey);
+            service.logout(token);
         } catch (DataAccessException e) {
             context.status(401);
             context.result(new Gson().toJson(new ErrorObject("Error: Unauthorized")));
@@ -121,13 +121,17 @@ public class Server {
             JoinGameData setUpInfo = new Gson().fromJson(context.body(), JoinGameData.class);
             String token = context.header("authorization");
             context.status(200);
-            context.result(service.joinGame(setUpInfo.gameID(), setUpInfo.color(), token, setUpInfo.user()));
+            service.joinGame(setUpInfo.gameID(), setUpInfo.playerColor(), token);
         } catch (DataAccessException e) {
-            if (e.getMessage().equals("Not Found")) {
+            if (e.getMessage().equals("EF")) {
+                context.status(400);
+                context.result(new Gson().toJson(new ErrorObject("Error: Some Fields Were Empty")));
+            }
+            else if (e.getMessage().equals("Not Found")) {
                 context.status(400);
                 context.result(new Gson().toJson(new ErrorObject("Error: Invalid Game ID")));
             }
-            if (e.getMessage().equals("Bad Color")) {
+            else if (e.getMessage().equals("Bad Color")) {
                 context.status(403);
                 context.result(new Gson().toJson(new ErrorObject("Error: That Color Is Not A Valid Option")));
             }

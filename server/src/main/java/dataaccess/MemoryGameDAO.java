@@ -44,11 +44,11 @@ public class MemoryGameDAO implements GameDAO {
     public void updatePlayer(int gameID, ChessGame.TeamColor color, String username) {
         GameData game = getGame(gameID);
         if (color == ChessGame.TeamColor.WHITE) {
-            GameData gameUpdated = new GameData(gameID, username, null, game.gameName());
+            GameData gameUpdated = new GameData(gameID, username, game.blackUsername(), game.gameName());
             games.add(gameUpdated);
         }
         else if (color == ChessGame.TeamColor.BLACK) {
-            GameData gameUpdated = new GameData(gameID, null, username, game.gameName());
+            GameData gameUpdated = new GameData(gameID, game.whiteUsername(), username, game.gameName());
             games.add(gameUpdated);
         }
         games.remove(game);

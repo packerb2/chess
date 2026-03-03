@@ -6,6 +6,7 @@ import model.UserData;
 public interface AuthDAO {
     AuthData addAuth(UserData userData);
     void deleteAuths();
-    void removeKey(AuthData authKey);
-    boolean findKey(AuthData authKey);
+    void removeKey(String token);
+    boolean findKey(String token);
+    AuthData getKey(String token);
 }
