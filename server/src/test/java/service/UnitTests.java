@@ -20,6 +20,7 @@ public class UnitTests {
     private static UserData p1;
     private static UserData p2;
     private static UserData p3;
+    private static UserData badUser;
 
     @BeforeAll
     public static void setUpAll() {
@@ -30,16 +31,29 @@ public class UnitTests {
         p1 = new UserData("p1", "pass", "1@email");
         p2 = new UserData("p2", "passw", "2@email");
         p3 = new UserData("p3", "password", "3@email");
+        badUser = new UserData(null, null, null);
     }
 
     @Test
-    public void clearTest() {
+    public void registerWorksTest() {
         try {
             testService.register(p1);
             testService.register(p2);
             testService.register(p3);
+            Assertions.assertSame(testUserDB.getUser(p1), p1);
+            Assertions.assertSame(testUserDB.getUser(p2), p2);
+            Assertions.assertSame(testUserDB.getUser(p3), p3);
         } catch (DataAccessException e) {
-            assert false;
+            Assertions.assertTrue(0 == 1, "register threw an error");
+        }
+    }
+
+    @Test
+    public void registerRaisesErrorsTest() {
+        try {
+            testService.register(badUser);
+        } catch (DataAccessException e) {
+            Assertions.assertFalse(0 == 1, "register threw an error");
         }
     }
 }
