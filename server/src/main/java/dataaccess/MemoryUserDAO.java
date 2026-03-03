@@ -19,9 +19,6 @@ public class MemoryUserDAO implements UserDAO {
                 return person;
             }
         }
-//        if (data.contains(info)) {
-//            return info;
-//        }
         return null;
     }
 

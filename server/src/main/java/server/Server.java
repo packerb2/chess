@@ -21,18 +21,6 @@ public class Server {
 
     private final Javalin javalin;
     private final Service service = new Service(new MemoryUserDAO(), new MemoryGameDAO(), new MemoryAuthDAO());
-    final private HashSet<String> validTokens = new HashSet<>(Set.of("secret1", "secret2"));
-
-    private boolean authorized(Context ctx) {
-        String authToken = ctx.header("authorization");
-        if (!validTokens.contains(authToken)) {
-            ctx.contentType("application/json");
-            ctx.status(401);
-            ctx.result(new Gson().toJson(Map.of("msg", "invalid authorization")));
-            return false;
-        }
-        return true;
-    }
 
     private void clear(Context context) {
         context.status(200);
