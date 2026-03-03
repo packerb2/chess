@@ -53,66 +53,76 @@ public class Server {
     }
 //TODO change returns to be inside a context.result(~__~) and change function return types to void
 
-    private String login(Context context) {
+    private void login(Context context) {
         try {
             UserData user = new Gson().fromJson(context.body(), UserData.class);
-            return service.login(user);
+            context.status(200);
+            context.result(service.login(user));
         } catch (DataAccessException e) {
-            context.status(401);
-            return new Gson().toJson(new ErrorObject("Error: Credentials are Incorrect"));
+            if (e.getMessage().equals("UE")) {
+                context.status(401);
+                context.result(new Gson().toJson(new ErrorObject("Error: Credentials are Incorrect (Username)")));
+            } else {
+                context.status(401);
+                context.result(new Gson().toJson(new ErrorObject("Error: Credentials are Incorrect (Password)")));
+            }
         }
     }
 
-    private String logout(Context context) {
+    private void logout(Context context) {
         try {
             AuthData authKey = new Gson().fromJson(context.body(), AuthData.class);
-            return service.logout(authKey);
+            context.status(200);
+            context.result(service.logout(authKey));
         } catch (DataAccessException e) {
             context.status(401);
-            return new Gson().toJson(new ErrorObject("Error: Unauthorized"));
+            context.result(new Gson().toJson(new ErrorObject("Error: Unauthorized")));
         }
     }
 
-    private String listGames(Context context) {
+    private void listGames(Context context) {
         try {
             String token = context.header("authorization");
-            return service.listGames(token);
+            context.status(200);
+            context.result(service.listGames(token));
         } catch (DataAccessException e) {
             context.status(401);
-            return new Gson().toJson(new ErrorObject("Error: Unauthorized"));
+            context.result(new Gson().toJson(new ErrorObject("Error: Unauthorized")));
         }
     }
 
-    private String createGame(Context context) {
+    private void createGame(Context context) {
         try {
             Map<String, String> gameName = new Gson().fromJson(context.body(), Map.class);
             String token = context.header("authorization");
             // authorization capitalized?
             // check that token exists in authData
-            return service.createGame(gameName.get("gameName"), token);
+            context.status(200);
+            context.result(service.createGame(gameName.get("gameName"), token));
         } catch (DataAccessException e) {
             context.status(401);
-            return new Gson().toJson(new ErrorObject("Error: Unauthorized"));
+            context.result(new Gson().toJson(new ErrorObject("Error: Unauthorized")));
         }
     }
 
-    private String joinGame(Context context) {
+    private void joinGame(Context context) {
         try {
             JoinGameData setUpInfo = new Gson().fromJson(context.body(), JoinGameData.class);
             String token = context.header("authorization");
-            return service.joinGame(setUpInfo.gameID(), setUpInfo.color(), token, setUpInfo.user());
+            context.status(200);
+            context.result(service.joinGame(setUpInfo.gameID(), setUpInfo.color(), token, setUpInfo.user()));
         } catch (DataAccessException e) {
             if (e.getMessage().equals("Not Found")) {
                 context.status(500);
-                return new Gson().toJson(new ErrorObject("Error: Invalid Game ID"));
+                context.result(new Gson().toJson(new ErrorObject("Error: Invalid Game ID")));
             }
             else if (e.getMessage().equals("Taken")) {
                 context.status(403);
-                return new Gson().toJson(new ErrorObject("Error: Color Has Already Been Taken"));
+                context.result(new Gson().toJson(new ErrorObject("Error: Color Has Already Been Taken")));
             }
             else {
                 context.status(401);
-                return new Gson().toJson(new ErrorObject("Error: Unauthorized"));
+                context.result(new Gson().toJson(new ErrorObject("Error: Unauthorized")));
             }
         }
     }

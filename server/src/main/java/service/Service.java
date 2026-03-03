@@ -38,10 +38,10 @@ public class Service {
     public String login(UserData user) throws DataAccessException {
         UserData data = userData.getUser(user);
         if (data == null) {
-            throw new DataAccessException("Error: Credentials are Incorrect");
+            throw new DataAccessException("UE");
         }
-        if (!data.password().equals(user.password())) {
-            throw new DataAccessException("Error: Credentials are Incorrect");
+        else if (!data.password().equals(user.password())) {
+            throw new DataAccessException("PE");
         }
         AuthData a = authData.addAuth(user);
         return new Gson().toJson(new loginReturn(user.username(), a.token()));
