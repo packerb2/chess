@@ -87,4 +87,42 @@ public class UnitTests {
     public void loginWorksExceptionTest() {
             Assertions.assertThrows(DataAccessException.class, () -> testService.login(badUser));
     }
+
+    @Test
+    public void logoutWorksTest() {
+        try {
+            String resultString = testService.login(p1);
+            LoginReturn result = new Gson().fromJson(resultString, LoginReturn.class);
+            Assertions.assertDoesNotThrow(() -> testService.logout(result.authToken));
+        } catch (DataAccessException e) {
+            Assertions.assertTrue(0 == 1, "login threw an error");
+        }
+    }
+
+    @Test
+    public void logoutWorksExceptionTest() {
+        try {
+            testService.login(p1);
+            Assertions.assertThrows(DataAccessException.class, () -> testService.logout("ooops"));
+        } catch (DataAccessException e) {
+            Assertions.assertTrue(0 == 1, "login threw an error");
+        }
+
+    }
+
+    @Test
+    public void createWorksTest() {
+        try {
+            String logString = testService.login(p1);
+            LoginReturn logS = new Gson().fromJson(logString, LoginReturn.class);
+            Assertions.assertDoesNotThrow(() -> testService.createGame("name", logS.authToken));
+        } catch (DataAccessException e) {
+            Assertions.assertTrue(0 == 1, "login threw an error");
+        }
+    }
+
+    @Test
+    public void createWorksExceptionTest() {
+        Assertions.assertThrows(DataAccessException.class, () -> testService.createGame("n", "n"));
+    }
 }
