@@ -113,8 +113,12 @@ public class Server {
             context.result(service.joinGame(setUpInfo.gameID(), setUpInfo.color(), token, setUpInfo.user()));
         } catch (DataAccessException e) {
             if (e.getMessage().equals("Not Found")) {
-                context.status(500);
+                context.status(400);
                 context.result(new Gson().toJson(new ErrorObject("Error: Invalid Game ID")));
+            }
+            if (e.getMessage().equals("Bad Color")) {
+                context.status(403);
+                context.result(new Gson().toJson(new ErrorObject("Error: That Color Is Not A Valid Option")));
             }
             else if (e.getMessage().equals("Taken")) {
                 context.status(403);

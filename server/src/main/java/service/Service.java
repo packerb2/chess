@@ -69,6 +69,9 @@ public class Service {
         if (!authData.findKey(authKey)) {
             throw new DataAccessException("Error: Not Authorized");
         }
+        if (color != ChessGame.TeamColor.WHITE && color != ChessGame.TeamColor.BLACK) {
+            throw new DataAccessException("Bad Color");
+        }
         GameData game = gameData.getGame(gameID);
         if (game == null) {
             throw new DataAccessException("Not Found");
