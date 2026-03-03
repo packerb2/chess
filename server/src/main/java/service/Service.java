@@ -61,6 +61,9 @@ public class Service {
     }
 
     public String createGame(String gameName, String token) throws DataAccessException {
+        if (gameName == null || token == null) {
+            throw new DataAccessException("EF");
+        }
         AuthData authKey = new AuthData(token);
         if (!authData.findKey(authKey)) {
             throw new DataAccessException("Error: Not Authorized");

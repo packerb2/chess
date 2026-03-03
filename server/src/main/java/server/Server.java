@@ -13,10 +13,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import model.AuthData;
-import model.ErrorObject;
-import model.JoinGameData;
-import model.UserData;
+import model.*;
 import service.*;
 
 
@@ -102,15 +99,20 @@ public class Server {
 
     private void createGame(Context context) {
         try {
-            Map<String, String> gameName = new Gson().fromJson(context.body(), Map.class);
+            GameName game = new Gson().fromJson(context.body(), GameName.class);
             String token = context.header("authorization");
             // authorization capitalized?
             // check that token exists in authData
             context.status(200);
-            context.result(service.createGame(gameName.get("gameName"), token));
+            context.result(service.createGame(game.gameName, token));
         } catch (DataAccessException e) {
-            context.status(401);
-            context.result(new Gson().toJson(new ErrorObject("Error: Unauthorized")));
+            if (e.getMessage().equals("EF")) {
+                context.status(400);
+                context.result(new Gson().toJson(new ErrorObject("Error: Missing Info")));
+            } else {
+                context.status(401);
+                context.result(new Gson().toJson(new ErrorObject("Error: Unauthorized")));
+            }
         }
     }
 
