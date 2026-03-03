@@ -97,6 +97,6 @@ public class Service {
         if (!authData.findKey(authKey)) {
             throw new DataAccessException("Error: Not Authorized");
         }
-        return new Gson().toJson(gameData.getGamesList());
+        return new Gson().toJson(new GameList(gameData.getGamesList()));
     }
 }

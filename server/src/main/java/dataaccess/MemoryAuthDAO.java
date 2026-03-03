@@ -18,6 +18,10 @@ public class MemoryAuthDAO implements AuthDAO {
     public AuthData addAuth(UserData userData) {
         String token = generateToken();
         AuthData authKey = new AuthData(token);
+        while (findKey(authKey)) {
+            token = generateToken();
+            authKey = new AuthData(token);
+        }
         data.add(token);
         return authKey;
     }
