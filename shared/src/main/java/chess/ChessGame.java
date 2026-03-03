@@ -59,22 +59,22 @@ public class ChessGame {
             return null;
         }
         Collection<ChessMove> moves = piece.pieceMoves(currentBoard, startPosition);
-        Collection<ChessMove> to_remove = new ArrayList<>();
+        Collection<ChessMove> toRemove = new ArrayList<>();
         for (ChessMove move : moves) {
-            ChessBoard test_board = new ChessBoard(currentBoard);
-            test_board.addPiece(move.getEndPosition(), piece);
-            test_board.addPiece(move.getStartPosition(), null);
-            if (isMoveIntoCheck(piece.getTeamColor(), test_board)) {
-                to_remove.add(move);
+            ChessBoard testBoard = new ChessBoard(currentBoard);
+            testBoard.addPiece(move.getEndPosition(), piece);
+            testBoard.addPiece(move.getStartPosition(), null);
+            if (isMoveIntoCheck(piece.getTeamColor(), testBoard)) {
+                toRemove.add(move);
             }
         }
-        for (ChessMove wrong : to_remove) {
+        for (ChessMove wrong : toRemove) {
             moves.remove(wrong);
         }
         return moves;
     }
 
-    public boolean isMoveIntoCheck(TeamColor teamColor, ChessBoard test_board) {
+    public boolean isMoveIntoCheck(TeamColor teamColor, ChessBoard testBoard) {
         ChessPosition spot;
         ChessPiece piece;
         int x = 0;
@@ -82,12 +82,12 @@ public class ChessGame {
             int y = 0;
             while (y++ < 8) {
                 spot = new ChessPosition(x, y);
-                piece = test_board.getPiece(spot);
+                piece = testBoard.getPiece(spot);
                 if (piece != null && piece.getTeamColor() != teamColor) {
-                    Collection<ChessMove> moves = piece.pieceMoves(test_board, spot);
+                    Collection<ChessMove> moves = piece.pieceMoves(testBoard, spot);
                     for (ChessMove move : moves) {
                         ChessPosition square = move.getEndPosition();
-                        ChessPiece target = test_board.getPiece(square);
+                        ChessPiece target = testBoard.getPiece(square);
                         if (target != null && target.getPieceType() == ChessPiece.PieceType.KING && target.getTeamColor() == teamColor) {
                             return true;
                         }

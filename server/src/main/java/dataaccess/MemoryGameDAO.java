@@ -9,7 +9,7 @@ import java.util.Random;
 public class MemoryGameDAO implements GameDAO {
 
     public ArrayList<GameData> games = new ArrayList<>();
-    public Integer ID = 0;
+    public Integer id = 0;
 
     @Override
     public void deleteGames() {
@@ -21,10 +21,10 @@ public class MemoryGameDAO implements GameDAO {
     @Override
     public Integer createGame(String gameName) {
         Random random = new Random();
-        ID = random.nextInt(999999999 - 100000000) + 100000000;
-        GameData game = new GameData(ID, null, null, gameName);
+        id = random.nextInt(999999999 - 100000000) + 100000000;
+        GameData game = new GameData(id, null, null, gameName);
         games.add(game);
-        return ID;
+        return id;
     }
 
     @Override
