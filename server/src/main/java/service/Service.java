@@ -36,6 +36,9 @@ public class Service {
     }
 
     public String login(UserData user) throws DataAccessException {
+        if (user.username() == null || user.password() == null) {
+            throw new DataAccessException("EF");
+        }
         UserData data = userData.getUser(user);
         if (data == null) {
             throw new DataAccessException("UE");

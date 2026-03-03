@@ -59,12 +59,16 @@ public class Server {
             context.status(200);
             context.result(service.login(user));
         } catch (DataAccessException e) {
-            if (e.getMessage().equals("UE")) {
+            if (e.getMessage().equals("EF")) {
+                context.status(400);
+                context.result(new Gson().toJson(new ErrorObject("Error: Credentials are Incorrect")));
+            }
+            else if (e.getMessage().equals("UE")) {
                 context.status(401);
-                context.result(new Gson().toJson(new ErrorObject("Error: Credentials are Incorrect (Username)")));
+                context.result(new Gson().toJson(new ErrorObject("Error: Credentials are Incorrect")));
             } else {
                 context.status(401);
-                context.result(new Gson().toJson(new ErrorObject("Error: Credentials are Incorrect (Password)")));
+                context.result(new Gson().toJson(new ErrorObject("Error: Credentials are Incorrect")));
             }
         }
     }
