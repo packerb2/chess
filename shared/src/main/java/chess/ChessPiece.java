@@ -137,9 +137,7 @@ public class ChessPiece {
     }
 
     public List<ChessMove> pawnMoves(ChessBoard board, ChessPosition myPosition, ChessPiece piece, List<ChessMove> moves, int x, int y) {
-        // white
         if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
-            // up
             ChessPiece encounter = board.getPiece(new ChessPosition(x + 1, y));
             if (encounter == null) {
                 if (x + 1 == 8) {
@@ -152,7 +150,6 @@ public class ChessPiece {
                     moves.add(new ChessMove(myPosition, new ChessPosition(x + 1, y), null));
                 }
             }
-            // right capture
             if (y < 8) {
                 ChessPiece diagonalRightEncounter = board.getPiece(new ChessPosition(x + 1, y + 1));
                 if (diagonalRightEncounter != null && diagonalRightEncounter.getTeamColor() != piece.getTeamColor()) {
@@ -167,7 +164,6 @@ public class ChessPiece {
                     }
                 }
             }
-            // left capture
             if (y > 1) {
                 ChessPiece diagonalLeftEncounter = board.getPiece(new ChessPosition(x + 1, y - 1));
                 if (diagonalLeftEncounter != null && diagonalLeftEncounter.getTeamColor() != piece.getTeamColor()) {
@@ -182,7 +178,6 @@ public class ChessPiece {
                     }
                 }
             }
-            // initial
             if (x == 2) {
                 ChessPiece encounter2 = board.getPiece(new ChessPosition(x + 2, y));
                 if (encounter2 == null && encounter == null) {
@@ -190,10 +185,7 @@ public class ChessPiece {
                 }
             }
         }
-
-        // black
         if (piece.getTeamColor() == ChessGame.TeamColor.BLACK) {
-            // up
             ChessPiece encounter = board.getPiece(new ChessPosition(x - 1, y));
             if (encounter == null) {
                 if (x - 1 == 1) {
@@ -206,7 +198,6 @@ public class ChessPiece {
                     moves.add(new ChessMove(myPosition, new ChessPosition(x - 1, y), null));
                 }
             }
-            // right capture
             if (y < 8) {
                 ChessPiece diagonalRightEncounter = board.getPiece(new ChessPosition(x - 1, y + 1));
                 if (diagonalRightEncounter != null && diagonalRightEncounter.getTeamColor() != piece.getTeamColor()) {
@@ -221,7 +212,6 @@ public class ChessPiece {
                     }
                 }
             }
-            // left capture
             if (y > 1) {
                 ChessPiece diagonalLeftEncounter = board.getPiece(new ChessPosition(x - 1, y - 1));
                 if (diagonalLeftEncounter != null && diagonalLeftEncounter.getTeamColor() != piece.getTeamColor()) {
@@ -236,7 +226,6 @@ public class ChessPiece {
                     }
                 }
             }
-            // initial
             if (x == 7) {
                 ChessPiece encounter2 = board.getPiece(new ChessPosition(x - 2, y));
                 if (encounter2 == null && encounter == null) {
