@@ -1,8 +1,10 @@
 package service;
 import chess.ChessGame;
+import com.google.gson.Gson;
 import dataaccess.*;
 import model.AuthData;
 import model.GameData;
+import model.LoginReturn;
 import model.UserData;
 import org.junit.jupiter.api.*;
 import passoff.model.*;
@@ -10,7 +12,6 @@ import passoff.server.TestServerFacade;
 import server.Server;
 
 import java.util.*;
-
 public class UnitTests {
 
     private static Service testService;
@@ -34,26 +35,56 @@ public class UnitTests {
         badUser = new UserData(null, null, null);
     }
 
-    @Test
-    public void registerWorksTest() {
+    @BeforeEach
+    public void setUp() {
+        testService.clear();
         try {
             testService.register(p1);
             testService.register(p2);
             testService.register(p3);
-            Assertions.assertSame(testUserDB.getUser(p1), p1);
-            Assertions.assertSame(testUserDB.getUser(p2), p2);
-            Assertions.assertSame(testUserDB.getUser(p3), p3);
         } catch (DataAccessException e) {
             Assertions.assertTrue(0 == 1, "register threw an error");
         }
     }
 
     @Test
+    public void registerWorksTest() {
+        Assertions.assertSame(testUserDB.getUser(p1), p1);
+        Assertions.assertSame(testUserDB.getUser(p2), p2);
+        Assertions.assertSame(testUserDB.getUser(p3), p3);
+    }
+
+    @Test
     public void registerRaisesErrorsTest() {
+        Assertions.assertThrows(DataAccessException.class, () -> testService.register(badUser));
+    }
+
+    @Test
+    public void clearWorksTest() {
+        Assertions.assertSame(testUserDB.getUser(p1), p1);
+        Assertions.assertSame(testUserDB.getUser(p2), p2);
+        Assertions.assertSame(testUserDB.getUser(p3), p3);
+        testService.clear();
+        Assertions.assertNotSame(testUserDB.getUser(p1), p1);
+        Assertions.assertNotSame(testUserDB.getUser(p2), p2);
+        Assertions.assertNotSame(testUserDB.getUser(p3), p3);
+    }
+
+    @Test
+    public void loginWorksTest() {
         try {
-            testService.register(badUser);
+            String resultString = testService.login(p1);
+            String expectedString = new Gson().toJson(new LoginReturn(p1.username(), "111-aaa-xyz"));
+            LoginReturn result = new Gson().fromJson(resultString, LoginReturn.class);
+            LoginReturn expected = new Gson().fromJson(expectedString, LoginReturn.class);
+            Assertions.assertEquals(result.username, expected.username);
         } catch (DataAccessException e) {
-            Assertions.assertFalse(0 == 1, "register threw an error");
+            Assertions.assertTrue(0 == 1, "login threw an error");
         }
+    }
+
+    @Test
+    public void loginWorksExceptionTest() {
+            Assertions.assertThrows(DataAccessException.class, () -> testService.login(badUser));
     }
 }
