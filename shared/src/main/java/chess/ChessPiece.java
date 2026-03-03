@@ -61,11 +61,11 @@ public class ChessPiece {
         /** list of all BISHOP moves */
         if (piece.getPieceType() == PieceType.BISHOP) {
             List<ChessMove> moves = new ArrayList<>();
-            int x_start = myPosition.getRow();
-            int y_start = myPosition.getColumn();
+            int xStart = myPosition.getRow();
+            int yStart = myPosition.getColumn();
             // up left
-            int x = x_start;
-            int y = y_start;
+            int x = xStart;
+            int y = yStart;
             boolean b = false;
             while (!b && x++ < 8 && y-- > 1) {
                 ChessPiece encounter = board.getPiece(new ChessPosition(x, y));
@@ -81,8 +81,8 @@ public class ChessPiece {
                 }
             }
             // up right
-            x = x_start;
-            y = y_start;
+            x = xStart;
+            y = yStart;
             b = false;
             while (!b && x++ < 8 && y++ < 8) {
                 ChessPiece encounter = board.getPiece(new ChessPosition(x, y));
@@ -98,8 +98,8 @@ public class ChessPiece {
                 }
             }
             // down right
-            x = x_start;
-            y = y_start;
+            x = xStart;
+            y = yStart;
             b = false;
             while (!b && x-- > 1 && y++ < 8) {
                 ChessPiece encounter = board.getPiece(new ChessPosition(x, y));
@@ -115,8 +115,8 @@ public class ChessPiece {
                 }
             }
             // down left
-            x = x_start;
-            y = y_start;
+            x = xStart;
+            y = yStart;
             b = false;
             while (!b && x-- > 1 && y-- > 1) {
                 ChessPiece encounter = board.getPiece(new ChessPosition(x, y));
@@ -316,11 +316,11 @@ public class ChessPiece {
         /** list of all ROOK moves */
         if (piece.getPieceType() == PieceType.ROOK) {
             List<ChessMove> moves = new ArrayList<>();
-            int x_start = myPosition.getRow();
-            int y_start = myPosition.getColumn();
+            int xStart = myPosition.getRow();
+            int yStart = myPosition.getColumn();
             // up
-            int x = x_start;
-            int y = y_start;
+            int x = xStart;
+            int y = yStart;
             boolean b = false;
             while (!b && x++ < 8) {
                 ChessPiece encounter = board.getPiece(new ChessPosition(x, y));
@@ -336,8 +336,8 @@ public class ChessPiece {
                 }
             }
             // right
-            x = x_start;
-            y = y_start;
+            x = xStart;
+            y = yStart;
             b = false;
             while (!b && y++ < 8) {
                 ChessPiece encounter = board.getPiece(new ChessPosition(x, y));
@@ -353,8 +353,8 @@ public class ChessPiece {
                 }
             }
             // down
-            x = x_start;
-            y = y_start;
+            x = xStart;
+            y = yStart;
             b = false;
             while (!b && x-- > 1) {
                 ChessPiece encounter = board.getPiece(new ChessPosition(x, y));
@@ -370,8 +370,8 @@ public class ChessPiece {
                 }
             }
             // left
-            x = x_start;
-            y = y_start;
+            x = xStart;
+            y = yStart;
             b = false;
             while (!b && y-- > 1) {
                 ChessPiece encounter = board.getPiece(new ChessPosition(x, y));
@@ -393,11 +393,11 @@ public class ChessPiece {
         /** list of all QUEEN moves */
         if (piece.getPieceType() == PieceType.QUEEN) {
             List<ChessMove> moves = new ArrayList<>();
-            int x_start = myPosition.getRow();
-            int y_start = myPosition.getColumn();
+            int xStart = myPosition.getRow();
+            int yStart = myPosition.getColumn();
             // up
-            int x = x_start;
-            int y = y_start;
+            int x = xStart;
+            int y = yStart;
             boolean b = false;
             while (!b && x++ < 8) {
                 ChessPiece encounter = board.getPiece(new ChessPosition(x, y));
@@ -413,8 +413,8 @@ public class ChessPiece {
                 }
             }
             // right
-            x = x_start;
-            y = y_start;
+            x = xStart;
+            y = yStart;
             b = false;
             while (!b && y++ < 8) {
                 ChessPiece encounter = board.getPiece(new ChessPosition(x, y));
@@ -430,8 +430,8 @@ public class ChessPiece {
                 }
             }
             // down
-            x = x_start;
-            y = y_start;
+            x = xStart;
+            y = yStart;
             b = false;
             while (!b && x-- > 1) {
                 ChessPiece encounter = board.getPiece(new ChessPosition(x, y));
@@ -447,8 +447,8 @@ public class ChessPiece {
                 }
             }
             // left
-            x = x_start;
-            y = y_start;
+            x = xStart;
+            y = yStart;
             b = false;
             while (!b && y-- > 1) {
                 ChessPiece encounter = board.getPiece(new ChessPosition(x, y));
@@ -464,8 +464,8 @@ public class ChessPiece {
                 }
             }
             // up left
-            x = x_start;
-            y = y_start;
+            x = xStart;
+            y = yStart;
             b = false;
             while (!b && x++ < 8 && y-- > 1) {
                 ChessPiece encounter = board.getPiece(new ChessPosition(x, y));
@@ -481,8 +481,8 @@ public class ChessPiece {
                 }
             }
             // up right
-            x = x_start;
-            y = y_start;
+            x = xStart;
+            y = yStart;
             b = false;
             while (!b && x++ < 8 && y++ < 8) {
                 ChessPiece encounter = board.getPiece(new ChessPosition(x, y));
@@ -498,8 +498,8 @@ public class ChessPiece {
                 }
             }
             // down right
-            x = x_start;
-            y = y_start;
+            x = xStart;
+            y = yStart;
             b = false;
             while (!b && x-- > 1 && y++ < 8) {
                 ChessPiece encounter = board.getPiece(new ChessPosition(x, y));
@@ -515,8 +515,8 @@ public class ChessPiece {
                 }
             }
             // down left
-            x = x_start;
-            y = y_start;
+            x = xStart;
+            y = yStart;
             b = false;
             while (!b && x-- > 1 && y-- > 1) {
                 ChessPiece encounter = board.getPiece(new ChessPosition(x, y));
@@ -558,8 +558,8 @@ public class ChessPiece {
                 }
                 // right capture
                 if (y < 8) {
-                    ChessPiece diagonal_right_encounter = board.getPiece(new ChessPosition(x + 1, y + 1));
-                    if (diagonal_right_encounter != null && diagonal_right_encounter.getTeamColor() != piece.getTeamColor()) {
+                    ChessPiece diagonalRightEncounter = board.getPiece(new ChessPosition(x + 1, y + 1));
+                    if (diagonalRightEncounter != null && diagonalRightEncounter.getTeamColor() != piece.getTeamColor()) {
                         if (x + 1 == 8) {
                             moves.add(new ChessMove(myPosition, new ChessPosition(x + 1, y + 1), PieceType.QUEEN));
                             moves.add(new ChessMove(myPosition, new ChessPosition(x + 1, y + 1), PieceType.ROOK));
@@ -573,8 +573,8 @@ public class ChessPiece {
                 }
                 // left capture
                 if (y > 1) {
-                    ChessPiece diagonal_left_encounter = board.getPiece(new ChessPosition(x + 1, y - 1));
-                    if (diagonal_left_encounter != null && diagonal_left_encounter.getTeamColor() != piece.getTeamColor()) {
+                    ChessPiece diagonalLeftEncounter = board.getPiece(new ChessPosition(x + 1, y - 1));
+                    if (diagonalLeftEncounter != null && diagonalLeftEncounter.getTeamColor() != piece.getTeamColor()) {
                         if (x + 1 == 8) {
                             moves.add(new ChessMove(myPosition, new ChessPosition(x + 1, y - 1), PieceType.QUEEN));
                             moves.add(new ChessMove(myPosition, new ChessPosition(x + 1, y - 1), PieceType.ROOK));
@@ -588,8 +588,8 @@ public class ChessPiece {
                 }
                 // initial
                 if (x == 2) {
-                    ChessPiece encounter_2 = board.getPiece(new ChessPosition(x + 2, y));
-                    if (encounter_2 == null && encounter == null) {
+                    ChessPiece encounter2 = board.getPiece(new ChessPosition(x + 2, y));
+                    if (encounter2 == null && encounter == null) {
                         moves.add(new ChessMove(myPosition, new ChessPosition(x + 2, y), null));
                     }
                 }
@@ -612,8 +612,8 @@ public class ChessPiece {
                 }
                 // right capture
                 if (y < 8) {
-                    ChessPiece diagonal_right_encounter = board.getPiece(new ChessPosition(x - 1, y + 1));
-                    if (diagonal_right_encounter != null && diagonal_right_encounter.getTeamColor() != piece.getTeamColor()) {
+                    ChessPiece diagonalRightEncounter = board.getPiece(new ChessPosition(x - 1, y + 1));
+                    if (diagonalRightEncounter != null && diagonalRightEncounter.getTeamColor() != piece.getTeamColor()) {
                         if (x - 1 == 1) {
                             moves.add(new ChessMove(myPosition, new ChessPosition(x - 1, y + 1), PieceType.QUEEN));
                             moves.add(new ChessMove(myPosition, new ChessPosition(x - 1, y + 1), PieceType.ROOK));
@@ -627,8 +627,8 @@ public class ChessPiece {
                 }
                 // left capture
                 if (y > 1) {
-                    ChessPiece diagonal_left_encounter = board.getPiece(new ChessPosition(x - 1, y - 1));
-                    if (diagonal_left_encounter != null && diagonal_left_encounter.getTeamColor() != piece.getTeamColor()) {
+                    ChessPiece diagonalLeftEncounter = board.getPiece(new ChessPosition(x - 1, y - 1));
+                    if (diagonalLeftEncounter != null && diagonalLeftEncounter.getTeamColor() != piece.getTeamColor()) {
                         if (x - 1 == 1) {
                             moves.add(new ChessMove(myPosition, new ChessPosition(x - 1, y - 1), PieceType.QUEEN));
                             moves.add(new ChessMove(myPosition, new ChessPosition(x - 1, y - 1), PieceType.ROOK));
@@ -642,8 +642,8 @@ public class ChessPiece {
                 }
                 // initial
                 if (x == 7) {
-                    ChessPiece encounter_2 = board.getPiece(new ChessPosition(x - 2, y));
-                    if (encounter_2 == null && encounter == null) {
+                    ChessPiece encounter2 = board.getPiece(new ChessPosition(x - 2, y));
+                    if (encounter2 == null && encounter == null) {
                         moves.add(new ChessMove(myPosition, new ChessPosition(x - 2, y), null));
                     }
                 }
