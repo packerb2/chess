@@ -47,11 +47,15 @@ public class Server {
             UserData user = new Gson().fromJson(context.body(), UserData.class);
             context.result(service.register(user));
         } catch (DataAccessException e) {
-            context.status(403);
-            context.result(new Gson().toJson(new ErrorObject("Error: username already exists")));
+            if (e.getMessage().equals("EF")) {
+                context.status(400);
+                context.result(new Gson().toJson(new ErrorObject("Error: Some Fields Are Empty")));
+            } else {
+                context.status(403);
+                context.result(new Gson().toJson(new ErrorObject("Error: username already exists")));
+            }
         }
     }
-//TODO change returns to be inside a context.result(~__~) and change function return types to void
 
     private void login(Context context) {
         try {

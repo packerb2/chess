@@ -26,9 +26,12 @@ public class Service {
     }
 
     public String register(UserData user) throws DataAccessException{
+        if (user.username() == null || user.password() == null || user.email() == null) {
+            throw new DataAccessException("EF");
+        }
         UserData data = userData.getUser(user);
         if (data != null) {
-            throw new DataAccessException("Error: Username is already taken");
+            throw new DataAccessException("Taken");
         }
         userData.addUser(user);
         AuthData a = authData.addAuth(user);
