@@ -8,6 +8,7 @@ import dataaccess.*;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
+import model.loginReturn;
 
 public class Service {
 
@@ -34,8 +35,7 @@ public class Service {
         }
         userData.addUser(user);
         AuthData a = authData.addAuth(user);
-        return "{username: " + user.username() + ", authToken: " + a.token() + "}";
-        //return new Gson().toJson({"username": data.username(), "authToken": a.token()});
+        return new Gson().toJson(new loginReturn(user.username(), a.token()));
     }
 
     public String login(UserData user) throws DataAccessException {
@@ -47,16 +47,15 @@ public class Service {
             throw new DataAccessException("Error: Credentials are Incorrect");
         }
         AuthData a = authData.addAuth(user);
-        // format: "{"key": "value"}"
-        return "{username: " + data.username() + ", authToken: " + a.token() + "}";
-        //return new Gson().toJson({"username": data.username(), "authToken": a.token()});
+        return new Gson().toJson(new loginReturn(user.username(), a.token()));
     }
 
-    public void logout(AuthData authKey) throws DataAccessException {
+    public String logout(AuthData authKey) throws DataAccessException {
         if (!authData.findKey(authKey)) {
             throw new DataAccessException("Error: Not Authorized");
         }
         authData.removeKey(authKey);
+        return new Gson().toJson("");
     }
 
     public String createGame(String gameName, String token) throws DataAccessException {
@@ -70,7 +69,7 @@ public class Service {
         //return "{"gameID": id}";
     }
 
-    public void joinGame(String gameID, ChessGame.TeamColor color, String token, UserData user) throws DataAccessException {
+    public String joinGame(int gameID, ChessGame.TeamColor color, String token, UserData user) throws DataAccessException {
         AuthData authKey = new AuthData(token);
         if (!authData.findKey(authKey)) {
             throw new DataAccessException("Error: Not Authorized");
@@ -81,7 +80,7 @@ public class Service {
         }
         if (color == ChessGame.TeamColor.WHITE) {
             if (game.player_white() == null) {
-                game.player_white = user.username();
+                gameData.updatePlayer(gameID, ChessGame.TeamColor.WHITE, user.username());
             }
             else {
                 throw new DataAccessException("Error: White is Taken");
@@ -89,11 +88,12 @@ public class Service {
         }
         else if (color == ChessGame.TeamColor.BLACK) {
             if (game.player_black() == null) {
-                game.player_black = user.username();
+                gameData.updatePlayer(gameID, ChessGame.TeamColor.BLACK, user.username());
             }
             else {
                 throw new DataAccessException("Error: White is Taken");
             }
         }
+        return new Gson().toJson("");
     }
 }

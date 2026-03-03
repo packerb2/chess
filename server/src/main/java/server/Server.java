@@ -37,55 +37,79 @@ public class Server {
     }
 
     private void clear(Context context) {
+        context.status(200);
         service.clear();
     }
 
-    private String register(Context context) throws DataAccessException {
-        UserData user = new Gson().fromJson(context.body(), UserData.class);
-        String response = service.register(user);
-        return response;
-    }
-
-    private String login(Context context) throws DataAccessException {
-        UserData user = new Gson().fromJson(context.body(), UserData.class);
-        String response = service.login(user);
-        return response;
-    }
-
-    private void logout(Context context) throws DataAccessException {
-        if (!authorized(context)) {
-            throw new DataAccessException("Error: Not Authorized");
+    private String register(Context context) {
+        try {
+            UserData user = new Gson().fromJson(context.body(), UserData.class);
+            return service.register(user);
+        } catch (DataAccessException e) {
+            context.status(401);
+            return new Gson().toJson("~ error object ~");
         }
-        AuthData authKey = new Gson().fromJson(context.body(), AuthData.class);
-        service.logout(authKey);
+    }
+
+    private String login(Context context) {
+        try {
+            UserData user = new Gson().fromJson(context.body(), UserData.class);
+            return service.login(user);
+        } catch (DataAccessException e) {
+            context.status(401);
+            return new Gson().toJson("~ error object ~");
+        }
+    }
+
+    private String logout(Context context) throws DataAccessException {
+        try {
+            if (!authorized(context)) {
+                throw new DataAccessException("Error: Not Authorized");
+            }
+            AuthData authKey = new Gson().fromJson(context.body(), AuthData.class);
+            return service.logout(authKey);
+        } catch (DataAccessException e) {
+            context.status(401);
+            return new Gson().toJson("~ error object ~");
+        }
     }
 
     private void listGames(Context context) throws DataAccessException {
         if (!authorized(context)) {
             throw new DataAccessException("Error: Not Authorized");
         }
+        //TODO return list of ALL games
         return;
     }
 
     private String createGame(Context context) throws DataAccessException {
-        if (!authorized(context)) {
-            throw new DataAccessException("Error: Not Authorized");
+        try {
+            if (!authorized(context)) {
+                throw new DataAccessException("Error: Not Authorized");
+            }
+            Map<String, String> gameName = new Gson().fromJson(context.body(), Map.class);
+            String token = context.header("Authorization");
+            // authorization capitalized?
+            // check that token exists in authData
+            return service.createGame(gameName.get("gameName"), token);
+        } catch (DataAccessException e) {
+            context.status(401);
+            return new Gson().toJson("~ error object ~");
         }
-        Map <String, String> gameName = new Gson().fromJson(context.body(), Map.class);
-        String token = context.header("Authorization");
-        // authorization capitalized?
-        // check that token exists in authData
-        String response = service.createGame(gameName.get("gameName"), token);
-        return response;
     }
 
-    private void joinGame(Context context) throws DataAccessException {
-        if (!authorized(context)) {
-            throw new DataAccessException("Error: Not Authorized");
+    private String joinGame(Context context) throws DataAccessException {
+        try {
+            if (!authorized(context)) {
+                throw new DataAccessException("Error: Not Authorized");
+            }
+            JoinGameData setUpInfo = new Gson().fromJson(context.body(), JoinGameData.class);
+            String token = context.header("Authorization");
+            return service.joinGame(setUpInfo.gameID(), setUpInfo.color(), token, setUpInfo.user());
+        } catch (DataAccessException e) {
+            context.status(401);
+            return new Gson().toJson("~ error object ~");
         }
-        JoinGameData setUpInfo = new Gson().fromJson(context.body(), JoinGameData.class);
-        String token = context.header("Authorization");
-        service.joinGame(setUpInfo.gameID(), setUpInfo.color(), token, setUpInfo.user());
     }
 
     public Server() {
