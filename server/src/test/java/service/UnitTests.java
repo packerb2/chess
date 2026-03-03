@@ -79,7 +79,7 @@ public class UnitTests {
             LoginReturn expected = new Gson().fromJson(expectedString, LoginReturn.class);
             Assertions.assertEquals(result.username, expected.username);
         } catch (DataAccessException e) {
-            Assertions.assertTrue(0 == 1, "login threw an error");
+            Assertions.assertTrue(0 == 1, "login threw an error in logout test");
         }
     }
 
@@ -95,7 +95,7 @@ public class UnitTests {
             LoginReturn result = new Gson().fromJson(resultString, LoginReturn.class);
             Assertions.assertDoesNotThrow(() -> testService.logout(result.authToken));
         } catch (DataAccessException e) {
-            Assertions.assertTrue(0 == 1, "login threw an error");
+            Assertions.assertTrue(0 == 1, "login threw an error in logout test");
         }
     }
 
@@ -105,7 +105,7 @@ public class UnitTests {
             testService.login(p1);
             Assertions.assertThrows(DataAccessException.class, () -> testService.logout("ooops"));
         } catch (DataAccessException e) {
-            Assertions.assertTrue(0 == 1, "login threw an error");
+            Assertions.assertTrue(0 == 1, "login threw an error in logout test");
         }
 
     }
@@ -117,12 +117,66 @@ public class UnitTests {
             LoginReturn logS = new Gson().fromJson(logString, LoginReturn.class);
             Assertions.assertDoesNotThrow(() -> testService.createGame("name", logS.authToken));
         } catch (DataAccessException e) {
-            Assertions.assertTrue(0 == 1, "login threw an error");
+            Assertions.assertTrue(0 == 1, "create threw an error in create test");
         }
     }
 
     @Test
     public void createWorksExceptionTest() {
         Assertions.assertThrows(DataAccessException.class, () -> testService.createGame("n", "n"));
+    }
+
+    @Test
+    public void listGamesWorksTest() {
+        try {
+            String logString = testService.login(p1);
+            LoginReturn logS = new Gson().fromJson(logString, LoginReturn.class);
+            testService.createGame("game1", logS.authToken);
+            testService.createGame("game2", logS.authToken);
+            testService.createGame("game3", logS.authToken);
+            Assertions.assertDoesNotThrow(() -> testService.listGames(logS.authToken));
+        } catch (DataAccessException e) {
+            Assertions.assertTrue(0 == 1, "login threw an error in list test");
+        }
+    }
+
+    @Test
+    public void listGamesWorksExceptionTest() {
+        try {
+            String logString = testService.login(p1);
+            LoginReturn logS = new Gson().fromJson(logString, LoginReturn.class);
+            testService.createGame("game1", logS.authToken);
+            testService.createGame("game2", logS.authToken);
+            testService.createGame("game3", logS.authToken);
+            Assertions.assertThrows(DataAccessException.class, () -> testService.listGames("bad_token"));
+        } catch (DataAccessException e) {
+            Assertions.assertTrue(0 == 1, "login threw an error in logout test");
+        }
+    }
+
+    @Test
+    public void joinGamesWorksTest() {
+        try {
+            String logString = testService.login(p1);
+            LoginReturn logS = new Gson().fromJson(logString, LoginReturn.class);
+            testService.createGame("game1", logS.authToken);
+            String games = testService.listGames(logS.authToken);
+            Integer id = Integer.parseInt(games.substring(20, 29));
+            Assertions.assertDoesNotThrow(() -> testService.joinGame(id, ChessGame.TeamColor.WHITE, logS.authToken));
+        } catch (DataAccessException e) {
+            Assertions.assertTrue(0 == 1, "login threw an error in list test");
+        }
+    }
+
+    @Test
+    public void joinGamesWorksExceptionTest() {
+        try {
+            String logString = testService.login(p1);
+            LoginReturn logS = new Gson().fromJson(logString, LoginReturn.class);
+            testService.createGame("game1", logS.authToken);
+            Assertions.assertThrows(DataAccessException.class, () -> testService.joinGame(0, ChessGame.TeamColor.WHITE, "bad_token"));
+        } catch (DataAccessException e) {
+            Assertions.assertTrue(0 == 1, "login threw an error in logout test");
+        }
     }
 }

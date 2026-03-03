@@ -64,17 +64,14 @@ public class Service {
         if (gameName == null || token == null) {
             throw new DataAccessException("EF");
         }
-//        AuthData authKey = new AuthData(token);
         if (!authData.findKey(token)) {
             throw new DataAccessException("Error: Not Authorized");
         }
         int id = gameData.createGame(gameName);
-        String result = new Gson().toJson(new GameIDs(id));
-        return result;
+        return new Gson().toJson(new GameIDs(id));
     }
 
     public void joinGame(Integer gameID, ChessGame.TeamColor color, String token) throws DataAccessException {
-//        AuthData authKey = new AuthData(token);
         if (!authData.findKey(token)) {
             throw new DataAccessException("Error: Not Authorized");
         }
@@ -97,7 +94,7 @@ public class Service {
                 throw new DataAccessException("Taken");
             }
         }
-        else if (color == ChessGame.TeamColor.BLACK) {
+        else {
             if (game.blackUsername() == null) {
                 gameData.updatePlayer(gameID, ChessGame.TeamColor.BLACK, key.username());
             }
@@ -108,7 +105,6 @@ public class Service {
     }
 
     public String listGames(String token) throws DataAccessException {
-//        AuthData authKey = new AuthData(token);
         if (!authData.findKey(token)) {
             throw new DataAccessException("Error: Not Authorized");
         }
