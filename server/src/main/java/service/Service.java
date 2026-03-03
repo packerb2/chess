@@ -35,7 +35,7 @@ public class Service {
         }
         userData.addUser(user);
         AuthData a = authData.addAuth(user);
-        return new Gson().toJson(new loginReturn(user.username(), a.token()));
+        return new Gson().toJson(new LoginReturn(user.username(), a.token()));
     }
 
     public String login(UserData user) throws DataAccessException {
@@ -50,7 +50,7 @@ public class Service {
             throw new DataAccessException("PE");
         }
         AuthData a = authData.addAuth(user);
-        return new Gson().toJson(new loginReturn(user.username(), a.token()));
+        return new Gson().toJson(new LoginReturn(user.username(), a.token()));
     }
 
     public void logout(String token) throws DataAccessException {
@@ -69,7 +69,7 @@ public class Service {
             throw new DataAccessException("Error: Not Authorized");
         }
         int id = gameData.createGame(gameName);
-        String result = new Gson().toJson(new gameIDs(id));
+        String result = new Gson().toJson(new GameIDs(id));
         return result;
     }
 

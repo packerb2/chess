@@ -1,9 +1,9 @@
 package model;
 
-public class gameIDs {
+public class GameIDs {
     public int gameID;
 
-    public gameIDs(int id) {
+    public GameIDs(int id) {
         gameID = id;
     }
 }
