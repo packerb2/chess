@@ -72,10 +72,13 @@ public class Service {
         return new Gson().toJson(new gameIDs(id));
     }
 
-    public String joinGame(int gameID, ChessGame.TeamColor color, String token, UserData user) throws DataAccessException {
+    public String joinGame(Integer gameID, ChessGame.TeamColor color, String token, UserData user) throws DataAccessException {
         AuthData authKey = new AuthData(token);
         if (!authData.findKey(authKey)) {
             throw new DataAccessException("Error: Not Authorized");
+        }
+        if (gameID == null) {
+            throw new DataAccessException("Not Found");
         }
         if (color != ChessGame.TeamColor.WHITE && color != ChessGame.TeamColor.BLACK) {
             throw new DataAccessException("Bad Color");
