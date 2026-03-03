@@ -12,28 +12,35 @@ public class MemoryAuthDAO implements AuthDAO {
         return UUID.randomUUID().toString();
     }
 
-    private ArrayList<AuthData> data;
+    public ArrayList<String> data = new ArrayList<>();
 
     @Override
     public AuthData addAuth(UserData userData) {
         String token = generateToken();
         AuthData authKey = new AuthData(token);
-        data.add(authKey);
+        data.add(token);
         return authKey;
     }
 
     @Override
     public void deleteAuths() {
-        data.clear();
+        if (data != null) {
+            data.clear();
+        }
     }
 
     @Override
     public void removeKey(AuthData authKey) {
-        data.remove(authKey);
+        if (data != null) {
+            data.remove(authKey.token());
+        }
     }
 
     @Override
     public boolean findKey(AuthData authKey) {
-        return data.contains(authKey);
+        if (data == null) {
+            return false;
+        }
+        return data.contains(authKey.token());
     }
 }

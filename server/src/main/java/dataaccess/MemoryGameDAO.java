@@ -4,27 +4,34 @@ import chess.ChessGame;
 import model.GameData;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 public class MemoryGameDAO implements GameDAO {
 
-    public ArrayList<GameData> games;
-    public Integer highestID = 0;
+    public ArrayList<GameData> games = new ArrayList<>();
+    public Integer ID = 0;
 
     @Override
     public void deleteGames() {
-        games.clear();
+        if (games != null) {
+            games.clear();
+        }
     }
 
     @Override
     public Integer createGame(String gameName) {
-        highestID = highestID + 1;
-        GameData game = new GameData(highestID, null, null, gameName);
+        Random random = new Random();
+        ID = random.nextInt(999999999 - 100000000) + 100000000;
+        GameData game = new GameData(ID, null, null, gameName);
         games.add(game);
-        return highestID;
+        return ID;
     }
 
     @Override
     public GameData getGame(int gameID) {
+        if (games.isEmpty()) {
+            return null;
+        }
         for (GameData game : games) {
             if (game.gameID() == gameID) {
                 return game;

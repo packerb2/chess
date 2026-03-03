@@ -5,10 +5,7 @@ import com.google.gson.Gson;
 import dataaccess.UserDAO;
 import dataaccess.MemoryUserDAO;
 import dataaccess.*;
-import model.AuthData;
-import model.GameData;
-import model.UserData;
-import model.loginReturn;
+import model.*;
 
 public class Service {
 
@@ -64,9 +61,7 @@ public class Service {
             throw new DataAccessException("Error: Not Authorized");
         }
         int id = gameData.createGame(gameName);
-        return "{gameID: " + id + "}";
-        //return new Gson().toJson({"gameID": id});
-        //return "{"gameID": id}";
+        return new Gson().toJson(new gameIDs(id));
     }
 
     public String joinGame(int gameID, ChessGame.TeamColor color, String token, UserData user) throws DataAccessException {
@@ -76,14 +71,14 @@ public class Service {
         }
         GameData game = gameData.getGame(gameID);
         if (game == null) {
-            throw new DataAccessException("Error: No Game Found");
+            throw new DataAccessException("Not Found");
         }
         if (color == ChessGame.TeamColor.WHITE) {
             if (game.player_white() == null) {
                 gameData.updatePlayer(gameID, ChessGame.TeamColor.WHITE, user.username());
             }
             else {
-                throw new DataAccessException("Error: White is Taken");
+                throw new DataAccessException("Taken");
             }
         }
         else if (color == ChessGame.TeamColor.BLACK) {
@@ -91,7 +86,7 @@ public class Service {
                 gameData.updatePlayer(gameID, ChessGame.TeamColor.BLACK, user.username());
             }
             else {
-                throw new DataAccessException("Error: White is Taken");
+                throw new DataAccessException("Taken");
             }
         }
         return new Gson().toJson("");

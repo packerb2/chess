@@ -2,10 +2,10 @@ package model;
 
 public class loginReturn {
     public String username;
-    public String token;
+    public String authToken;
 
     public loginReturn(String un, String t) {
         username = un;
-        token = t;
+        authToken = t;
     }
 }
