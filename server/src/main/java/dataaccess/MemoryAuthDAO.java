@@ -42,7 +42,7 @@ public class MemoryAuthDAO implements AuthDAO {
 
     @Override
     public boolean findKey(AuthData authKey) {
-        if (data == null || authKey == null) {
+        if (data.isEmpty() || authKey == null) {
             return false;
         }
         return data.contains(authKey.token());

@@ -79,9 +79,10 @@ public class Server {
 
     private void logout(Context context) {
         try {
-            AuthData authKey = new Gson().fromJson(context.body(), AuthData.class);
+            String token = context.header("authorization");
+            AuthData authKey = new AuthData(token);
             context.status(200);
-            context.result(service.logout(authKey));
+            service.logout(authKey);
         } catch (DataAccessException e) {
             context.status(401);
             context.result(new Gson().toJson(new ErrorObject("Error: Unauthorized")));

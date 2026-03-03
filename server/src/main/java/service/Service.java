@@ -53,12 +53,11 @@ public class Service {
         return new Gson().toJson(new loginReturn(user.username(), a.token()));
     }
 
-    public String logout(AuthData authKey) throws DataAccessException {
+    public void logout(AuthData authKey) throws DataAccessException {
         if (!authData.findKey(authKey)) {
             throw new DataAccessException("Error: Not Authorized");
         }
         authData.removeKey(authKey);
-        return new Gson().toJson("");
     }
 
     public String createGame(String gameName, String token) throws DataAccessException {
