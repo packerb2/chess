@@ -1,7 +1,15 @@
 package dataaccess;
 
+import org.mindrot.jbcrypt.BCrypt;
+
 import java.sql.*;
 import java.util.Properties;
+import chess.ChessGame;
+import com.google.gson.Gson;
+import dataaccess.UserDAO;
+import dataaccess.MemoryUserDAO;
+import dataaccess.*;
+import model.*;
 
 public class DatabaseManager {
     private static String databaseName;
@@ -14,6 +22,22 @@ public class DatabaseManager {
      */
     static {
         loadPropertiesFromResources();
+    }
+
+    void storeUserPassword(String username, String clearTextPassword) {
+        String hashedPassword = BCrypt.hashpw(clearTextPassword, BCrypt.gensalt());
+
+        // write the hashed password in database along with the user's other information
+        writeHashedPasswordToDatabase(username, hashedPassword);
+
+        // Is this?: Server.register(*context = hashed info*);
+    }
+
+    boolean verifyUser(String username, String providedClearTextPassword) {
+        // read the previously hashed password from the database
+        var hashedPassword = readHashedPasswordFromDatabase(username);
+
+        return BCrypt.checkpw(providedClearTextPassword, hashedPassword);
     }
 
     /**
