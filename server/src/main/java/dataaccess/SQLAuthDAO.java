@@ -50,9 +50,7 @@ public class SQLAuthDAO implements AuthDAO {
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
                 ps.executeUpdate();
             }
-        } catch (DataAccessException | SQLException e) {
-            return;
-        }
+        } catch (DataAccessException | SQLException _) {}
     }
 
     @Override
@@ -63,9 +61,7 @@ public class SQLAuthDAO implements AuthDAO {
                 ps.setString(1, token);
                 ps.executeUpdate();
             }
-        } catch (DataAccessException | SQLException e) {
-            return;
-        }
+        } catch (DataAccessException | SQLException _) {}
     }
 
     @Override

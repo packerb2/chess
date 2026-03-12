@@ -50,9 +50,7 @@ public class SQLUserDAO implements UserDAO{
                 ps.setString(3, info.email());
                 ps.executeUpdate();
             }
-        } catch (DataAccessException | SQLException e) {
-            return;
-        }
+        } catch (DataAccessException | SQLException _) {}
     }
 
     @Override
@@ -62,8 +60,6 @@ public class SQLUserDAO implements UserDAO{
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
                 ps.executeUpdate();
             }
-        } catch (DataAccessException | SQLException e) {
-            return;
-        }
+        } catch (DataAccessException | SQLException _) {}
     }
 }
