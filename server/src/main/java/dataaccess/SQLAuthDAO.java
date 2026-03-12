@@ -56,14 +56,16 @@ public class SQLAuthDAO implements AuthDAO {
     }
 
     @Override
-    public void removeKey(String token) {
+    public void removeKey(String token) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()) {
             var statement = "DELETE FROM auths WHERE token=?";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
                 ps.setString(1, token);
                 ps.executeUpdate();
             }
-        } catch (DataAccessException | SQLException _) {}
+        } catch (DataAccessException | SQLException _) {
+            throw new DataAccessException("Could not remove key");
+        }
     }
 
     @Override

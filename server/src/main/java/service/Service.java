@@ -63,7 +63,11 @@ public class Service {
         if (!authData.findKey(token)) {
             throw new DataAccessException("Error: Not Authorized");
         }
-        authData.removeKey(token);
+        try {
+            authData.removeKey(token);
+        } catch (DataAccessException e) {
+            throw new DataAccessException("Error: Failed to remove Authentication");
+        }
     }
 
     public String createGame(String gameName, String token) throws DataAccessException {
