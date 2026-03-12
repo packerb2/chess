@@ -58,7 +58,15 @@ public class SQLAuthDAO implements AuthDAO {
 
     @Override
     public void removeKey(String token) {
-
+        try (Connection conn = DatabaseManager.getConnection()) {
+            var statement = "DELETE FROM auths WHERE token=?";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                ps.setString(1, token);
+                ps.executeUpdate();
+            }
+        } catch (DataAccessException | SQLException e) {
+            return;
+        }
     }
 
     @Override
@@ -84,6 +92,24 @@ public class SQLAuthDAO implements AuthDAO {
 
     @Override
     public AuthData getKey(String token) {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT token, username FROM auths WHERE token=?";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                ps.setString(1, token);
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        String gotToken = rs.getString("token");
+                        String gotUser = rs.getString("username");
+                        AuthData a = new AuthData(gotToken, gotUser);
+                        if (Objects.equals(gotToken, token)) {
+                            return a;
+                        }
+                    }
+                }
+            }
+        } catch (DataAccessException | SQLException e) {
+            return null;
+        }
         return null;
     }
 }
