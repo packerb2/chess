@@ -22,7 +22,7 @@ public class Server {
     private void clear(Context context) {
         context.status(200);
         if (service.clear() == -1) {
-            context.status(500);
+            context.status(401);
         }
     }
 
@@ -40,7 +40,7 @@ public class Server {
             }
             else {
                 context.status(500);
-                context.result(new Gson().toJson(new ErrorObject("Error: Server Error")));
+                context.result(new Gson().toJson(new ErrorObject("Error: System Error in Register")));
             }
         }
     }
@@ -53,14 +53,14 @@ public class Server {
         } catch (DataAccessException e) {
             if (e.getMessage().equals("EF")) {
                 context.status(400);
-                context.result(new Gson().toJson(new ErrorObject("Error: Credentials are Incorrect")));
+                context.result(new Gson().toJson(new ErrorObject("Error: Credentials are Incomplete")));
             }
-            else if (e.getMessage().equals("UE")) {
+            else if (e.getMessage().equals("NU")) {
                 context.status(401);
                 context.result(new Gson().toJson(new ErrorObject("Error: Credentials are Incorrect")));
             } else {
                 context.status(500);
-                context.result(new Gson().toJson(new ErrorObject("Error: Server Error")));
+                context.result(new Gson().toJson(new ErrorObject("Error: System Error in Login")));
             }
         }
     }
@@ -73,11 +73,11 @@ public class Server {
         } catch (DataAccessException e) {
             if (e.getMessage().equals("NA")) {
                 context.status(401);
-                context.result(new Gson().toJson(new ErrorObject("Error: Unauthorized")));
+                context.result(new Gson().toJson(new ErrorObject("Error: Unauthorized Logout")));
             }
             else {
                 context.status(500);
-                context.result(new Gson().toJson(new ErrorObject("Error: System Error")));
+                context.result(new Gson().toJson(new ErrorObject("Error: System Error in Logout")));
             }
         }
     }
@@ -88,8 +88,14 @@ public class Server {
             context.status(200);
             context.result(service.listGames(token));
         } catch (DataAccessException e) {
-            context.status(500);
-            context.result(new Gson().toJson(new ErrorObject("Error: Unauthorized")));
+            if (e.getMessage().equals("NA")) {
+                context.status(401);
+                context.result(new Gson().toJson(new ErrorObject("Error: Unauthorized List")));
+            }
+            else {
+                context.status(500);
+                context.result(new Gson().toJson(new ErrorObject("Error: System Error in ListGames")));
+            }
         }
     }
 
@@ -111,7 +117,7 @@ public class Server {
                 context.result(new Gson().toJson(new ErrorObject("Error: Not Authorized")));
             } else {
                 context.status(500);
-                context.result(new Gson().toJson(new ErrorObject("Error: System Error")));
+                context.result(new Gson().toJson(new ErrorObject("Error: System Error in CreateGame")));
             }
         }
     }
@@ -128,21 +134,25 @@ public class Server {
                     context.status(400);
                     context.result(new Gson().toJson(new ErrorObject("Error: Some Fields Were Empty")));
                 }
-                case "Not Found" -> {
+                case "NF" -> {
                     context.status(400);
                     context.result(new Gson().toJson(new ErrorObject("Error: Invalid Game ID")));
                 }
-                case "Bad Color" -> {
+                case "NA" -> {
+                    context.status(401);
+                    context.result(new Gson().toJson(new ErrorObject("Error: Unauthorized Joining")));
+                }
+                case "BC" -> {
                     context.status(403);
                     context.result(new Gson().toJson(new ErrorObject("Error: That Color Is Not A Valid Option")));
                 }
-                case "Taken" -> {
+                case "T" -> {
                     context.status(403);
                     context.result(new Gson().toJson(new ErrorObject("Error: Color Has Already Been Taken")));
                 }
                 default -> {
                     context.status(500);
-                    context.result(new Gson().toJson(new ErrorObject("Error: Unauthorized")));
+                    context.result(new Gson().toJson(new ErrorObject("Error: System Error in JoinGame")));
                 }
             }
         }

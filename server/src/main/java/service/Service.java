@@ -57,12 +57,12 @@ public class Service {
             }
             UserData data = userData.getUser(user);
             if (data == null) {
-                throw new DataAccessException("UE");
+                throw new DataAccessException("NU");
             }
             AuthData a = authData.addAuth(user);
             return new Gson().toJson(new LoginReturn(user.username(), a.token()));
         } catch (DataAccessException e) {
-            if (e.getMessage().equals("EF") || e.getMessage().equals("UE")) {
+            if (e.getMessage().equals("EF") || e.getMessage().equals("NU")) {
                 throw e;
             }
             else {
@@ -103,45 +103,58 @@ public class Service {
     public void joinGame(Integer gameID, ChessGame.TeamColor color, String token) throws DataAccessException {
         try {
             if (!authData.findKey(token)) {
-                throw new DataAccessException("Error: Not Authorized");
+                throw new DataAccessException("NA");
             }
             if (gameID == null || color == null) {
                 throw new DataAccessException("EF");
             }
             GameData game = gameData.getGame(gameID);
             if (game == null) {
-                throw new DataAccessException("Not Found");
+                throw new DataAccessException("NF");
             }
             if (color != ChessGame.TeamColor.WHITE && color != ChessGame.TeamColor.BLACK) {
-                throw new DataAccessException("Bad Color");
+                throw new DataAccessException("BC");
             }
             AuthData key = authData.getKey(token);
             if (color == ChessGame.TeamColor.WHITE) {
                 if (game.whiteUsername() == null) {
                     gameData.updatePlayer(gameID, ChessGame.TeamColor.WHITE, key.username());
                 } else {
-                    throw new DataAccessException("Taken");
+                    throw new DataAccessException("T");
                 }
             } else {
                 if (game.blackUsername() == null) {
                     gameData.updatePlayer(gameID, ChessGame.TeamColor.BLACK, key.username());
                 } else {
-                    throw new DataAccessException("Taken");
+                    throw new DataAccessException("T");
                 }
             }
         } catch (DataAccessException e) {
-            throw new DataAccessException("Could not join game");
+            if (e.getMessage().equals("NA")
+                    || e.getMessage().equals("EF")
+                    || e.getMessage().equals("NF")
+                    || e.getMessage().equals("BC")
+                    || e.getMessage().equals("T")) {
+                throw e;
+            } else {
+                throw new DataAccessException("Server Error");
+            }
         }
     }
 
     public String listGames(String token) throws DataAccessException {
         try {
             if (!authData.findKey(token)) {
-                throw new DataAccessException("Error: Not Authorized");
+                throw new DataAccessException("NA");
             }
             return new Gson().toJson(new GameList(gameData.getGamesList()));
         } catch (DataAccessException e) {
-            throw new DataAccessException("Error listing games");
+            if (e.getMessage().equals("NA")) {
+                throw e;
+            }
+            else {
+                throw new DataAccessException("Server Error");
+            }
         }
     }
 }
