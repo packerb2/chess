@@ -32,15 +32,15 @@ public class SQLGameDAO implements GameDAO {
     @Override
     public Integer createGame(String gameName) {
         try (Connection conn = DatabaseManager.getConnection()) {
-            var statement = "INSERT INTO games (whiteUsername, blackUsername, gameName) VALUES (?, ?, ?, ?)";
+            var statement = "INSERT INTO games (whiteUsername, blackUsername, gameName) VALUES (?, ?, ?)";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
                 ps.setString(1, null);
                 ps.setString(2, null);
                 ps.setString(3, gameName);
                 return ps.executeUpdate();
             }
-        } catch (DataAccessException | SQLException _) {
-            return -1;
+        } catch (DataAccessException | SQLException e) {
+            return null;
         }
     }
 
@@ -70,14 +70,29 @@ public class SQLGameDAO implements GameDAO {
 
     @Override
     public void updatePlayer(int gameID, ChessGame.TeamColor color, String username) {
-
+        try (Connection conn = DatabaseManager.getConnection()) {
+            var statement = "";
+            if (color == ChessGame.TeamColor.WHITE) {
+                statement = "UPDATE games SET whiteUsername=? WHERE gameID=?";
+            }
+            else if (color == ChessGame.TeamColor.BLACK) {
+                statement = "UPDATE games SET blackUsername=? WHERE gameID=?";
+            }
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                ps.setString(1, username);
+                ps.setInt(2, gameID);
+                ps.executeUpdate();
+            }
+        } catch (DataAccessException | SQLException e) {
+            return;
+        }
     }
 
     @Override
     public ArrayList<GameData> getGamesList() {
         ArrayList<GameData> result = new ArrayList<>();
         try (Connection conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT gameID, whiteUsername, blackUsername, gameName FROM games WHERE gameID=?";
+            var statement = "SELECT gameID, whiteUsername, blackUsername, gameName FROM games";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
