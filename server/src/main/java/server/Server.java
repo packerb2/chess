@@ -67,7 +67,7 @@ public class Server {
             context.status(200);
             service.logout(token);
         } catch (DataAccessException e) {
-            context.status(401);
+            context.status(500);
             context.result(new Gson().toJson(new ErrorObject("Error: Unauthorized")));
         }
     }
@@ -78,7 +78,7 @@ public class Server {
             context.status(200);
             context.result(service.listGames(token));
         } catch (DataAccessException e) {
-            context.status(401);
+            context.status(500);
             context.result(new Gson().toJson(new ErrorObject("Error: Unauthorized")));
         }
     }

@@ -40,7 +40,7 @@ public class SQLUserDAO implements UserDAO{
     }
 
     @Override
-    public void addUser(UserData info) {
+    public void addUser(UserData info) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()) {
             String hashedPassword = BCrypt.hashpw(info.password(), BCrypt.gensalt());
             var statement = "INSERT INTO users (username, password, email) VALUES (?, ?, ?)";
@@ -50,16 +50,20 @@ public class SQLUserDAO implements UserDAO{
                 ps.setString(3, info.email());
                 ps.executeUpdate();
             }
-        } catch (DataAccessException | SQLException _) {}
+        } catch (DataAccessException | SQLException e) {
+            throw new DataAccessException("Could not add user");
+        }
     }
 
     @Override
-    public void deleteUsers() {
+    public void deleteUsers() throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()) {
             var statement = "TRUNCATE users";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
                 ps.executeUpdate();
             }
-        } catch (DataAccessException | SQLException _) {}
+        } catch (DataAccessException | SQLException e) {
+            throw new DataAccessException("Could not delete user");
+        }
     }
 }

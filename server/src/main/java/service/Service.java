@@ -34,13 +34,17 @@ public class Service {
         if (user.username() == null || user.password() == null || user.email() == null) {
             throw new DataAccessException("EF");
         }
-        UserData data = userData.getUser(user);
-        if (data != null) {
-            throw new DataAccessException("Taken");
+        try {
+            UserData data = userData.getUser(user);
+            if (data != null) {
+                throw new DataAccessException("Taken");
+            }
+            userData.addUser(user);
+            AuthData a = authData.addAuth(user);
+            return new Gson().toJson(new LoginReturn(user.username(), a.token()));
+        } catch (DataAccessException e) {
+            throw new DataAccessException("Unauthorized");
         }
-        userData.addUser(user);
-        AuthData a = authData.addAuth(user);
-        return new Gson().toJson(new LoginReturn(user.username(), a.token()));
     }
 
     public String login(UserData user) throws DataAccessException {
