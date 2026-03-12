@@ -2,8 +2,6 @@ package dataaccess;
 
 import chess.ChessGame;
 import model.GameData;
-import model.UserData;
-import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -11,7 +9,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-import static java.sql.Statement.RETURN_GENERATED_KEYS;
 
 public class SQLGameDAO implements GameDAO {
 
@@ -22,17 +19,19 @@ public class SQLGameDAO implements GameDAO {
     }
 
     @Override
-    public void deleteGames() {
+    public void deleteGames() throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()) {
             var statement = "TRUNCATE games";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
                 ps.executeUpdate();
             }
-        } catch (DataAccessException | SQLException _) {}
+        } catch (DataAccessException | SQLException _) {
+            throw new DataAccessException("Could not delete games");
+        }
     }
 
     @Override
-    public Integer createGame(String gameName) {
+    public Integer createGame(String gameName) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()) {
             var statement = "INSERT INTO games (whiteUsername, blackUsername, gameName) VALUES (?, ?, ?)";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
@@ -51,13 +50,13 @@ public class SQLGameDAO implements GameDAO {
                 }
             }
         } catch (DataAccessException | SQLException e) {
-            return null;
+            throw new DataAccessException("Error creating game");
         }
         return null;
     }
 
     @Override
-    public GameData getGame(int gameID) {
+    public GameData getGame(int gameID) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()) {
             var statement = "SELECT gameID, whiteUsername, blackUsername, gameName FROM games WHERE gameID=?";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
@@ -75,13 +74,13 @@ public class SQLGameDAO implements GameDAO {
                 }
             }
         } catch (DataAccessException | SQLException e) {
-            return null;
+            throw new DataAccessException("could not retrieve game");
         }
         return null;
     }
 
     @Override
-    public void updatePlayer(int ID, ChessGame.TeamColor color, String username) {
+    public void updatePlayer(int ID, ChessGame.TeamColor color, String username) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()) {
             var statement = "";
             if (color == ChessGame.TeamColor.WHITE) {
@@ -96,12 +95,12 @@ public class SQLGameDAO implements GameDAO {
                 ps.executeUpdate();
             }
         } catch (DataAccessException | SQLException e) {
-            return;
+            throw new DataAccessException("could not update player");
         }
     }
 
     @Override
-    public ArrayList<GameData> getGamesList() {
+    public ArrayList<GameData> getGamesList() throws DataAccessException {
         ArrayList<GameData> result = new ArrayList<>();
         try (Connection conn = DatabaseManager.getConnection()) {
             var statement = "SELECT gameID, whiteUsername, blackUsername, gameName FROM games";
@@ -118,7 +117,7 @@ public class SQLGameDAO implements GameDAO {
                 }
             }
         } catch (DataAccessException | SQLException e) {
-            return null;
+            throw new DataAccessException("Error retrieving game list");
         }
     }
 }

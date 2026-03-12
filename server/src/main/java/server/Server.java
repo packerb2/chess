@@ -34,9 +34,13 @@ public class Server {
             if (e.getMessage().equals("EF")) {
                 context.status(400);
                 context.result(new Gson().toJson(new ErrorObject("Error: Some Fields Are Empty")));
-            } else {
-                context.status(500);
+            } else if (e.getMessage().equals("Taken")) {
+                context.status(403);
                 context.result(new Gson().toJson(new ErrorObject("Error: username already exists")));
+            }
+            else {
+                context.status(500);
+                context.result(new Gson().toJson(new ErrorObject("Error: Server Error")));
             }
         }
     }
@@ -52,11 +56,11 @@ public class Server {
                 context.result(new Gson().toJson(new ErrorObject("Error: Credentials are Incorrect")));
             }
             else if (e.getMessage().equals("UE")) {
-                context.status(500);
+                context.status(401);
                 context.result(new Gson().toJson(new ErrorObject("Error: Credentials are Incorrect")));
             } else {
                 context.status(500);
-                context.result(new Gson().toJson(new ErrorObject("Error: Credentials are Incorrect")));
+                context.result(new Gson().toJson(new ErrorObject("Error: Server Error")));
             }
         }
     }
@@ -67,8 +71,14 @@ public class Server {
             context.status(200);
             service.logout(token);
         } catch (DataAccessException e) {
-            context.status(500);
-            context.result(new Gson().toJson(new ErrorObject("Error: Unauthorized")));
+            if (e.getMessage().equals("NA")) {
+                context.status(401);
+                context.result(new Gson().toJson(new ErrorObject("Error: Unauthorized")));
+            }
+            else {
+                context.status(500);
+                context.result(new Gson().toJson(new ErrorObject("Error: System Error")));
+            }
         }
     }
 
@@ -95,9 +105,13 @@ public class Server {
             if (e.getMessage().equals("EF")) {
                 context.status(400);
                 context.result(new Gson().toJson(new ErrorObject("Error: Missing Info")));
+            }
+            else if (e.getMessage().equals("NA")) {
+                context.status(401);
+                context.result(new Gson().toJson(new ErrorObject("Error: Not Authorized")));
             } else {
                 context.status(500);
-                context.result(new Gson().toJson(new ErrorObject("Error: Unauthorized")));
+                context.result(new Gson().toJson(new ErrorObject("Error: System Error")));
             }
         }
     }

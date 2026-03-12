@@ -43,81 +43,105 @@ public class Service {
             AuthData a = authData.addAuth(user);
             return new Gson().toJson(new LoginReturn(user.username(), a.token()));
         } catch (DataAccessException e) {
-            throw new DataAccessException("Unauthorized");
+            if (e.getMessage().equals("Taken")) {
+                throw e;
+            }
+            throw new DataAccessException("Server Error");
         }
     }
 
     public String login(UserData user) throws DataAccessException {
-        if (user.username() == null || user.password() == null) {
-            throw new DataAccessException("EF");
+        try {
+            if (user.username() == null || user.password() == null) {
+                throw new DataAccessException("EF");
+            }
+            UserData data = userData.getUser(user);
+            if (data == null) {
+                throw new DataAccessException("UE");
+            }
+            AuthData a = authData.addAuth(user);
+            return new Gson().toJson(new LoginReturn(user.username(), a.token()));
+        } catch (DataAccessException e) {
+            if (e.getMessage().equals("EF") || e.getMessage().equals("UE")) {
+                throw e;
+            }
+            else {
+                throw new DataAccessException("Server Error");
+            }
         }
-        UserData data = userData.getUser(user);
-        if (data == null) {
-            throw new DataAccessException("UE");
-        }
-        AuthData a = authData.addAuth(user);
-        return new Gson().toJson(new LoginReturn(user.username(), a.token()));
     }
 
     public void logout(String token) throws DataAccessException {
         if (!authData.findKey(token)) {
-            throw new DataAccessException("Error: Not Authorized");
+            throw new DataAccessException("NA");
         }
         try {
             authData.removeKey(token);
         } catch (DataAccessException e) {
-            throw new DataAccessException("Error: Failed to remove Authentication");
+            throw new DataAccessException("Server Error");
         }
     }
 
     public String createGame(String gameName, String token) throws DataAccessException {
-        if (gameName == null || token == null) {
-            throw new DataAccessException("EF");
+        try {
+            if (gameName == null || token == null) {
+                throw new DataAccessException("EF");
+            }
+            if (!authData.findKey(token)) {
+                throw new DataAccessException("NA");
+            }
+            int id = gameData.createGame(gameName);
+            return new Gson().toJson(new GameIDs(id));
+        } catch (DataAccessException e) {
+            if (e.getMessage().equals("EF") || e.getMessage().equals("NA")) {
+                throw e;
+            }
+            throw new DataAccessException("System Error");
         }
-        if (!authData.findKey(token)) {
-            throw new DataAccessException("Error: Not Authorized");
-        }
-        int id = gameData.createGame(gameName);
-        return new Gson().toJson(new GameIDs(id));
     }
 
     public void joinGame(Integer gameID, ChessGame.TeamColor color, String token) throws DataAccessException {
-        if (!authData.findKey(token)) {
-            throw new DataAccessException("Error: Not Authorized");
-        }
-        if (gameID == null || color == null) {
-            throw new DataAccessException("EF");
-        }
-        GameData game = gameData.getGame(gameID);
-        if (game == null) {
-            throw new DataAccessException("Not Found");
-        }
-        if (color != ChessGame.TeamColor.WHITE && color != ChessGame.TeamColor.BLACK) {
-            throw new DataAccessException("Bad Color");
-        }
-        AuthData key = authData.getKey(token);
-        if (color == ChessGame.TeamColor.WHITE) {
-            if (game.whiteUsername() == null) {
-                gameData.updatePlayer(gameID, ChessGame.TeamColor.WHITE, key.username());
+        try {
+            if (!authData.findKey(token)) {
+                throw new DataAccessException("Error: Not Authorized");
             }
-            else {
-                throw new DataAccessException("Taken");
+            if (gameID == null || color == null) {
+                throw new DataAccessException("EF");
             }
-        }
-        else {
-            if (game.blackUsername() == null) {
-                gameData.updatePlayer(gameID, ChessGame.TeamColor.BLACK, key.username());
+            GameData game = gameData.getGame(gameID);
+            if (game == null) {
+                throw new DataAccessException("Not Found");
             }
-            else {
-                throw new DataAccessException("Taken");
+            if (color != ChessGame.TeamColor.WHITE && color != ChessGame.TeamColor.BLACK) {
+                throw new DataAccessException("Bad Color");
             }
+            AuthData key = authData.getKey(token);
+            if (color == ChessGame.TeamColor.WHITE) {
+                if (game.whiteUsername() == null) {
+                    gameData.updatePlayer(gameID, ChessGame.TeamColor.WHITE, key.username());
+                } else {
+                    throw new DataAccessException("Taken");
+                }
+            } else {
+                if (game.blackUsername() == null) {
+                    gameData.updatePlayer(gameID, ChessGame.TeamColor.BLACK, key.username());
+                } else {
+                    throw new DataAccessException("Taken");
+                }
+            }
+        } catch (DataAccessException e) {
+            throw new DataAccessException("Could not join game");
         }
     }
 
     public String listGames(String token) throws DataAccessException {
-        if (!authData.findKey(token)) {
-            throw new DataAccessException("Error: Not Authorized");
+        try {
+            if (!authData.findKey(token)) {
+                throw new DataAccessException("Error: Not Authorized");
+            }
+            return new Gson().toJson(new GameList(gameData.getGamesList()));
+        } catch (DataAccessException e) {
+            throw new DataAccessException("Error listing games");
         }
-        return new Gson().toJson(new GameList(gameData.getGamesList()));
     }
 }
