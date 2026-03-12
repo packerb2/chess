@@ -82,7 +82,8 @@ public class SQLDataAccess implements DataAccess{
             `whiteUsername` varchar(255),
             `blackUsername` varchar(255),
             `gameName` varchar(255) NOT NULL,
-             PRIMARY KEY (`gameID`)
+             PRIMARY KEY (`gameID`),
+             INDEX (`gameName`)
         )
         """
     };

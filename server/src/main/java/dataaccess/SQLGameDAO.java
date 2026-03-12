@@ -11,6 +11,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
+import static java.sql.Statement.RETURN_GENERATED_KEYS;
+
 public class SQLGameDAO implements GameDAO {
 
     public SQLGameDAO() {
@@ -37,11 +39,21 @@ public class SQLGameDAO implements GameDAO {
                 ps.setString(1, null);
                 ps.setString(2, null);
                 ps.setString(3, gameName);
-                return ps.executeUpdate();
+                ps.executeUpdate();
+                var statement2 = "SELECT gameID FROM games WHERE gameName=?";
+                try (PreparedStatement ps2 = conn.prepareStatement(statement2)) {
+                    ps2.setString(1, gameName);
+                    try (ResultSet rs = ps2.executeQuery()) {
+                        if (rs.next()) {
+                            return rs.getInt("gameID");
+                        }
+                    }
+                }
             }
         } catch (DataAccessException | SQLException e) {
             return null;
         }
+        return null;
     }
 
     @Override
@@ -69,7 +81,7 @@ public class SQLGameDAO implements GameDAO {
     }
 
     @Override
-    public void updatePlayer(int gameID, ChessGame.TeamColor color, String username) {
+    public void updatePlayer(int ID, ChessGame.TeamColor color, String username) {
         try (Connection conn = DatabaseManager.getConnection()) {
             var statement = "";
             if (color == ChessGame.TeamColor.WHITE) {
@@ -80,7 +92,7 @@ public class SQLGameDAO implements GameDAO {
             }
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
                 ps.setString(1, username);
-                ps.setInt(2, gameID);
+                ps.setInt(2, ID);
                 ps.executeUpdate();
             }
         } catch (DataAccessException | SQLException e) {
