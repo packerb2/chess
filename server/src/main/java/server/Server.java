@@ -1,10 +1,7 @@
 package server;
 
 import com.google.gson.Gson;
-import dataaccess.DataAccessException;
-import dataaccess.MemoryAuthDAO;
-import dataaccess.MemoryGameDAO;
-import dataaccess.MemoryUserDAO;
+import dataaccess.*;
 import io.javalin.*;
 
 import io.javalin.http.Context;
@@ -20,7 +17,7 @@ import service.*;
 public class Server {
 
     private final Javalin javalin;
-    private final Service service = new Service(new MemoryUserDAO(), new MemoryGameDAO(), new MemoryAuthDAO());
+    private final Service service = new Service(new SQLUserDAO(), new MemoryGameDAO(), new MemoryAuthDAO());
 
     private void clear(Context context) {
         context.status(200);
