@@ -21,7 +21,9 @@ public class Server {
 
     private void clear(Context context) {
         context.status(200);
-        service.clear();
+        if (service.clear() == -1) {
+            context.status(500);
+        }
     }
 
     private void register(Context context) {
@@ -33,7 +35,7 @@ public class Server {
                 context.status(400);
                 context.result(new Gson().toJson(new ErrorObject("Error: Some Fields Are Empty")));
             } else {
-                context.status(403);
+                context.status(500);
                 context.result(new Gson().toJson(new ErrorObject("Error: username already exists")));
             }
         }
@@ -50,7 +52,7 @@ public class Server {
                 context.result(new Gson().toJson(new ErrorObject("Error: Credentials are Incorrect")));
             }
             else if (e.getMessage().equals("UE")) {
-                context.status(401);
+                context.status(500);
                 context.result(new Gson().toJson(new ErrorObject("Error: Credentials are Incorrect")));
             } else {
                 context.status(500);
@@ -62,7 +64,6 @@ public class Server {
     private void logout(Context context) {
         try {
             String token = context.header("authorization");
-//            AuthData authKey = new AuthData(token);
             context.status(200);
             service.logout(token);
         } catch (DataAccessException e) {
@@ -95,7 +96,7 @@ public class Server {
                 context.status(400);
                 context.result(new Gson().toJson(new ErrorObject("Error: Missing Info")));
             } else {
-                context.status(401);
+                context.status(500);
                 context.result(new Gson().toJson(new ErrorObject("Error: Unauthorized")));
             }
         }

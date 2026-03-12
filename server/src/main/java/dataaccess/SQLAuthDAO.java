@@ -44,13 +44,15 @@ public class SQLAuthDAO implements AuthDAO {
     }
 
     @Override
-    public void deleteAuths() {
+    public void deleteAuths() throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()) {
             var statement = "TRUNCATE auths";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
                 ps.executeUpdate();
             }
-        } catch (DataAccessException | SQLException _) {}
+        } catch (DataAccessException | SQLException _) {
+            throw new DataAccessException("Could not clear");
+        }
     }
 
     @Override

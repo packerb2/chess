@@ -19,10 +19,15 @@ public class Service {
         this.authData = authData;
     }
 
-    public void clear() {
-        userData.deleteUsers();
-        gameData.deleteGames();
-        authData.deleteAuths();
+    public int clear() {
+        try {
+            userData.deleteUsers();
+            gameData.deleteGames();
+            authData.deleteAuths();
+            return 0;
+        } catch (DataAccessException e) {
+            return -1;
+        }
     }
 
     public String register(UserData user) throws DataAccessException{
