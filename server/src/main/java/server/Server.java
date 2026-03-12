@@ -53,7 +53,7 @@ public class Server {
                 context.status(401);
                 context.result(new Gson().toJson(new ErrorObject("Error: Credentials are Incorrect")));
             } else {
-                context.status(401);
+                context.status(500);
                 context.result(new Gson().toJson(new ErrorObject("Error: Credentials are Incorrect")));
             }
         }

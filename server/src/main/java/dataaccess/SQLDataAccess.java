@@ -10,7 +10,7 @@ import static java.sql.Types.NULL;
 
 public class SQLDataAccess implements DataAccess{
 
-    public void MySqlDataAccess() throws DataAccessException {
+    public SQLDataAccess() throws DataAccessException {
         configureDatabase();
     }
 

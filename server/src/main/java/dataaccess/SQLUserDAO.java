@@ -10,6 +10,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class SQLUserDAO implements UserDAO{
+
+    public SQLUserDAO() {
+        try {new SQLDataAccess();} catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @Override
     public UserData getUser(UserData info) {
         try (Connection conn = DatabaseManager.getConnection()) {
