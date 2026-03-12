@@ -75,6 +75,15 @@ public class SQLDataAccess implements DataAccess{
             `username` varchar(255) NOT NULL,
              PRIMARY KEY (`token`)
         )
+        """,
+        """
+        CREATE TABLE IF NOT EXISTS games (
+            `gameID` int NOT NULL AUTO_INCREMENT,
+            `whiteUsername` varchar(255) NOT NULL,
+            `blackUsername` varchar(255) NOT NULL,
+            `gameName` varchar(255) NOT NULL,
+             PRIMARY KEY (`gameID`)
+        )
         """
     };
 
