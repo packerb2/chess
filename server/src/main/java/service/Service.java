@@ -87,6 +87,7 @@ public class Service {
             if (gameName == null || token == null) {
                 throw new DataAccessException("EF");
             }
+            authData.findKey(token);
             if (!authData.findKey(token)) {
                 throw new DataAccessException("NA");
             }

@@ -103,8 +103,6 @@ public class Server {
         try {
             GameName game = new Gson().fromJson(context.body(), GameName.class);
             String token = context.header("authorization");
-            // authorization capitalized?
-            // check that token exists in authData
             context.status(200);
             context.result(service.createGame(game.gameName, token));
         } catch (DataAccessException e) {

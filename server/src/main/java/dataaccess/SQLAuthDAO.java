@@ -69,7 +69,7 @@ public class SQLAuthDAO implements AuthDAO {
     }
 
     @Override
-    public boolean findKey(String token) {
+    public boolean findKey(String token) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()) {
             var statement = "SELECT token FROM auths WHERE token=?";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
@@ -81,12 +81,12 @@ public class SQLAuthDAO implements AuthDAO {
                             return true;
                         }
                     }
+                    return false;
                 }
             }
         } catch (DataAccessException | SQLException e) {
-            return false;
+            throw new DataAccessException("System Error");
         }
-        return false;
     }
 
     @Override
