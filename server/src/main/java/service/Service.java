@@ -59,6 +59,9 @@ public class Service {
             if (data == null) {
                 throw new DataAccessException("NU");
             }
+            if (data.username().equals("ERROR")) {
+                throw new DataAccessException("SE");
+            }
             AuthData a = authData.addAuth(user);
             return new Gson().toJson(new LoginReturn(user.username(), a.token()));
         } catch (DataAccessException e) {

@@ -34,7 +34,7 @@ public class SQLUserDAO implements UserDAO{
                 }
             }
         } catch (DataAccessException | SQLException e) {
-            return null;
+            return new UserData("ERROR", "ERROR", "ERROR");
         }
         return null;
     }
