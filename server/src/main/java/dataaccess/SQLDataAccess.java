@@ -69,6 +69,13 @@ public class SQLDataAccess implements DataAccess{
             `email` varchar(255) NOT NULL,
              PRIMARY KEY (`username`)
         )
+        
+        CREATE TABLE IF NOT EXISTS auths (
+            `username` varchar(255) NOT NULL,
+            `password` varchar(255) NOT NULL,
+            `email` varchar(255) NOT NULL,
+             PRIMARY KEY (`username`)
+        )
         """
     };
 

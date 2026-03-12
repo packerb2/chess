@@ -17,7 +17,7 @@ import service.*;
 public class Server {
 
     private final Javalin javalin;
-    private final Service service = new Service(new SQLUserDAO(), new MemoryGameDAO(), new MemoryAuthDAO());
+    private final Service service = new Service(new SQLUserDAO(), new MemoryGameDAO(), new SQLAuthDAO());
 
     private void clear(Context context) {
         context.status(200);
