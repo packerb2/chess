@@ -24,8 +24,7 @@ public class SQLDataAccess implements DataAccess{
                 ps.setString(2, hashedPassword);
                 ps.executeUpdate();
             }
-        } catch (DataAccessException | SQLException e) {
-            return;
+        } catch (DataAccessException | SQLException _) {
         }
     }
 
@@ -69,7 +68,8 @@ public class SQLDataAccess implements DataAccess{
             `email` varchar(255) NOT NULL,
              PRIMARY KEY (`username`)
         )
-        
+        """,
+        """
         CREATE TABLE IF NOT EXISTS auths (
             `token` varchar(255) NOT NULL,
             `username` varchar(255) NOT NULL,
