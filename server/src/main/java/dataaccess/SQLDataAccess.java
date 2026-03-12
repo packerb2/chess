@@ -71,10 +71,9 @@ public class SQLDataAccess implements DataAccess{
         )
         
         CREATE TABLE IF NOT EXISTS auths (
+            `token` varchar(255) NOT NULL,
             `username` varchar(255) NOT NULL,
-            `password` varchar(255) NOT NULL,
-            `email` varchar(255) NOT NULL,
-             PRIMARY KEY (`username`)
+             PRIMARY KEY (`token`)
         )
         """
     };
