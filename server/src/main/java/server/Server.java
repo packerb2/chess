@@ -108,25 +108,27 @@ public class Server {
             context.status(200);
             service.joinGame(setUpInfo.gameID(), setUpInfo.playerColor(), token);
         } catch (DataAccessException e) {
-            if (e.getMessage().equals("EF")) {
-                context.status(400);
-                context.result(new Gson().toJson(new ErrorObject("Error: Some Fields Were Empty")));
-            }
-            else if (e.getMessage().equals("Not Found")) {
-                context.status(400);
-                context.result(new Gson().toJson(new ErrorObject("Error: Invalid Game ID")));
-            }
-            else if (e.getMessage().equals("Bad Color")) {
-                context.status(403);
-                context.result(new Gson().toJson(new ErrorObject("Error: That Color Is Not A Valid Option")));
-            }
-            else if (e.getMessage().equals("Taken")) {
-                context.status(403);
-                context.result(new Gson().toJson(new ErrorObject("Error: Color Has Already Been Taken")));
-            }
-            else {
-                context.status(401);
-                context.result(new Gson().toJson(new ErrorObject("Error: Unauthorized")));
+            switch (e.getMessage()) {
+                case "EF" -> {
+                    context.status(400);
+                    context.result(new Gson().toJson(new ErrorObject("Error: Some Fields Were Empty")));
+                }
+                case "Not Found" -> {
+                    context.status(400);
+                    context.result(new Gson().toJson(new ErrorObject("Error: Invalid Game ID")));
+                }
+                case "Bad Color" -> {
+                    context.status(403);
+                    context.result(new Gson().toJson(new ErrorObject("Error: That Color Is Not A Valid Option")));
+                }
+                case "Taken" -> {
+                    context.status(403);
+                    context.result(new Gson().toJson(new ErrorObject("Error: Color Has Already Been Taken")));
+                }
+                default -> {
+                    context.status(500);
+                    context.result(new Gson().toJson(new ErrorObject("Error: Unauthorized")));
+                }
             }
         }
     }

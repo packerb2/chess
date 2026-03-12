@@ -23,7 +23,7 @@ public class SQLAuthDAO implements AuthDAO {
     }
 
     @Override
-    public AuthData addAuth(UserData info) {
+    public AuthData addAuth(UserData info) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()) {
             String token = generateToken();
             AuthData authKey = new AuthData(token, info.username());
@@ -39,7 +39,7 @@ public class SQLAuthDAO implements AuthDAO {
                 return authKey;
             }
         } catch (DataAccessException | SQLException e) {
-            return null;
+            throw new DataAccessException("Could not add authentication");
         }
     }
 
