@@ -72,18 +72,16 @@ public class SQLAuthDAO implements AuthDAO {
     public boolean findKey(String token) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()) {
             var statement = "SELECT token FROM auths WHERE token=?";
-            try (PreparedStatement ps = conn.prepareStatement(statement)) {
-                ps.setString(1, token);
-                try (ResultSet rs = ps.executeQuery()) {
-                    while (rs.next()) {
-                        String gotToken = rs.getString("token");
-                        if (Objects.equals(gotToken, token)) {
-                            return true;
-                        }
-                    }
-                    return false;
+            PreparedStatement ps = conn.prepareStatement(statement);
+            ps.setString(1, token);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                String gotToken = rs.getString("token");
+                if (Objects.equals(gotToken, token)) {
+                    return true;
                 }
             }
+            return false;
         } catch (DataAccessException | SQLException e) {
             throw new DataAccessException("System Error");
         }
@@ -93,17 +91,15 @@ public class SQLAuthDAO implements AuthDAO {
     public AuthData getKey(String token) {
         try (Connection conn = DatabaseManager.getConnection()) {
             var statement = "SELECT token, username FROM auths WHERE token=?";
-            try (PreparedStatement ps = conn.prepareStatement(statement)) {
-                ps.setString(1, token);
-                try (ResultSet rs = ps.executeQuery()) {
-                    while (rs.next()) {
-                        String gotToken = rs.getString("token");
-                        String gotUser = rs.getString("username");
-                        AuthData a = new AuthData(gotToken, gotUser);
-                        if (Objects.equals(gotToken, token)) {
-                            return a;
-                        }
-                    }
+            PreparedStatement ps = conn.prepareStatement(statement);
+            ps.setString(1, token);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                String gotToken = rs.getString("token");
+                String gotUser = rs.getString("username");
+                AuthData a = new AuthData(gotToken, gotUser);
+                if (Objects.equals(gotToken, token)) {
+                    return a;
                 }
             }
         } catch (DataAccessException | SQLException e) {

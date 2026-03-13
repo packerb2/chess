@@ -20,17 +20,15 @@ public class SQLUserDAO implements UserDAO{
     public UserData getUser(UserData info) {
         try (Connection conn = DatabaseManager.getConnection()) {
             var statement = "SELECT username, password, email FROM users WHERE username=?";
-            try (PreparedStatement ps = conn.prepareStatement(statement)) {
-                ps.setString(1, info.username());
-                try (ResultSet rs = ps.executeQuery()) {
-                    while (rs.next()) {
-                        String gotUsername = rs.getString("username");
-                        String gotPassword = rs.getString("password");
-                        String gotEmail = rs.getString("email");
-                        if (BCrypt.checkpw(info.password(), gotPassword)) {
-                            return new UserData(gotUsername, gotPassword, gotEmail);
-                        }
-                    }
+            PreparedStatement ps = conn.prepareStatement(statement);
+            ps.setString(1, info.username());
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                String gotUsername = rs.getString("username");
+                String gotPassword = rs.getString("password");
+                String gotEmail = rs.getString("email");
+                if (BCrypt.checkpw(info.password(), gotPassword)) {
+                    return new UserData(gotUsername, gotPassword, gotEmail);
                 }
             }
         } catch (DataAccessException | SQLException e) {
