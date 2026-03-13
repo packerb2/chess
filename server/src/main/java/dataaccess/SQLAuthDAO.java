@@ -50,7 +50,7 @@ public class SQLAuthDAO implements AuthDAO {
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
                 ps.executeUpdate();
             }
-        } catch (DataAccessException | SQLException _) {
+        } catch (DataAccessException | SQLException e) {
             throw new DataAccessException("Could not clear");
         }
     }
@@ -63,7 +63,7 @@ public class SQLAuthDAO implements AuthDAO {
                 ps.setString(1, token);
                 ps.executeUpdate();
             }
-        } catch (DataAccessException | SQLException _) {
+        } catch (DataAccessException | SQLException e) {
             throw new DataAccessException("Could not remove key");
         }
     }

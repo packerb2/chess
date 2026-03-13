@@ -25,7 +25,7 @@ public class SQLGameDAO implements GameDAO {
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
                 ps.executeUpdate();
             }
-        } catch (DataAccessException | SQLException _) {
+        } catch (DataAccessException | SQLException e) {
             throw new DataAccessException("Could not delete games");
         }
     }
