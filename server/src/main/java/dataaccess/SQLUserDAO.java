@@ -51,7 +51,7 @@ public class SQLUserDAO implements UserDAO{
                 ps.executeUpdate();
             }
         } catch (DataAccessException | SQLException e) {
-            throw new DataAccessException("Could not add user");
+            throw new DataAccessException("System Error");
         }
     }
 

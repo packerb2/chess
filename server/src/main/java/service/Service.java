@@ -37,6 +37,9 @@ public class Service {
         try {
             UserData data = userData.getUser(user);
             if (data != null) {
+                if (data.username().equals("ERROR")) {
+                    throw new DataAccessException("SE");
+                }
                 throw new DataAccessException("Taken");
             }
             userData.addUser(user);
