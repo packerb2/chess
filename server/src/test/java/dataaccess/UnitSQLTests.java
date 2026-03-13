@@ -1,12 +1,15 @@
 package dataaccess;
 import chess.ChessGame;
 import com.google.gson.Gson;
+import model.GameData;
 import model.GameIDs;
 import model.LoginReturn;
 import model.UserData;
 import org.junit.jupiter.api.*;
 import org.mindrot.jbcrypt.BCrypt;
 import service.Service;
+
+import java.util.ArrayList;
 
 public class UnitSQLTests {
 
@@ -179,6 +182,112 @@ public class UnitSQLTests {
             Assertions.assertThrows(DataAccessException.class, () -> testService.joinGame(0, ChessGame.TeamColor.WHITE, "bad_token"));
         } catch (DataAccessException e) {
             Assertions.assertTrue(0 == 1, "login threw an error in logout test");
+        }
+    }
+
+    @Test
+    public void getUserTest() {
+        UserData person = testUserDB.getUser(p1);
+        Assertions.assertEquals(person.username(), p1.username());
+    }
+
+    @Test
+    public void getUserNullTest() {
+        UserData person = testUserDB.getUser(badUser);
+        Assertions.assertNull(person);
+    }
+
+    @Test
+    public void addUserTest() {
+        testService.clear();
+        Assertions.assertDoesNotThrow(() -> testUserDB.addUser(p1));
+    }
+
+    @Test
+    public void addUserExceptionTest() {
+        testService.clear();
+        Assertions.assertThrows(DataAccessException.class, () -> testUserDB.addUser(badUser));
+    }
+
+    @Test
+    public void delUsersTest() {
+        Assertions.assertDoesNotThrow(() -> testUserDB.deleteUsers());
+    }
+
+    @Test
+    public void delGamesTest() {
+        Assertions.assertDoesNotThrow(() -> testGameDB.deleteGames());
+    }
+
+    @Test
+    public void createGamesTest() {
+        Assertions.assertDoesNotThrow(() -> testGameDB.createGame("test"));
+    }
+
+    @Test
+    public void createGamesExceptionTest() {
+        Assertions.assertThrows(DataAccessException.class, () -> testGameDB.createGame(null));
+    }
+
+    @Test
+    public void getGamesTest() {
+        try {
+            testGameDB.createGame("test");
+            Assertions.assertDoesNotThrow(() -> testGameDB.getGame(1));
+        } catch (DataAccessException e) {
+            Assertions.assertDoesNotThrow(() -> testGameDB.createGame("test"));
+        }
+    }
+
+    @Test
+    public void getGamesExceptionTest() {
+        try {
+            Assertions.assertNull(testGameDB.getGame(-1));
+        } catch (DataAccessException e) {
+            Assertions.assertDoesNotThrow(() -> testGameDB.getGame(-1));
+        }
+    }
+
+    @Test
+    public void addPlayerTest() {
+        try {
+            testGameDB.createGame("test");
+            Assertions.assertDoesNotThrow(() ->
+                    testGameDB.updatePlayer(1, ChessGame.TeamColor.WHITE, "a"));
+        } catch (DataAccessException e) {
+            Assertions.assertDoesNotThrow(() -> testGameDB.createGame("test"));
+        }
+    }
+
+    @Test
+    public void addPlayerExceptionTest() {
+        try {
+            testGameDB.createGame("test");
+            Assertions.assertThrows(DataAccessException.class, () ->
+                    testGameDB.updatePlayer(-1, null, null));
+        } catch (DataAccessException e) {
+            Assertions.assertDoesNotThrow(() -> testGameDB.createGame("test"));
+        }
+    }
+
+    @Test
+    public void listGamesTest() {
+        try {
+            testGameDB.createGame("test");
+            Assertions.assertDoesNotThrow(() -> testGameDB.getGamesList());
+        } catch (DataAccessException e) {
+            Assertions.assertDoesNotThrow(() -> testGameDB.createGame("test"));
+        }
+    }
+
+    @Test
+    public void listGamesExceptionTest() {
+        try {
+            ArrayList<GameData> expected = new ArrayList<>();
+            testService.clear();
+            Assertions.assertEquals(testGameDB.getGamesList(), expected);
+        } catch (DataAccessException e) {
+            Assertions.assertDoesNotThrow(() -> testGameDB.createGame("test"));
         }
     }
 }
