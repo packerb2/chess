@@ -22,7 +22,8 @@ public class Server {
     private void clear(Context context) {
         context.status(200);
         if (service.clear() == -1) {
-            context.status(401);
+            context.status(500);
+            context.result(new Gson().toJson(new ErrorObject("Error: System Error in Clear")));
         }
     }
 

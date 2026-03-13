@@ -40,7 +40,9 @@ public class Service {
                 if (data.username().equals("ERROR")) {
                     throw new DataAccessException("SE");
                 }
-                throw new DataAccessException("Taken");
+                else {
+                    throw new DataAccessException("Taken");
+                }
             }
             userData.addUser(user);
             AuthData a = authData.addAuth(user);
@@ -49,7 +51,9 @@ public class Service {
             if (e.getMessage().equals("Taken")) {
                 throw e;
             }
-            throw new DataAccessException("Server Error");
+            else {
+                throw new DataAccessException("System Error");
+            }
         }
     }
 
