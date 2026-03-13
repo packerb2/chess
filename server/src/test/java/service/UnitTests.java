@@ -1,1 +1,0 @@
-// tests have been moved to UnitSQLTests.java
