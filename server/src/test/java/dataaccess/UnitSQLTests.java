@@ -1,10 +1,7 @@
 package dataaccess;
 import chess.ChessGame;
 import com.google.gson.Gson;
-import model.GameData;
-import model.GameIDs;
-import model.LoginReturn;
-import model.UserData;
+import model.*;
 import org.junit.jupiter.api.*;
 import org.mindrot.jbcrypt.BCrypt;
 import service.Service;
@@ -289,5 +286,71 @@ public class UnitSQLTests {
         } catch (DataAccessException e) {
             Assertions.assertDoesNotThrow(() -> testGameDB.createGame("test"));
         }
+    }
+
+    @Test
+    public void addAuthTest() {
+        Assertions.assertDoesNotThrow(() -> testAuthDB.addAuth(p1));
+    }
+
+    @Test
+    public void addAuthExceptionTest() {
+        Assertions.assertThrows(DataAccessException.class, () -> testAuthDB.addAuth(badUser));
+    }
+
+    @Test
+    public void delAuthTest() {
+        try {
+            testAuthDB.addAuth(p1);
+            Assertions.assertDoesNotThrow(() -> testAuthDB.addAuth(p1));
+        } catch (DataAccessException e) {
+            Assertions.assertDoesNotThrow(() -> testAuthDB.addAuth(p1));
+        }
+    }
+
+    @Test
+    public void removeAuthTest() {
+        try {
+            AuthData a = testAuthDB.addAuth(p1);
+            Assertions.assertDoesNotThrow(() -> testAuthDB.removeKey(a.token()));
+        } catch (DataAccessException e) {
+            Assertions.assertDoesNotThrow(() -> testAuthDB.addAuth(p1));
+        }
+    }
+
+    @Test
+    public void findAuthTest() {
+        try {
+            AuthData a = testAuthDB.addAuth(p1);
+            Assertions.assertTrue(testAuthDB.findKey(a.token()));
+        } catch (DataAccessException e) {
+            Assertions.assertDoesNotThrow(() -> testAuthDB.addAuth(p1));
+        }
+    }
+
+    @Test
+    public void findFalseAuthTest() {
+        try {
+            testService.clear();
+            Assertions.assertFalse(testAuthDB.findKey("nope"));
+        } catch (DataAccessException e) {
+            Assertions.assertDoesNotThrow(() -> testAuthDB.addAuth(p1));
+        }
+    }
+
+    @Test
+    public void getAuthTest() {
+        try {
+            AuthData a = testAuthDB.addAuth(p1);
+            Assertions.assertEquals(testAuthDB.getKey(a.token()), a);
+        } catch (DataAccessException e) {
+            Assertions.assertDoesNotThrow(() -> testAuthDB.addAuth(p1));
+        }
+    }
+
+    @Test
+    public void getNullAuthTest() {
+        testService.clear();
+        Assertions.assertNull(testAuthDB.getKey("not this"));
     }
 }
