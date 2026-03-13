@@ -80,7 +80,7 @@ public class SQLGameDAO implements GameDAO {
     }
 
     @Override
-    public void updatePlayer(int ID, ChessGame.TeamColor color, String username) throws DataAccessException {
+    public void updatePlayer(int id, ChessGame.TeamColor color, String username) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()) {
             var statement = "";
             if (color == ChessGame.TeamColor.WHITE) {
@@ -91,7 +91,7 @@ public class SQLGameDAO implements GameDAO {
             }
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
                 ps.setString(1, username);
-                ps.setInt(2, ID);
+                ps.setInt(2, id);
                 ps.executeUpdate();
             }
         } catch (DataAccessException | SQLException e) {

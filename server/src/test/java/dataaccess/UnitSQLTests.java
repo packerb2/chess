@@ -8,7 +8,7 @@ import org.junit.jupiter.api.*;
 import org.mindrot.jbcrypt.BCrypt;
 import service.Service;
 
-public class unitTestsSQL {
+public class UnitSQLTests {
 
     private static Service testService;
     private static UserDAO testUserDB;
