@@ -9,9 +9,9 @@ import model.*;
 
 public class Service {
 
-    private UserDAO userData = new MemoryUserDAO();
-    private GameDAO gameData = new MemoryGameDAO();
-    private AuthDAO authData = new MemoryAuthDAO();
+    private UserDAO userData = new SQLUserDAO();
+    private GameDAO gameData = new SQLGameDAO();
+    private AuthDAO authData = new SQLAuthDAO();
 
     public Service(UserDAO userData, GameDAO gameData, AuthDAO authData) {
         this.userData = userData;
