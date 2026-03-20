@@ -1,4 +1,4 @@
-package client;
+package java.client;
 
 import org.junit.jupiter.api.*;
 import server.Server;
