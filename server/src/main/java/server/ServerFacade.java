@@ -9,11 +9,19 @@ import io.javalin.http.Context;
 import model.*;
 import service.*;
 
+import java.net.http.HttpClient;
 
-public class Server {
+
+public class ServerFacade {
 
     private final Javalin javalin;
     private final Service service = new Service(new SQLUserDAO(), new SQLGameDAO(), new SQLAuthDAO());
+    private final HttpClient client = HttpClient.newHttpClient();
+    private final String serverUrl;
+
+    public ServerFacade(String url) {
+        serverUrl = url;
+    }
 
     private void clear(Context context) {
         context.status(200);
