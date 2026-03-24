@@ -2,20 +2,19 @@ package server;
 
 import com.google.gson.Gson;
 import dataaccess.*;
-import io.javalin.*;
 
 import io.javalin.http.Context;
 
 import model.*;
-import service.*;
 
+import java.net.URI;
 import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 
 
 public class ServerFacade {
 
-    private final Javalin javalin;
-    private final Service service = new Service(new SQLUserDAO(), new SQLGameDAO(), new SQLAuthDAO());
     private final HttpClient client = HttpClient.newHttpClient();
     private final String serverUrl;
 
@@ -24,162 +23,117 @@ public class ServerFacade {
     }
 
     private void clear(Context context) {
-        context.status(200);
-        if (service.clear() == -1) {
-            context.status(500);
-            context.result(new Gson().toJson(new ErrorObject("Error: System Error in Clear")));
-        }
-    }
-
-    private void register(Context context) {
         try {
-            UserData user = new Gson().fromJson(context.body(), UserData.class);
-            context.result(service.register(user));
+            var request = buildRequest("DELETE", "/db", null);
+            sendRequest(request);
         } catch (DataAccessException e) {
-            if (e.getMessage().equals("EF")) {
-                context.status(400);
-                context.result(new Gson().toJson(new ErrorObject("Error: Some Fields Are Empty")));
-            } else if (e.getMessage().equals("Taken")) {
-                context.status(403);
-                context.result(new Gson().toJson(new ErrorObject("Error: username already exists")));
-            }
-            else {
-                context.status(500);
-                context.result(new Gson().toJson(new ErrorObject("Error: System Error in Register")));
-            }
+            return;
         }
     }
 
-    private void login(Context context) {
+    private UserData register(UserData user) {
         try {
-            UserData user = new Gson().fromJson(context.body(), UserData.class);
-            context.status(200);
-            context.result(service.login(user));
+            var request = buildRequest("POST", "/user", user);
+            var response = sendRequest(request);
+            return handleResponse(response, UserData.class);
         } catch (DataAccessException e) {
-            if (e.getMessage().equals("EF")) {
-                context.status(400);
-                context.result(new Gson().toJson(new ErrorObject("Error: Credentials are Incomplete")));
-            }
-            else if (e.getMessage().equals("NU")) {
-                context.status(401);
-                context.result(new Gson().toJson(new ErrorObject("Error: Credentials are Incorrect")));
-            } else {
-                context.status(500);
-                context.result(new Gson().toJson(new ErrorObject("Error: System Error in Login")));
-            }
+            return user;
         }
     }
 
-    private void logout(Context context) {
+    private UserData login(UserData user) {
         try {
-            String token = context.header("authorization");
-            context.status(200);
-            service.logout(token);
+            var request = buildRequest("POST", "/session", user);
+            var response = sendRequest(request);
+            return handleResponse(response, UserData.class);
         } catch (DataAccessException e) {
-            if (e.getMessage().equals("NA")) {
-                context.status(401);
-                context.result(new Gson().toJson(new ErrorObject("Error: Unauthorized Logout")));
-            }
-            else {
-                context.status(500);
-                context.result(new Gson().toJson(new ErrorObject("Error: System Error in Logout")));
-            }
+            return user;
         }
     }
 
-    private void listGames(Context context) {
+    private void logout() {
         try {
-            String token = context.header("authorization");
-            context.status(200);
-            context.result(service.listGames(token));
+            var request = buildRequest("DELETE", "/session", null);
+            sendRequest(request);
         } catch (DataAccessException e) {
-            if (e.getMessage().equals("NA")) {
-                context.status(401);
-                context.result(new Gson().toJson(new ErrorObject("Error: Unauthorized List")));
-            }
-            else {
-                context.status(500);
-                context.result(new Gson().toJson(new ErrorObject("Error: System Error in ListGames")));
-            }
+            return;
         }
     }
 
-    private void createGame(Context context) {
+    private GameList listGames() {
         try {
-            GameName game = new Gson().fromJson(context.body(), GameName.class);
-            String token = context.header("authorization");
-            context.status(200);
-            context.result(service.createGame(game.gameName, token));
+            var request = buildRequest("GET", "/game", null);
+            var response = sendRequest(request);
+            return handleResponse(response, GameList.class);
         } catch (DataAccessException e) {
-            if (e.getMessage().equals("EF")) {
-                context.status(400);
-                context.result(new Gson().toJson(new ErrorObject("Error: Missing Info")));
-            }
-            else if (e.getMessage().equals("NA")) {
-                context.status(401);
-                context.result(new Gson().toJson(new ErrorObject("Error: Not Authorized")));
-            } else {
-                context.status(500);
-                context.result(new Gson().toJson(new ErrorObject("Error: System Error in CreateGame")));
-            }
+            return null;
         }
     }
 
-    private void joinGame(Context context) {
+    private GameIDs createGame(String name) {
         try {
-            JoinGameData setUpInfo = new Gson().fromJson(context.body(), JoinGameData.class);
-            String token = context.header("authorization");
-            context.status(200);
-            service.joinGame(setUpInfo.gameID(), setUpInfo.playerColor(), token);
+            var request = buildRequest("POST", "/game", name);
+            var response = sendRequest(request);
+            return handleResponse(response, GameIDs.class);
         } catch (DataAccessException e) {
-            switch (e.getMessage()) {
-                case "EF" -> {
-                    context.status(400);
-                    context.result(new Gson().toJson(new ErrorObject("Error: Some Fields Were Empty")));
-                }
-                case "NF" -> {
-                    context.status(400);
-                    context.result(new Gson().toJson(new ErrorObject("Error: Invalid Game ID")));
-                }
-                case "NA" -> {
-                    context.status(401);
-                    context.result(new Gson().toJson(new ErrorObject("Error: Unauthorized Joining")));
-                }
-                case "BC" -> {
-                    context.status(403);
-                    context.result(new Gson().toJson(new ErrorObject("Error: That Color Is Not A Valid Option")));
-                }
-                case "T" -> {
-                    context.status(403);
-                    context.result(new Gson().toJson(new ErrorObject("Error: Color Has Already Been Taken")));
-                }
-                default -> {
-                    context.status(500);
-                    context.result(new Gson().toJson(new ErrorObject("Error: System Error in JoinGame")));
-                }
-            }
+            return null;
         }
     }
 
-    public Server() {
-        javalin = Javalin.create(config -> config.staticFiles.add("web"))
-
-                // Register your endpoints and exception handlers here.
-                .post("/user", this::register)
-                .post("/session", this::login)
-                .delete("/session", this::logout)
-                .get("/game", this::listGames)
-                .post("/game", this::createGame)
-                .put("/game", this::joinGame)
-                .delete("/db", this::clear);
+    private void joinGame(int id) {
+        try {
+            var request = buildRequest("PUT", "/game", id);
+            sendRequest(request);
+        } catch (DataAccessException e) {
+            return;
+        }
     }
 
-    public int run(int desiredPort) {
-        javalin.start(desiredPort);
-        return javalin.port();
+    private HttpRequest buildRequest(String method, String path, Object body) {
+        var request = HttpRequest.newBuilder()
+                .uri(URI.create(serverUrl + path))
+                .method(method, makeRequestBody(body));
+        if (body != null) {
+            request.setHeader("Content-Type", "application/json");
+        }
+        return request.build();
     }
 
-    public void stop() {
-        javalin.stop();
+    private HttpRequest.BodyPublisher makeRequestBody(Object request) {
+        if (request != null) {
+            return HttpRequest.BodyPublishers.ofString(new Gson().toJson(request));
+        } else {
+            return HttpRequest.BodyPublishers.noBody();
+        }
+    }
+
+    private HttpResponse<String> sendRequest(HttpRequest request) throws DataAccessException {
+        try {
+            return client.send(request, HttpResponse.BodyHandlers.ofString());
+        } catch (Exception ex) {
+            throw new DataAccessException(ex.getMessage());
+        }
+    }
+
+    private <T> T handleResponse(HttpResponse<String> response, Class<T> responseClass) throws DataAccessException {
+        var status = response.statusCode();
+        if (!isSuccessful(status)) {
+            var body = response.body();
+            if (body != null) {
+                throw new DataAccessException("other failure: " + status);
+            }
+
+            throw new DataAccessException("other failure: " + status);
+        }
+
+        if (responseClass != null) {
+            return new Gson().fromJson(response.body(), responseClass);
+        }
+
+        return null;
+    }
+
+    private boolean isSuccessful(int status) {
+        return status / 100 == 2;
     }
 }
