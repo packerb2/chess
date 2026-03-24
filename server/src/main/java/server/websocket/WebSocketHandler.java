@@ -2,11 +2,8 @@ package server.websocket;
 
 import com.google.gson.Gson;
 import io.javalin.websocket.WsCloseContext;
-import io.javalin.websocket.WsCloseHandler;
 import io.javalin.websocket.WsConnectContext;
-import io.javalin.websocket.WsConnectHandler;
 import io.javalin.websocket.WsMessageContext;
-import io.javalin.websocket.WsMessageHandler;
 import org.eclipse.jetty.websocket.api.Session;
 import webSocketMessages.Action;
 import webSocketMessages.Notification;
