@@ -61,9 +61,11 @@ public class ChessClient {
             String cmd = (tokens.length > 0) ? tokens[0] : "help";
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
-                case "signin" -> signIn(params);
+                case "register" -> register(params);
+                case "login" -> login(params);
+                case "logout" -> logout();
+                case "createGame" -> createGame();
                 case "listGames" -> listGames();
-                case "signout" -> signOut();
                 case "joinGame" -> joinGame(params);
                 case "quit" -> "quit";
                 default -> help();
@@ -73,7 +75,7 @@ public class ChessClient {
         }
     }
 
-    public String signIn(String... params) throws DataAccessException {
+    public String register(String... params) throws DataAccessException {
         if (params.length >= 1) {
             state = State.SIGNEDIN;
             userName = String.join("-", params);
@@ -83,12 +85,49 @@ public class ChessClient {
         throw new DataAccessException("Expected: <UserName>");
     }
 
-    public String listGames() throws DataAccessException {
+    public String login(String... params) throws DataAccessException {
+        if (params.length >= 1) {
+            state = State.SIGNEDIN;
+            userName = String.join("-", params);
+            ws.enterPetShop(userName);
+            return String.format("You logged in as %s.", userName);
+        }
+        throw new DataAccessException("Expected: <UserName>");
+    }
+
+    public String logout(String... params) throws DataAccessException {
         assertSignedIn();
-        GameList games = server.listGames();
+        if (params.length >= 1) {
+            state = State.SIGNEDIN;
+            userName = String.join("-", params);
+            ws.enterPetShop(userName);
+            return String.format("You logged in as %s.", userName);
+        }
+        throw new DataAccessException("Expected: <UserName>");
+    }
+
+    public String createGame(String... params) throws DataAccessException {
+        assertSignedIn();
         var result = new StringBuilder();
         var gson = new Gson();
-        for (GameData game : games) {
+        if (params.length == 1) {
+            GameIDs id = server.createGame(params[0]);
+            if (id == null) {
+                throw new DataAccessException("no game found");
+            } else {
+                result.append(gson.toJson(id));
+                return result.toString();
+            }
+        }
+        throw new DataAccessException("bad request");
+    }
+
+    public String listGames() throws DataAccessException {
+        assertSignedIn();
+        GameList gamesList = server.listGames();
+        var result = new StringBuilder();
+        var gson = new Gson();
+        for (GameData game : gamesList) {
             result.append(gson.toJson(game)).append('\n');
         }
         return result.toString();

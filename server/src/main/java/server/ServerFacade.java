@@ -70,7 +70,7 @@ public class ServerFacade {
         }
     }
 
-    private GameIDs createGame(String name) {
+    public GameIDs createGame(String name) {
         try {
             var request = buildRequest("POST", "/game", name);
             var response = sendRequest(request);
