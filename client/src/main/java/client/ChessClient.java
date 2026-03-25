@@ -17,7 +17,6 @@ import static ui.EscapeSequences.*;
 public class ChessClient {
     private String userName = null;
     private String password = null;
-    private String email = null;
     private final ServerFacade server;
     private final WebSocketFacade ws;
     private State state = State.SIGNEDOUT;
@@ -28,7 +27,7 @@ public class ChessClient {
     }
 
     public void run() {
-        System.out.println(SET_TEXT_BOLD + " Welcome to the pet store. Sign in to start.");
+        System.out.println(SET_TEXT_BOLD + " Welcome to the chess game. Login to start.");
         System.out.print(help());
 
         Scanner scanner = new Scanner(System.in);
@@ -83,7 +82,7 @@ public class ChessClient {
         if (params.length == 3) {
             userName = params[0];
             password = params[1];
-            email = params[2];
+            String email = params[2];
             UserData userNew = new UserData(userName, password, email);
             server.register(userNew);
             server.login(userNew);
@@ -113,30 +112,22 @@ public class ChessClient {
 
     public String logout() throws DataAccessException {
         assertSignedIn();
-        try {
-            server.logout();
+        server.logout();
 //        ws.enterPetShop(userName);
-            state = State.SIGNEDOUT;
-            return "You logged out";
-        } catch (DataAccessException e) {
-            throw new DataAccessException("Could not logout");
-        }
+        state = State.SIGNEDOUT;
+        return "You logged out";
     }
 
     public String createGame(String... params) throws DataAccessException {
         assertSignedIn();
-        var result = new StringBuilder();
-        var gson = new Gson();
         if (params.length == 1) {
+            var result = new StringBuilder();
+            var gson = new Gson();
             GameIDs id = server.createGame(params[0]);
-            if (id == null) {
-                throw new DataAccessException("no game found");
-            } else {
-                result.append(gson.toJson(id));
-                return result.toString();
-            }
+            result.append(gson.toJson(id));
+            return result.toString();
         }
-        throw new DataAccessException("bad request");
+        throw new DataAccessException("Expected: <GameName>");
     }
 
     public String listGames() throws DataAccessException {
@@ -166,11 +157,11 @@ public class ChessClient {
             else {
                 throw new DataAccessException("color is not correct");
             }
-            request.append(gson.toJson(id)).append(color);
+            request.append(gson.toJson(id)).append(gson.toJson(color));
             server.joinGame(request.toString());
             return String.format("You joined game %s as %s.", id, color);
         }
-        throw new DataAccessException("bad request");
+        throw new DataAccessException("Expected: <GameID> <TeamColor>");
     }
 
     public String clear() throws DataAccessException {
@@ -182,15 +173,15 @@ public class ChessClient {
     public String help() {
         if (state == State.SIGNEDOUT) {
             return """
-                    - register <UserName, Password, Email>
-                    - signIn <UserName, Password>
+                    - register <UserName> <Password> <Email>
+                    - signIn <UserName> <Password>
                     - quit
                     """;
         }
         return """
-                - createGame
+                - createGame <GameName>
                 - listGames
-                - joinGame <GameID, TeamColor>
+                - joinGame <GameID> <TeamColor>
                 - signOut
                 - clear
                 - quit

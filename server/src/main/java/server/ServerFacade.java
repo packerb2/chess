@@ -53,12 +53,8 @@ public class ServerFacade {
     }
 
     public void logout() throws DataAccessException {
-        try {
-            var request = buildRequest("DELETE", "/session", null);
-            sendRequest(request);
-        } catch (DataAccessException e) {
-            throw new DataAccessException("could not log out");
-        }
+        var request = buildRequest("DELETE", "/session", null);
+        sendRequest(request);
     }
 
     public GameList listGames() {
@@ -71,23 +67,19 @@ public class ServerFacade {
         }
     }
 
-    public GameIDs createGame(String name) {
+    public GameIDs createGame(String name) throws DataAccessException {
         try {
             var request = buildRequest("POST", "/game", name);
             var response = sendRequest(request);
             return handleResponse(response, GameIDs.class);
         } catch (DataAccessException e) {
-            return null;
+            throw new DataAccessException("Could not create game");
         }
     }
 
-    public void joinGame(String info) {
-        try {
-            var request = buildRequest("PUT", "/game", info);
-            sendRequest(request);
-        } catch (DataAccessException e) {
-            return;
-        }
+    public void joinGame(String info) throws DataAccessException {
+        var request = buildRequest("PUT", "/game", info);
+        sendRequest(request);
     }
 
     private HttpRequest buildRequest(String method, String path, Object body) {
