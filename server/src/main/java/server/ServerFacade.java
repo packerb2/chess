@@ -32,32 +32,32 @@ public class ServerFacade {
         }
     }
 
-    public UserData register(UserData user) {
+    public UserData register(UserData user) throws DataAccessException {
         try {
             var request = buildRequest("POST", "/user", user);
             var response = sendRequest(request);
             return handleResponse(response, UserData.class);
         } catch (DataAccessException e) {
-            return null;
+            throw new DataAccessException("could not register user");
         }
     }
 
-    public UserData login(UserData user) {
+    public UserData login(UserData user) throws DataAccessException {
         try {
             var request = buildRequest("POST", "/session", user);
             var response = sendRequest(request);
             return handleResponse(response, UserData.class);
         } catch (DataAccessException e) {
-            return null;
+            throw new DataAccessException("could not log in");
         }
     }
 
-    private void logout() {
+    public void logout() throws DataAccessException {
         try {
             var request = buildRequest("DELETE", "/session", null);
             sendRequest(request);
         } catch (DataAccessException e) {
-            return;
+            throw new DataAccessException("could not log out");
         }
     }
 

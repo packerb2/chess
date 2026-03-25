@@ -85,14 +85,8 @@ public class ChessClient {
             password = params[1];
             email = params[2];
             UserData userNew = new UserData(userName, password, email);
-            UserData response = server.register(userNew);
-            if (response == null) {
-                throw new DataAccessException("could not add user");
-            }
-            UserData login_response = server.login(userNew);
-            if (login_response == null) {
-                throw new DataAccessException("could not login");
-            }
+            server.register(userNew);
+            server.login(userNew);
             state = State.SIGNEDIN;
 //            ws.enterPetShop(userName);
             return String.format("You registered and logged in as %s.", userName);
@@ -102,29 +96,31 @@ public class ChessClient {
 
     public String login(String... params) throws DataAccessException {
         if (params.length >= 1) {
-            userName = params[0];
-            password = params[1];
-            UserData userNew = new UserData(userName, password, null);
-            UserData response = server.login(userNew);
-            if (response == null) {
+            try {
+                userName = params[0];
+                password = params[1];
+                UserData userNew = new UserData(userName, password, null);
+                server.login(userNew);
+                state = State.SIGNEDIN;
+//            ws.enterPetShop(userName);
+                return String.format("You logged in as %s.", userName);
+            } catch (DataAccessException e) {
                 throw new DataAccessException("could not login");
             }
-            state = State.SIGNEDIN;
-//            ws.enterPetShop(userName);
-            return String.format("You logged in as %s.", userName);
         }
         throw new DataAccessException("Expected: <UserName, Password>");
     }
 
-    public String logout(String... params) throws DataAccessException {
+    public String logout() throws DataAccessException {
         assertSignedIn();
-        if (params.length >= 1) {
-            state = State.SIGNEDIN;
-            userName = String.join("-", params);
-            ws.enterPetShop(userName);
-            return String.format("You logged in as %s.", userName);
+        try {
+            server.logout();
+//        ws.enterPetShop(userName);
+            state = State.SIGNEDOUT;
+            return "You logged out";
+        } catch (DataAccessException e) {
+            throw new DataAccessException("Could not logout");
         }
-        throw new DataAccessException("Expected: <UserName>");
     }
 
     public String createGame(String... params) throws DataAccessException {
@@ -203,7 +199,7 @@ public class ChessClient {
 
     private void assertSignedIn() throws DataAccessException {
         if (state == State.SIGNEDOUT) {
-            throw new DataAccessException("You must sign in");
+            throw new DataAccessException("You must log in");
         }
     }
 }
