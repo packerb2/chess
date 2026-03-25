@@ -3,21 +3,10 @@ package service;
 import chess.ChessGame;
 import com.google.gson.Gson;
 import dataaccess.UserDAO;
-import dataaccess.MemoryUserDAO;
 import dataaccess.*;
 import model.*;
 
-public class Service {
-
-    private UserDAO userData = new SQLUserDAO();
-    private GameDAO gameData = new SQLGameDAO();
-    private AuthDAO authData = new SQLAuthDAO();
-
-    public Service(UserDAO userData, GameDAO gameData, AuthDAO authData) {
-        this.userData = userData;
-        this.gameData = gameData;
-        this.authData = authData;
-    }
+public record Service(UserDAO userData, GameDAO gameData, AuthDAO authData) {
 
     public int clear() {
         try {
@@ -30,7 +19,7 @@ public class Service {
         }
     }
 
-    public String register(UserData user) throws DataAccessException{
+    public String register(UserData user) throws DataAccessException {
         if (user.username() == null || user.password() == null || user.email() == null) {
             throw new DataAccessException("EF");
         }
@@ -39,8 +28,7 @@ public class Service {
             if (data != null) {
                 if (data.username().equals("ERROR")) {
                     throw new DataAccessException("SE");
-                }
-                else {
+                } else {
                     throw new DataAccessException("Taken");
                 }
             }
@@ -50,8 +38,7 @@ public class Service {
         } catch (DataAccessException e) {
             if (e.getMessage().equals("Taken")) {
                 throw e;
-            }
-            else {
+            } else {
                 throw new DataAccessException("System Error");
             }
         }
@@ -74,8 +61,7 @@ public class Service {
         } catch (DataAccessException e) {
             if (e.getMessage().equals("EF") || e.getMessage().equals("NU")) {
                 throw e;
-            }
-            else {
+            } else {
                 throw new DataAccessException("Server Error");
             }
         }
@@ -162,8 +148,7 @@ public class Service {
         } catch (DataAccessException e) {
             if (e.getMessage().equals("NA")) {
                 throw e;
-            }
-            else {
+            } else {
                 throw new DataAccessException("Server Error");
             }
         }

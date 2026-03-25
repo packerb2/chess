@@ -1,10 +1,10 @@
 package server;
 
-import chess.ChessGame;
+//import chess.ChessGame;
 import com.google.gson.Gson;
 import dataaccess.*;
 
-import io.javalin.http.Context;
+//import io.javalin.http.Context;
 
 import model.*;
 
@@ -28,21 +28,21 @@ public class ServerFacade {
         sendRequest(request);
     }
 
-    public UserData register(UserData user) throws DataAccessException {
+    public LoginReturn register(UserData user) throws DataAccessException {
         try {
             var request = buildRequest("POST", "/user", user);
             var response = sendRequest(request);
-            return handleResponse(response, UserData.class);
+            return handleResponse(response, LoginReturn.class);
         } catch (DataAccessException e) {
             throw new DataAccessException("could not register user");
         }
     }
 
-    public UserData login(UserData user) throws DataAccessException {
+    public LoginReturn login(UserData user) throws DataAccessException {
         try {
             var request = buildRequest("POST", "/session", user);
             var response = sendRequest(request);
-            return handleResponse(response, UserData.class);
+            return handleResponse(response, LoginReturn.class);
         } catch (DataAccessException e) {
             throw new DataAccessException("could not log in");
         }

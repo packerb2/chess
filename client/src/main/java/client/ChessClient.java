@@ -10,18 +10,19 @@ import model.*;
 //import client.websocket.NotificationHandler;
 import server.ServerFacade;
 //import client.websocket.WebSocketFacade;
-import webSocketMessages.Notification;
+//import webSocketMessages.Notification;
 
 import static ui.EscapeSequences.*;
 
 public class ChessClient {
     private String userName = null;
     private String password = null;
+    private String auth = null;
     private final ServerFacade server;
 //    private final WebSocketFacade ws;
     private State state = State.SIGNEDOUT;
 
-    public ChessClient(String serverUrl) throws DataAccessException {
+    public ChessClient(String serverUrl) {
         server = new ServerFacade(serverUrl);
 //        ws = new WebSocketFacade(serverUrl, this);
     }
@@ -47,10 +48,6 @@ public class ChessClient {
         System.out.println();
     }
 
-    public void notify(Notification notification) {
-        System.out.println(SET_TEXT_COLOR_RED + notification.message());
-        printPrompt();
-    }
 
     private void printPrompt() {
         System.out.print("\n" + RESET_TEXT_COLOR + ">>> " + SET_TEXT_COLOR_GREEN);
@@ -70,6 +67,7 @@ public class ChessClient {
                 case "list" -> listGames();
                 case "join" -> joinGame(params);
                 case "clear" -> clear();
+                case "board" -> board();
                 case "quit" -> "quit";
                 default -> help();
             };
@@ -84,7 +82,8 @@ public class ChessClient {
             password = params[1];
             String email = params[2];
             UserData userNew = new UserData(userName, password, email);
-            server.register(userNew);
+            LoginReturn lr = server.register(userNew);
+            auth = lr.authToken;
             server.login(userNew);
             state = State.SIGNEDIN;
             return String.format("You registered and logged in as %s.", userName);
@@ -98,7 +97,8 @@ public class ChessClient {
                 userName = params[0];
                 password = params[1];
                 UserData userNew = new UserData(userName, password, null);
-                server.login(userNew);
+                LoginReturn lr = server.login(userNew);
+                auth = lr.authToken;
                 state = State.SIGNEDIN;
                 return String.format("You logged in as %s.", userName);
             } catch (DataAccessException e) {
@@ -112,6 +112,7 @@ public class ChessClient {
         assertSignedIn();
         server.logout();
         state = State.SIGNEDOUT;
+        auth = null;
         return "You logged out";
     }
 
@@ -141,7 +142,7 @@ public class ChessClient {
         var gson = new Gson();
         if (params.length == 2) {
             GameIDs id = new GameIDs(Integer.parseInt(params[0]));
-            ChessGame.TeamColor color = null;
+            ChessGame.TeamColor color;
             if (params[1].equals("white")) {
                 color = ChessGame.TeamColor.WHITE;
             }
@@ -151,7 +152,8 @@ public class ChessClient {
             else {
                 throw new DataAccessException("color is not correct");
             }
-            request.append(gson.toJson(id)).append(gson.toJson(color));
+            JoinGameData jd = new JoinGameData(id.gameID, color, new UserData(userName, password, null));
+            request.append(gson.toJson(jd));
             server.joinGame(request.toString());
             return String.format("You joined game %s as %s.", id, color);
         }
@@ -162,6 +164,7 @@ public class ChessClient {
         assertSignedIn();
         server.logout();
         state = State.SIGNEDOUT;
+        auth = null;
         server.clear();
         return "System has been cleared.";
     }
@@ -180,6 +183,7 @@ public class ChessClient {
                 - joinGame <GameID> <TeamColor>
                 - logout
                 - clear
+                - board
                 - quit
                 """;
     }

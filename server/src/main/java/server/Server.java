@@ -98,8 +98,8 @@ public class Server {
 
     private void createGame(Context context) {
         try {
-            GameName game = new Gson().fromJson(context.body(), GameName.class);
             String token = context.header("authorization");
+            GameName game = new Gson().fromJson(context.body(), GameName.class);
             context.status(200);
             context.result(service.createGame(game.gameName, token));
         } catch (DataAccessException e) {
