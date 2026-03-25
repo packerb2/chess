@@ -7,9 +7,9 @@ import chess.ChessGame;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import model.*;
-import client.websocket.NotificationHandler;
+//import client.websocket.NotificationHandler;
 import server.ServerFacade;
-import client.websocket.WebSocketFacade;
+//import client.websocket.WebSocketFacade;
 import webSocketMessages.Notification;
 
 import static ui.EscapeSequences.*;
@@ -18,12 +18,12 @@ public class ChessClient {
     private String userName = null;
     private String password = null;
     private final ServerFacade server;
-    private final WebSocketFacade ws;
+//    private final WebSocketFacade ws;
     private State state = State.SIGNEDOUT;
 
     public ChessClient(String serverUrl) throws DataAccessException {
         server = new ServerFacade(serverUrl);
-        ws = new WebSocketFacade(serverUrl, this);
+//        ws = new WebSocketFacade(serverUrl, this);
     }
 
     public void run() {
@@ -87,7 +87,6 @@ public class ChessClient {
             server.register(userNew);
             server.login(userNew);
             state = State.SIGNEDIN;
-//            ws.enterPetShop(userName);
             return String.format("You registered and logged in as %s.", userName);
         }
         throw new DataAccessException("Expected: <UserName, Password, Email>");
@@ -101,7 +100,6 @@ public class ChessClient {
                 UserData userNew = new UserData(userName, password, null);
                 server.login(userNew);
                 state = State.SIGNEDIN;
-//            ws.enterPetShop(userName);
                 return String.format("You logged in as %s.", userName);
             } catch (DataAccessException e) {
                 throw new DataAccessException("could not login");
@@ -113,7 +111,6 @@ public class ChessClient {
     public String logout() throws DataAccessException {
         assertSignedIn();
         server.logout();
-//        ws.enterPetShop(userName);
         state = State.SIGNEDOUT;
         return "You logged out";
     }
@@ -135,7 +132,7 @@ public class ChessClient {
         GameList gamesList = server.listGames();
         var result = new StringBuilder();
         var gson = new Gson();
-        for (GameData game : gamesList) {
+        for (GameData game : gamesList.games) {
             result.append(gson.toJson(game)).append('\n');
         }
         return result.toString();
