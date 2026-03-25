@@ -172,7 +172,9 @@ public class ChessClient {
     public String board() {
         var board = new StringBuilder();
         var wArmy = whiteArmy();
+        var middle = middle();
         var border = whiteSideBorder();
+        board.append(middle);
         board.append(wArmy);
         board.append(border);
         return String.format("%s", board);
@@ -206,6 +208,39 @@ public class ChessClient {
         wPawnLine.append(RESET_BG_COLOR + "\n");
         army.append(String.format("%s", wPawnLine)).append(String.format("%s", wBackLine));
         return String.format("%s", army);
+    }
+
+    public String middle() {
+        var field = new StringBuilder();
+        var line1 = new StringBuilder();
+        var line2 = new StringBuilder();
+        var pair = new StringBuilder();
+        line1.append(SET_BG_COLOR_WHITE + EMPTY);
+        line1.append(SET_BG_COLOR_DARK_GREY + EMPTY);
+        line1.append(SET_BG_COLOR_LIGHT_GREY + EMPTY);
+        line1.append(SET_BG_COLOR_DARK_GREY + EMPTY);
+        line1.append(SET_BG_COLOR_LIGHT_GREY + EMPTY);
+        line1.append(SET_BG_COLOR_DARK_GREY + EMPTY);
+        line1.append(SET_BG_COLOR_LIGHT_GREY + EMPTY);
+        line1.append(SET_BG_COLOR_DARK_GREY + EMPTY);
+        line1.append(SET_BG_COLOR_LIGHT_GREY + EMPTY);
+        line1.append(SET_BG_COLOR_WHITE + EMPTY);
+        line1.append(RESET_BG_COLOR + "\n");
+        line2.append(SET_BG_COLOR_WHITE + EMPTY);
+        line2.append(SET_BG_COLOR_LIGHT_GREY + EMPTY);
+        line2.append(SET_BG_COLOR_DARK_GREY + EMPTY);
+        line2.append(SET_BG_COLOR_LIGHT_GREY + EMPTY);
+        line2.append(SET_BG_COLOR_DARK_GREY + EMPTY);
+        line2.append(SET_BG_COLOR_LIGHT_GREY + EMPTY);
+        line2.append(SET_BG_COLOR_DARK_GREY + EMPTY);
+        line2.append(SET_BG_COLOR_LIGHT_GREY + EMPTY);
+        line2.append(SET_BG_COLOR_DARK_GREY + EMPTY);
+        line2.append(SET_BG_COLOR_WHITE + EMPTY);
+        line2.append(RESET_BG_COLOR + "\n");
+//        pair.append(String.format("%s", line1)).append(String.format("%s", line2));
+//        field.append(String.format("%s", pair)).append(String.format("%s", pair));
+        field.append(String.format("%s%s%s%s", line2, line1, line2, line1));
+        return String.format("%s", field);
     }
 
     public String whiteSideBorder() {
