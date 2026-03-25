@@ -23,13 +23,9 @@ public class ServerFacade {
         serverUrl = url;
     }
 
-    public void clear() {
-        try {
-            var request = buildRequest("DELETE", "/db", null);
-            sendRequest(request);
-        } catch (DataAccessException e) {
-            return;
-        }
+    public void clear() throws DataAccessException {
+        var request = buildRequest("DELETE", "/db", null);
+        sendRequest(request);
     }
 
     public UserData register(UserData user) throws DataAccessException {
