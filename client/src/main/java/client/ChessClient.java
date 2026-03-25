@@ -83,6 +83,17 @@ public class ChessClient {
         throw new DataAccessException("Expected: <UserName>");
     }
 
+    public String listGames() throws DataAccessException {
+        assertSignedIn();
+        GameList games = server.listGames();
+        var result = new StringBuilder();
+        var gson = new Gson();
+        for (GameData game : games) {
+            result.append(gson.toJson(game)).append('\n');
+        }
+        return result.toString();
+    }
+
     public String help() {
         if (state == State.SIGNEDOUT) {
             return """

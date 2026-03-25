@@ -60,7 +60,7 @@ public class ServerFacade {
         }
     }
 
-    private GameList listGames() {
+    public GameList listGames() {
         try {
             var request = buildRequest("GET", "/game", null);
             var response = sendRequest(request);
