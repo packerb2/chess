@@ -3,6 +3,7 @@ package client;
 import java.util.Arrays;
 import java.util.Scanner;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import model.*;
@@ -133,16 +134,41 @@ public class ChessClient {
         return result.toString();
     }
 
+    public String joinGame(String... params) throws DataAccessException {
+        assertSignedIn();
+        var request = new StringBuilder();
+        var gson = new Gson();
+        if (params.length == 2) {
+            GameIDs id = new GameIDs(Integer.parseInt(params[0]));
+            ChessGame.TeamColor color = null;
+            if (params[1].equals("white")) {
+                color = ChessGame.TeamColor.WHITE;
+            }
+            else if (params[1].equals("black")) {
+                color = ChessGame.TeamColor.BLACK;
+            }
+            else {
+                throw new DataAccessException("color is not correct");
+            }
+            request.append(gson.toJson(id)).append(color);
+            server.joinGame(request.toString());
+            return String.format("You joined game %s as %s.", id, color);
+        }
+        throw new DataAccessException("bad request");
+    }
+
     public String help() {
         if (state == State.SIGNEDOUT) {
             return """
                     - signIn <UserName>
+                    - register <UserName>
                     - quit
                     """;
         }
         return """
+                - createGame
                 - listGames
-                - joinGame <game id> <team color>
+                - joinGame <game id, team color>
                 - signOut
                 - quit
                 """;

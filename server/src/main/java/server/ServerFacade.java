@@ -1,5 +1,6 @@
 package server;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import dataaccess.*;
 
@@ -80,9 +81,9 @@ public class ServerFacade {
         }
     }
 
-    private void joinGame(int id) {
+    public void joinGame(String info) {
         try {
-            var request = buildRequest("PUT", "/game", id);
+            var request = buildRequest("PUT", "/game", info);
             sendRequest(request);
         } catch (DataAccessException e) {
             return;
