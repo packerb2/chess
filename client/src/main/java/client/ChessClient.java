@@ -66,9 +66,9 @@ public class ChessClient {
                 case "register" -> register(params);
                 case "login" -> login(params);
                 case "logout" -> logout();
-                case "createGame" -> createGame(params);
-                case "listGames" -> listGames();
-                case "joinGame" -> joinGame(params);
+                case "create" -> createGame(params);
+                case "list" -> listGames();
+                case "join" -> joinGame(params);
                 case "clear" -> clear();
                 case "quit" -> "quit";
                 default -> help();
@@ -117,12 +117,9 @@ public class ChessClient {
 
     public String createGame(String... params) throws DataAccessException {
         assertSignedIn();
-        if (params.length == 1) {
-            var result = new StringBuilder();
-            var gson = new Gson();
-            GameIDs id = server.createGame(params[0]);
-            result.append(gson.toJson(id));
-            return result.toString();
+        if (params.length >= 1) {
+            GameIDs id = server.createGame(new GameName(params[0]));
+            return String.format("%s game created with id: %d", params[0], id.gameID);
         }
         throw new DataAccessException("Expected: <GameName>");
     }
@@ -163,6 +160,8 @@ public class ChessClient {
 
     public String clear() throws DataAccessException {
         assertSignedIn();
+        server.logout();
+        state = State.SIGNEDOUT;
         server.clear();
         return "System has been cleared.";
     }

@@ -63,14 +63,10 @@ public class ServerFacade {
         }
     }
 
-    public GameIDs createGame(String name) throws DataAccessException {
-        try {
-            var request = buildRequest("POST", "/game", name);
-            var response = sendRequest(request);
-            return handleResponse(response, GameIDs.class);
-        } catch (DataAccessException e) {
-            throw new DataAccessException("Could not create game");
-        }
+    public GameIDs createGame(GameName name) throws DataAccessException {
+        var request = buildRequest("POST", "/game", name);
+        var response = sendRequest(request);
+        return handleResponse(response, GameIDs.class);
     }
 
     public void joinGame(String info) throws DataAccessException {
