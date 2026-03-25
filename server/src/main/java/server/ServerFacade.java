@@ -23,7 +23,7 @@ public class ServerFacade {
         serverUrl = url;
     }
 
-    private void clear(Context context) {
+    public void clear() {
         try {
             var request = buildRequest("DELETE", "/db", null);
             sendRequest(request);
@@ -32,23 +32,23 @@ public class ServerFacade {
         }
     }
 
-    private UserData register(UserData user) {
+    public UserData register(UserData user) {
         try {
             var request = buildRequest("POST", "/user", user);
             var response = sendRequest(request);
             return handleResponse(response, UserData.class);
         } catch (DataAccessException e) {
-            return user;
+            return null;
         }
     }
 
-    private UserData login(UserData user) {
+    public UserData login(UserData user) {
         try {
             var request = buildRequest("POST", "/session", user);
             var response = sendRequest(request);
             return handleResponse(response, UserData.class);
         } catch (DataAccessException e) {
-            return user;
+            return null;
         }
     }
 

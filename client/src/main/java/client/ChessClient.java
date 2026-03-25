@@ -16,6 +16,8 @@ import static ui.EscapeSequences.*;
 
 public class ChessClient {
     private String userName = null;
+    private String password = null;
+    private String email = null;
     private final ServerFacade server;
     private final WebSocketFacade ws;
     private State state = State.SIGNEDOUT;
@@ -65,9 +67,10 @@ public class ChessClient {
                 case "register" -> register(params);
                 case "login" -> login(params);
                 case "logout" -> logout();
-                case "createGame" -> createGame();
+                case "createGame" -> createGame(params);
                 case "listGames" -> listGames();
                 case "joinGame" -> joinGame(params);
+                case "clear" -> clear();
                 case "quit" -> "quit";
                 default -> help();
             };
@@ -77,23 +80,40 @@ public class ChessClient {
     }
 
     public String register(String... params) throws DataAccessException {
-        if (params.length >= 1) {
+        if (params.length == 3) {
+            userName = params[0];
+            password = params[1];
+            email = params[2];
+            UserData userNew = new UserData(userName, password, email);
+            UserData response = server.register(userNew);
+            if (response == null) {
+                throw new DataAccessException("could not add user");
+            }
+            UserData login_response = server.login(userNew);
+            if (login_response == null) {
+                throw new DataAccessException("could not login");
+            }
             state = State.SIGNEDIN;
-            userName = String.join("-", params);
-            ws.enterPetShop(userName);
-            return String.format("You logged in as %s.", userName);
+//            ws.enterPetShop(userName);
+            return String.format("You registered and logged in as %s.", userName);
         }
-        throw new DataAccessException("Expected: <UserName>");
+        throw new DataAccessException("Expected: <UserName, Password, Email>");
     }
 
     public String login(String... params) throws DataAccessException {
         if (params.length >= 1) {
+            userName = params[0];
+            password = params[1];
+            UserData userNew = new UserData(userName, password, null);
+            UserData response = server.login(userNew);
+            if (response == null) {
+                throw new DataAccessException("could not login");
+            }
             state = State.SIGNEDIN;
-            userName = String.join("-", params);
-            ws.enterPetShop(userName);
+//            ws.enterPetShop(userName);
             return String.format("You logged in as %s.", userName);
         }
-        throw new DataAccessException("Expected: <UserName>");
+        throw new DataAccessException("Expected: <UserName, Password>");
     }
 
     public String logout(String... params) throws DataAccessException {
@@ -157,19 +177,26 @@ public class ChessClient {
         throw new DataAccessException("bad request");
     }
 
+    public String clear() throws DataAccessException {
+        assertSignedIn();
+        server.clear();
+        return "System has been cleared.";
+    }
+
     public String help() {
         if (state == State.SIGNEDOUT) {
             return """
-                    - signIn <UserName>
-                    - register <UserName>
+                    - register <UserName, Password, Email>
+                    - signIn <UserName, Password>
                     - quit
                     """;
         }
         return """
                 - createGame
                 - listGames
-                - joinGame <game id, team color>
+                - joinGame <GameID, TeamColor>
                 - signOut
+                - clear
                 - quit
                 """;
     }
