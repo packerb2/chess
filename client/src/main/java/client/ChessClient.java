@@ -169,6 +169,69 @@ public class ChessClient {
         return "System has been cleared.";
     }
 
+    public String board() {
+        var board = new StringBuilder();
+        var wArmy = whiteArmy();
+        var border = whiteSideBorder();
+        board.append(wArmy);
+        board.append(border);
+        return String.format("%s", board);
+    }
+
+    public String whiteArmy() {
+        var army = new StringBuilder();
+        var wBackLine = new StringBuilder();
+        var wPawnLine = new StringBuilder();
+        wBackLine.append(SET_BG_COLOR_WHITE + EMPTY);
+        wBackLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + WHITE_ROOK);
+        wBackLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_WHITE + WHITE_KNIGHT);
+        wBackLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + WHITE_BISHOP);
+        wBackLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_WHITE + WHITE_QUEEN);
+        wBackLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + WHITE_KING);
+        wBackLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_WHITE + WHITE_BISHOP);
+        wBackLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + WHITE_KNIGHT);
+        wBackLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_WHITE + WHITE_ROOK);
+        wBackLine.append(SET_BG_COLOR_WHITE + EMPTY);
+        wBackLine.append(RESET_BG_COLOR + "\n");
+        wPawnLine.append(SET_BG_COLOR_WHITE + EMPTY);
+        wPawnLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_WHITE + WHITE_PAWN);
+        wPawnLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + WHITE_PAWN);
+        wPawnLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_WHITE + WHITE_PAWN);
+        wPawnLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + WHITE_PAWN);
+        wPawnLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_WHITE + WHITE_PAWN);
+        wPawnLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + WHITE_PAWN);
+        wPawnLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_WHITE + WHITE_PAWN);
+        wPawnLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + WHITE_PAWN);
+        wPawnLine.append(SET_BG_COLOR_WHITE + EMPTY);
+        wPawnLine.append(RESET_BG_COLOR + "\n");
+        army.append(String.format("%s", wPawnLine)).append(String.format("%s", wBackLine));
+        return String.format("%s", army);
+    }
+
+    public String whiteSideBorder() {
+        var border = new StringBuilder();
+        border.append(SET_BG_COLOR_WHITE + EMPTY);
+        border.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + EMPTY);
+        border.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + EMPTY);
+        border.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + EMPTY);
+        border.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + EMPTY);
+        border.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + EMPTY);
+        border.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + EMPTY);
+        border.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + EMPTY);
+        border.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + EMPTY);
+//        border.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " a ");
+//        border.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " b ");
+//        border.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " c ");
+//        border.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " d ");
+//        border.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " e ");
+//        border.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " f ");
+//        border.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " g ");
+//        border.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " h ");
+        border.append(SET_BG_COLOR_WHITE + EMPTY);
+        border.append(RESET_BG_COLOR + "\n");
+        return String.format("%s", border);
+    }
+
     public String help() {
         if (state == State.SIGNEDOUT) {
             return """
