@@ -171,7 +171,7 @@ public class ChessClient {
         if (state == State.SIGNEDOUT) {
             return """
                     - register <UserName> <Password> <Email>
-                    - signIn <UserName> <Password>
+                    - login <UserName> <Password>
                     - quit
                     """;
         }
@@ -179,7 +179,7 @@ public class ChessClient {
                 - createGame <GameName>
                 - listGames
                 - joinGame <GameID> <TeamColor>
-                - signOut
+                - logout
                 - clear
                 - quit
                 """;
