@@ -68,6 +68,7 @@ public class ChessClient {
                 case "join" -> joinGame(params);
                 case "clear" -> clear();
                 case "board" -> board();
+                case "rev" -> reverseBoard();
                 case "quit" -> "quit";
                 default -> help();
             };
@@ -183,10 +184,24 @@ public class ChessClient {
         return String.format("%s", board);
     }
 
+    public String reverseBoard() {
+        var board = new StringBuilder();
+        var wArmy = whiteArmyReverse();
+        var middle = middle();
+        var bArmy = blackArmy();
+        var border = topBottomBorder();
+        board.append(border);
+        board.append(bArmy);
+        board.append(middle);
+        board.append(wArmy);
+        board.append(border);
+        return String.format("%s", board);
+    }
+
     public String whiteArmy() {
         var army = new StringBuilder();
         var wBackLine = new StringBuilder();
-        var wPawnLine = new StringBuilder();
+        var wPawnLine = whitePawns();
         wBackLine.append(SET_BG_COLOR_WHITE + EMPTY);
         wBackLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + WHITE_ROOK);
         wBackLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_WHITE + WHITE_KNIGHT);
@@ -198,6 +213,32 @@ public class ChessClient {
         wBackLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_WHITE + WHITE_ROOK);
         wBackLine.append(SET_BG_COLOR_WHITE + EMPTY);
         wBackLine.append(RESET_BG_COLOR + "\n");
+        army.append(String.format("%s", wPawnLine)).append(String.format("%s", wBackLine));
+        return String.format("%s", army);
+    }
+
+    public String whiteArmyReverse() {
+        var army = new StringBuilder();
+        var wBackLine = new StringBuilder();
+        var wPawnLine = whitePawns();
+        wBackLine.append(SET_BG_COLOR_WHITE + EMPTY);
+        wBackLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_WHITE + WHITE_ROOK);
+        wBackLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + WHITE_KNIGHT);
+        wBackLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_WHITE + WHITE_BISHOP);
+        wBackLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + WHITE_KING);
+        wBackLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_WHITE + WHITE_QUEEN);
+        wBackLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + WHITE_BISHOP);
+        wBackLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_WHITE + WHITE_KNIGHT);
+        wBackLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + WHITE_ROOK);
+        wBackLine.append(SET_BG_COLOR_WHITE + EMPTY);
+        wBackLine.append(RESET_BG_COLOR + "\n");
+        army.append(String.format("%s", wBackLine)).append(String.format("%s", wPawnLine));
+        return String.format("%s", army);
+    }
+
+    public String whitePawns() {
+        var army = new StringBuilder();
+        var wPawnLine = new StringBuilder();
         wPawnLine.append(SET_BG_COLOR_WHITE + EMPTY);
         wPawnLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_WHITE + WHITE_PAWN);
         wPawnLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + WHITE_PAWN);
@@ -209,14 +250,20 @@ public class ChessClient {
         wPawnLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + WHITE_PAWN);
         wPawnLine.append(SET_BG_COLOR_WHITE + EMPTY);
         wPawnLine.append(RESET_BG_COLOR + "\n");
-        army.append(String.format("%s", wPawnLine)).append(String.format("%s", wBackLine));
+        army.append(String.format("%s", wPawnLine));
         return String.format("%s", army);
     }
 
     public String middle() {
         var field = new StringBuilder();
+        var line1 = line1();
+        var line2 = line2();
+        field.append(String.format("%s%s%s%s", line2, line1, line2, line1));
+        return String.format("%s", field);
+    }
+
+    public String line1() {
         var line1 = new StringBuilder();
-        var line2 = new StringBuilder();
         line1.append(SET_BG_COLOR_WHITE + EMPTY);
         line1.append(SET_BG_COLOR_DARK_GREY + EMPTY);
         line1.append(SET_BG_COLOR_LIGHT_GREY + EMPTY);
@@ -228,6 +275,11 @@ public class ChessClient {
         line1.append(SET_BG_COLOR_LIGHT_GREY + EMPTY);
         line1.append(SET_BG_COLOR_WHITE + EMPTY);
         line1.append(RESET_BG_COLOR + "\n");
+        return String.format("%s", line1);
+    }
+
+    public String line2() {
+        var line2 = new StringBuilder();
         line2.append(SET_BG_COLOR_WHITE + EMPTY);
         line2.append(SET_BG_COLOR_LIGHT_GREY + EMPTY);
         line2.append(SET_BG_COLOR_DARK_GREY + EMPTY);
@@ -239,8 +291,7 @@ public class ChessClient {
         line2.append(SET_BG_COLOR_DARK_GREY + EMPTY);
         line2.append(SET_BG_COLOR_WHITE + EMPTY);
         line2.append(RESET_BG_COLOR + "\n");
-        field.append(String.format("%s%s%s%s", line2, line1, line2, line1));
-        return String.format("%s", field);
+        return String.format("%s", line2);
     }
 
     public String blackArmy() {
@@ -312,6 +363,7 @@ public class ChessClient {
                 - logout
                 - clear
                 - board
+                - rev
                 - quit
                 """;
     }
