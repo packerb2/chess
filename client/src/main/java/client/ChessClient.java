@@ -188,12 +188,12 @@ public class ChessClient {
         var board = new StringBuilder();
         var wArmy = whiteArmyReverse();
         var middle = middle();
-        var bArmy = blackArmy();
+        var bArmy = blackArmyRev();
         var border = topBottomBorder();
         board.append(border);
-        board.append(bArmy);
-        board.append(middle);
         board.append(wArmy);
+        board.append(middle);
+        board.append(bArmy);
         board.append(border);
         return String.format("%s", board);
     }
@@ -220,7 +220,7 @@ public class ChessClient {
     public String whiteArmyReverse() {
         var army = new StringBuilder();
         var wBackLine = new StringBuilder();
-        var wPawnLine = whitePawns();
+        var wPawnLine = whitePawnsRev();
         wBackLine.append(SET_BG_COLOR_WHITE + EMPTY);
         wBackLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_WHITE + WHITE_ROOK);
         wBackLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + WHITE_KNIGHT);
@@ -248,6 +248,24 @@ public class ChessClient {
         wPawnLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + WHITE_PAWN);
         wPawnLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_WHITE + WHITE_PAWN);
         wPawnLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + WHITE_PAWN);
+        wPawnLine.append(SET_BG_COLOR_WHITE + EMPTY);
+        wPawnLine.append(RESET_BG_COLOR + "\n");
+        army.append(String.format("%s", wPawnLine));
+        return String.format("%s", army);
+    }
+
+    public String whitePawnsRev() {
+        var army = new StringBuilder();
+        var wPawnLine = new StringBuilder();
+        wPawnLine.append(SET_BG_COLOR_WHITE + EMPTY);
+        wPawnLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + WHITE_PAWN);
+        wPawnLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_WHITE + WHITE_PAWN);
+        wPawnLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + WHITE_PAWN);
+        wPawnLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_WHITE + WHITE_PAWN);
+        wPawnLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + WHITE_PAWN);
+        wPawnLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_WHITE + WHITE_PAWN);
+        wPawnLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + WHITE_PAWN);
+        wPawnLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_WHITE + WHITE_PAWN);
         wPawnLine.append(SET_BG_COLOR_WHITE + EMPTY);
         wPawnLine.append(RESET_BG_COLOR + "\n");
         army.append(String.format("%s", wPawnLine));
@@ -297,7 +315,7 @@ public class ChessClient {
     public String blackArmy() {
         var army = new StringBuilder();
         var BackLine = new StringBuilder();
-        var PawnLine = new StringBuilder();
+        var PawnLine = blackPawns();
         BackLine.append(SET_BG_COLOR_WHITE + EMPTY);
         BackLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_ROOK);
         BackLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_KNIGHT);
@@ -309,6 +327,32 @@ public class ChessClient {
         BackLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_ROOK);
         BackLine.append(SET_BG_COLOR_WHITE + EMPTY);
         BackLine.append(RESET_BG_COLOR + "\n");
+        army.append(String.format("%s", BackLine)).append(String.format("%s", PawnLine));
+        return String.format("%s", army);
+    }
+
+    public String blackArmyRev() {
+        var army = new StringBuilder();
+        var BackLine = new StringBuilder();
+        var PawnLine = blackPawnsRev();
+        BackLine.append(SET_BG_COLOR_WHITE + EMPTY);
+        BackLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_ROOK);
+        BackLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_KNIGHT);
+        BackLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_BISHOP);
+        BackLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_QUEEN);
+        BackLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_KING);
+        BackLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_BISHOP);
+        BackLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_KNIGHT);
+        BackLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_ROOK);
+        BackLine.append(SET_BG_COLOR_WHITE + EMPTY);
+        BackLine.append(RESET_BG_COLOR + "\n");
+        army.append(String.format("%s", PawnLine)).append(String.format("%s", BackLine));
+        return String.format("%s", army);
+    }
+
+    public String blackPawns() {
+        var army = new StringBuilder();
+        var PawnLine = new StringBuilder();
         PawnLine.append(SET_BG_COLOR_WHITE + EMPTY);
         PawnLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
         PawnLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
@@ -320,29 +364,39 @@ public class ChessClient {
         PawnLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
         PawnLine.append(SET_BG_COLOR_WHITE + EMPTY);
         PawnLine.append(RESET_BG_COLOR + "\n");
-        army.append(String.format("%s", BackLine)).append(String.format("%s", PawnLine));
+        army.append(String.format("%s", PawnLine));
+        return String.format("%s", army);
+    }
+
+    public String blackPawnsRev() {
+        var army = new StringBuilder();
+        var PawnLine = new StringBuilder();
+        PawnLine.append(SET_BG_COLOR_WHITE + EMPTY);
+        PawnLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
+        PawnLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
+        PawnLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
+        PawnLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
+        PawnLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
+        PawnLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
+        PawnLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
+        PawnLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
+        PawnLine.append(SET_BG_COLOR_WHITE + EMPTY);
+        PawnLine.append(RESET_BG_COLOR + "\n");
+        army.append(String.format("%s", PawnLine));
         return String.format("%s", army);
     }
 
     public String topBottomBorder() {
         var border = new StringBuilder();
         border.append(SET_BG_COLOR_WHITE + EMPTY);
-        border.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + EMPTY);
-        border.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + EMPTY);
-        border.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + EMPTY);
-        border.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + EMPTY);
-        border.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + EMPTY);
-        border.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + EMPTY);
-        border.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + EMPTY);
-        border.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + EMPTY);
-//        border.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " a ");
-//        border.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " b ");
-//        border.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " c ");
-//        border.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " d ");
-//        border.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " e ");
-//        border.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " f ");
-//        border.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " g ");
-//        border.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " h ");
+        border.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " a ");
+        border.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " b ");
+        border.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " c ");
+        border.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " d ");
+        border.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " e ");
+        border.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " f ");
+        border.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " g ");
+        border.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " h ");
         border.append(SET_BG_COLOR_WHITE + EMPTY);
         border.append(RESET_BG_COLOR + "\n");
         return String.format("%s", border);
