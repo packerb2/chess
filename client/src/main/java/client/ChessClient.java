@@ -189,7 +189,7 @@ public class ChessClient {
         var wArmy = whiteArmyReverse();
         var middle = middle();
         var bArmy = blackArmyRev();
-        var border = topBottomBorder();
+        var border = topBottomBorderRev();
         board.append(border);
         board.append(wArmy);
         board.append(middle);
@@ -397,6 +397,22 @@ public class ChessClient {
         border.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " f ");
         border.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " g ");
         border.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " h ");
+        border.append(SET_BG_COLOR_WHITE + EMPTY);
+        border.append(RESET_BG_COLOR + "\n");
+        return String.format("%s", border);
+    }
+
+    public String topBottomBorderRev() {
+        var border = new StringBuilder();
+        border.append(SET_BG_COLOR_WHITE + EMPTY);
+        border.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " h ");
+        border.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " g ");
+        border.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " f ");
+        border.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " e ");
+        border.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " d ");
+        border.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " c ");
+        border.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " b ");
+        border.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " a ");
         border.append(SET_BG_COLOR_WHITE + EMPTY);
         border.append(RESET_BG_COLOR + "\n");
         return String.format("%s", border);
