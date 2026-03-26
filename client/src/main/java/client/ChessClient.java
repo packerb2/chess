@@ -1,6 +1,7 @@
 package client;
 
 import java.util.Arrays;
+//import java.util.Objects;
 import java.util.Scanner;
 
 import chess.ChessGame;
@@ -100,7 +101,7 @@ public class ChessClient {
                 state = State.SIGNEDIN;
                 return String.format("You logged in as %s.", userName);
             } catch (DataAccessException e) {
-                throw new DataAccessException("could not login");
+                throw new DataAccessException("Error: Could not login");
             }
         }
         throw new DataAccessException("Expected: <UserName, Password>");
@@ -158,10 +159,13 @@ public class ChessClient {
                 color = ChessGame.TeamColor.BLACK;
             }
             else {
-                throw new DataAccessException("color is not correct");
+                throw new DataAccessException("Error: Color is invalid. Please enter with 'white' or 'black'");
             }
             JoinGameData jd = new JoinGameData(id.gameID, color, new UserData(userName, password, null));
-            server.joinGame(jd);
+            ErrorObject error = server.joinGame(jd);
+            if (error != null) {
+                throw new DataAccessException(error.message);
+            }
             return String.format("You joined game %s as %s.", id, color);
         }
         throw new DataAccessException("Expected: <GameID> <TeamColor>");

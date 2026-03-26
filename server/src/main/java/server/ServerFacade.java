@@ -78,9 +78,10 @@ public class ServerFacade {
         return handleResponse(response, GameIDs.class);
     }
 
-    public void joinGame(JoinGameData info) throws DataAccessException {
+    public ErrorObject joinGame(JoinGameData info) throws DataAccessException {
         var request = buildRequest("PUT", "/game", info);
-        sendRequest(request);
+        var response = sendRequest(request);
+        return handleResponse(response, ErrorObject.class);
     }
 
     private HttpRequest buildRequest(String method, String path, Object body) {
@@ -114,7 +115,8 @@ public class ServerFacade {
         if (!isSuccessful(status)) {
             var body = response.body();
             if (body != null) {
-                throw new DataAccessException("other failure: " + status);
+                ErrorObject error = new Gson().fromJson(response.body(), ErrorObject.class);
+                throw new DataAccessException(error.message);
             }
 
             throw new DataAccessException("other failure: " + status);
