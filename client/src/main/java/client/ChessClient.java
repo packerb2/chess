@@ -450,56 +450,56 @@ public class ChessClient {
 
     public String blackArmyRev() {
         var army = new StringBuilder();
-        var BackLine = new StringBuilder();
-        var PawnLine = blackPawnsRev();
-        BackLine.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " 8 ");
-        BackLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_ROOK);
-        BackLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_KNIGHT);
-        BackLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_BISHOP);
-        BackLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_QUEEN);
-        BackLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_KING);
-        BackLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_BISHOP);
-        BackLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_KNIGHT);
-        BackLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_ROOK);
-        BackLine.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " 8 ");
-        BackLine.append(RESET_BG_COLOR + RESET_TEXT_COLOR + "\n");
-        army.append(String.format("%s", PawnLine)).append(String.format("%s", BackLine));
+        var bBackLine = new StringBuilder();
+        var bPawnLine = blackPawnsRev();
+        bBackLine.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " 8 ");
+        bBackLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_ROOK);
+        bBackLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_KNIGHT);
+        bBackLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_BISHOP);
+        bBackLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_QUEEN);
+        bBackLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_KING);
+        bBackLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_BISHOP);
+        bBackLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_KNIGHT);
+        bBackLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_ROOK);
+        bBackLine.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " 8 ");
+        bBackLine.append(RESET_BG_COLOR + RESET_TEXT_COLOR + "\n");
+        army.append(String.format("%s", bPawnLine)).append(String.format("%s", bBackLine));
         return String.format("%s", army);
     }
 
     public String blackPawns() {
         var army = new StringBuilder();
-        var PawnLine = new StringBuilder();
-        PawnLine.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " 7 ");
-        PawnLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
-        PawnLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
-        PawnLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
-        PawnLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
-        PawnLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
-        PawnLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
-        PawnLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
-        PawnLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
-        PawnLine.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " 7 ");
-        PawnLine.append(RESET_BG_COLOR + RESET_TEXT_COLOR + "\n");
-        army.append(String.format("%s", PawnLine));
+        var bPawnLine = new StringBuilder();
+        bPawnLine.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " 7 ");
+        bPawnLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
+        bPawnLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
+        bPawnLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
+        bPawnLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
+        bPawnLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
+        bPawnLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
+        bPawnLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
+        bPawnLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
+        bPawnLine.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " 7 ");
+        bPawnLine.append(RESET_BG_COLOR + RESET_TEXT_COLOR + "\n");
+        army.append(String.format("%s", bPawnLine));
         return String.format("%s", army);
     }
 
     public String blackPawnsRev() {
         var army = new StringBuilder();
-        var PawnLine = new StringBuilder();
-        PawnLine.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " 7 ");
-        PawnLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
-        PawnLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
-        PawnLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
-        PawnLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
-        PawnLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
-        PawnLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
-        PawnLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
-        PawnLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
-        PawnLine.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " 7 ");
-        PawnLine.append(RESET_BG_COLOR + RESET_TEXT_COLOR + "\n");
-        army.append(String.format("%s", PawnLine));
+        var bPawnLine = new StringBuilder();
+        bPawnLine.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " 7 ");
+        bPawnLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
+        bPawnLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
+        bPawnLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
+        bPawnLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
+        bPawnLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
+        bPawnLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
+        bPawnLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
+        bPawnLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
+        bPawnLine.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " 7 ");
+        bPawnLine.append(RESET_BG_COLOR + RESET_TEXT_COLOR + "\n");
+        army.append(String.format("%s", bPawnLine));
         return String.format("%s", army);
     }
 
