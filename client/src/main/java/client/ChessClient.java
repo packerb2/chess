@@ -1,40 +1,29 @@
 package client;
 
 import java.util.Arrays;
-//import java.util.Objects;
 import java.util.Scanner;
-
 import chess.ChessGame;
-//import com.google.gson.Gson;
 import model.*;
-//import client.websocket.NotificationHandler;
-//import client.websocket.WebSocketFacade;
-//import webSocketMessages.Notification;
-
 import static ui.EscapeSequences.*;
 
 public class ChessClient {
     private String userName = null;
     private String password = null;
     private final ServerFacade server;
-//    private final WebSocketFacade ws;
     private State state = State.SIGNEDOUT;
 
     public ChessClient(String serverUrl) {
         server = new ServerFacade(serverUrl);
-//        ws = new WebSocketFacade(serverUrl, this);
     }
 
     public void run() {
         System.out.println(SET_TEXT_BOLD + " Welcome to the chess game. Login to start.");
         System.out.print(help());
-
         Scanner scanner = new Scanner(System.in);
         var result = "";
         while (!result.equals("quit")) {
             printPrompt();
             String line = scanner.nextLine();
-
             try {
                 result = eval(line);
                 System.out.print(SET_TEXT_COLOR_BLUE + result);
@@ -45,7 +34,6 @@ public class ChessClient {
         }
         System.out.println();
     }
-
 
     private void printPrompt() {
         System.out.print("\n" + RESET_TEXT_COLOR + ">>> " + SET_TEXT_COLOR_GREEN);
@@ -71,9 +59,7 @@ public class ChessClient {
                 case "rev" -> reverseBoard();
                 default -> help();
             };
-        } catch (ClientException ex) {
-            return ex.getMessage();
-        }
+        } catch (ClientException ex) {return ex.getMessage();}
     }
 
     public String register(String... params) throws ClientException {
@@ -99,9 +85,7 @@ public class ChessClient {
                 server.login(userNew);
                 state = State.SIGNEDIN;
                 return String.format("You logged in as %s.", userName);
-            } catch (ClientException e) {
-                throw new ClientException("Error: Could not login");
-            }
+            } catch (ClientException e) {throw new ClientException("Error: Could not login");}
         }
         throw new ClientException("Expected: <UserName, Password>");
     }
@@ -125,21 +109,14 @@ public class ChessClient {
     public String listGames() throws ClientException {
         assertSignedIn();
         GameList gamesList = server.listGames();
-        if (gamesList.games.isEmpty()) {
-            return "No games have been created...";
-        }
+        if (gamesList.games.isEmpty()) {return "No games have been created...";}
         var result = new StringBuilder();
-        result.append(String.format("%-15s %-10s %-20s %-20s\n",
-                "Game Name", "Game ID", "White Player", "Black Player"));
+        result.append(String.format("%-15s %-10s %-20s %-20s\n", "Name", "Game ID", "White Player", "Black Player"));
         for (GameData game : gamesList.games) {
             String black = game.blackUsername();
-            if (black == null) {
-                black = "~empty~";
-            }
+            if (black == null) {black = "~empty~";}
             String white = game.whiteUsername();
-            if (white == null) {
-                white = "~empty~";
-            }
+            if (white == null) {white = "~empty~";}
             result.append(String.format("%-20s %-10d %-20s %-20s\n",
                     game.gameName(), game.gameID(), white, black));
         }
@@ -151,25 +128,15 @@ public class ChessClient {
         if (params.length == 2) {
             GameIDs id = new GameIDs(Integer.parseInt(params[0]));
             ChessGame.TeamColor color;
-            if (params[1].equals("white")) {
-                color = ChessGame.TeamColor.WHITE;
-            }
-            else if (params[1].equals("black")) {
-                color = ChessGame.TeamColor.BLACK;
-            }
-            else {
-                throw new ClientException("Error: Color is invalid. Please enter with 'white' or 'black'");
-            }
+            if (params[1].equals("white")) {color = ChessGame.TeamColor.WHITE;}
+            else if (params[1].equals("black")) {color = ChessGame.TeamColor.BLACK;}
+            else {throw new ClientException("Error: Color is invalid. Please enter with 'white' or 'black'");}
             JoinGameData jd = new JoinGameData(id.gameID, color, new UserData(userName, password, null));
             ErrorObject error = server.joinGame(jd);
-            if (error != null) {
-                throw new ClientException(error.message);
-            }
+            if (error != null) {throw new ClientException(error.message);}
             if (color == ChessGame.TeamColor.WHITE) {
                 return String.format("You joined game %s as %s.\n%s", id, color, board());
-            } else {
-                return String.format("You joined game %s as %s.\n%s", id, color, reverseBoard());
-            }
+            } else {return String.format("You joined game %s as %s.\n%s", id, color, reverseBoard());}
         }
         throw new ClientException("Expected: <GameID> <TeamColor>");
     }
@@ -177,9 +144,7 @@ public class ChessClient {
     public String observe(String... params) throws ClientException {
         assertSignedIn();
         GameList gamesList = server.listGames();
-        if (gamesList.games.isEmpty()) {
-            return "No games have been created...";
-        }
+        if (gamesList.games.isEmpty()) {return "No games have been created...";}
         var id = Integer.parseInt(params[0]);
         var result = new StringBuilder();
         for (GameData game : gamesList.games) {
@@ -193,9 +158,7 @@ public class ChessClient {
                     white = "~empty~";
                 }
                 result.append(String.format("%s\n%s" + SET_TEXT_COLOR_BLUE + "%s\n", black, board(), white));
-            } else {
-                result.append(String.format("Error: Game ID: %d does not exist", id));
-            }
+            } else {result.append(String.format("Error: Game ID: %d does not exist", id));}
         }
         return result.toString();
     }
@@ -215,11 +178,7 @@ public class ChessClient {
         var middle = middle();
         var bArmy = blackArmy();
         var border = topBottomBorder();
-        board.append(border);
-        board.append(bArmy);
-        board.append(middle);
-        board.append(wArmy);
-        board.append(border);
+        board.append(border).append(wArmy).append(middle).append(bArmy).append(border);
         return String.format("%s", board);
     }
 
@@ -229,11 +188,7 @@ public class ChessClient {
         var middle = middleRev();
         var bArmy = blackArmyRev();
         var border = topBottomBorderRev();
-        board.append(border);
-        board.append(wArmy);
-        board.append(middle);
-        board.append(bArmy);
-        board.append(border);
+        board.append(border).append(wArmy).append(middle).append(bArmy).append(border);
         return String.format("%s", board);
     }
 
@@ -278,15 +233,12 @@ public class ChessClient {
     public String whitePawns() {
         var army = new StringBuilder();
         var wPawnLine = new StringBuilder();
+        var lp = new StringBuilder();
+        var dp = new StringBuilder();
+        dp.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + WHITE_PAWN);
+        lp.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_WHITE + WHITE_PAWN);
         wPawnLine.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " 2 ");
-        wPawnLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_WHITE + WHITE_PAWN);
-        wPawnLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + WHITE_PAWN);
-        wPawnLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_WHITE + WHITE_PAWN);
-        wPawnLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + WHITE_PAWN);
-        wPawnLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_WHITE + WHITE_PAWN);
-        wPawnLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + WHITE_PAWN);
-        wPawnLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_WHITE + WHITE_PAWN);
-        wPawnLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + WHITE_PAWN);
+        wPawnLine.append(String.format("%s%s%s%s%s%s%s%s", lp, dp, lp, dp, lp, dp, lp, dp));
         wPawnLine.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " 2 ");
         wPawnLine.append(RESET_BG_COLOR + RESET_TEXT_COLOR + "\n");
         army.append(String.format("%s", wPawnLine));
@@ -296,15 +248,12 @@ public class ChessClient {
     public String whitePawnsRev() {
         var army = new StringBuilder();
         var wPawnLine = new StringBuilder();
+        var lp = new StringBuilder();
+        var dp = new StringBuilder();
+        dp.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + WHITE_PAWN);
+        lp.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_WHITE + WHITE_PAWN);
         wPawnLine.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " 2 ");
-        wPawnLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + WHITE_PAWN);
-        wPawnLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_WHITE + WHITE_PAWN);
-        wPawnLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + WHITE_PAWN);
-        wPawnLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_WHITE + WHITE_PAWN);
-        wPawnLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + WHITE_PAWN);
-        wPawnLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_WHITE + WHITE_PAWN);
-        wPawnLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + WHITE_PAWN);
-        wPawnLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_WHITE + WHITE_PAWN);
+        wPawnLine.append(String.format("%s%s%s%s%s%s%s%s", dp, lp, dp, lp, dp, lp, dp, lp));
         wPawnLine.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " 2 ");
         wPawnLine.append(RESET_BG_COLOR + RESET_TEXT_COLOR + "\n");
         army.append(String.format("%s", wPawnLine));
@@ -405,27 +354,21 @@ public class ChessClient {
 
     public String order2() {
         var line1 = new StringBuilder();
-        line1.append(SET_BG_COLOR_DARK_GREY + EMPTY);
-        line1.append(SET_BG_COLOR_LIGHT_GREY + EMPTY);
-        line1.append(SET_BG_COLOR_DARK_GREY + EMPTY);
-        line1.append(SET_BG_COLOR_LIGHT_GREY + EMPTY);
-        line1.append(SET_BG_COLOR_DARK_GREY + EMPTY);
-        line1.append(SET_BG_COLOR_LIGHT_GREY + EMPTY);
-        line1.append(SET_BG_COLOR_DARK_GREY + EMPTY);
-        line1.append(SET_BG_COLOR_LIGHT_GREY + EMPTY);
+        var ls = new StringBuilder();
+        var ds = new StringBuilder();
+        ls.append(SET_BG_COLOR_LIGHT_GREY + EMPTY);
+        ds.append(SET_BG_COLOR_DARK_GREY + EMPTY);
+        line1.append(String.format("%s%s%s%s%s%s%s%s", ds, ls, ds, ls, ds, ls, ds, ls));
         return String.format("%s", line1);
     }
 
     public String order1() {
         var line2 = new StringBuilder();
-        line2.append(SET_BG_COLOR_LIGHT_GREY + EMPTY);
-        line2.append(SET_BG_COLOR_DARK_GREY + EMPTY);
-        line2.append(SET_BG_COLOR_LIGHT_GREY + EMPTY);
-        line2.append(SET_BG_COLOR_DARK_GREY + EMPTY);
-        line2.append(SET_BG_COLOR_LIGHT_GREY + EMPTY);
-        line2.append(SET_BG_COLOR_DARK_GREY + EMPTY);
-        line2.append(SET_BG_COLOR_LIGHT_GREY + EMPTY);
-        line2.append(SET_BG_COLOR_DARK_GREY + EMPTY);
+        var ls = new StringBuilder();
+        var ds = new StringBuilder();
+        ls.append(SET_BG_COLOR_LIGHT_GREY + EMPTY);
+        ds.append(SET_BG_COLOR_DARK_GREY + EMPTY);
+        line2.append(String.format("%s%s%s%s%s%s%s%s", ls, ds, ls, ds, ls, ds, ls, ds));
         return String.format("%s", line2);
     }
 
@@ -470,15 +413,12 @@ public class ChessClient {
     public String blackPawns() {
         var army = new StringBuilder();
         var bPawnLine = new StringBuilder();
+        var lp = new StringBuilder();
+        var dp = new StringBuilder();
+        lp.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
+        dp.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
         bPawnLine.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " 7 ");
-        bPawnLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
-        bPawnLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
-        bPawnLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
-        bPawnLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
-        bPawnLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
-        bPawnLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
-        bPawnLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
-        bPawnLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
+        bPawnLine.append(String.format("%s%s%s%s%s%s%s%s", dp, lp, dp, lp, dp, lp, dp, lp));
         bPawnLine.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " 7 ");
         bPawnLine.append(RESET_BG_COLOR + RESET_TEXT_COLOR + "\n");
         army.append(String.format("%s", bPawnLine));
@@ -488,15 +428,12 @@ public class ChessClient {
     public String blackPawnsRev() {
         var army = new StringBuilder();
         var bPawnLine = new StringBuilder();
+        var lp = new StringBuilder();
+        var dp = new StringBuilder();
+        lp.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
+        dp.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
         bPawnLine.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " 7 ");
-        bPawnLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
-        bPawnLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
-        bPawnLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
-        bPawnLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
-        bPawnLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
-        bPawnLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
-        bPawnLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
-        bPawnLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_PAWN);
+        bPawnLine.append(String.format("%s%s%s%s%s%s%s%s", lp, dp, lp, dp, lp, dp, lp, dp));
         bPawnLine.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " 7 ");
         bPawnLine.append(RESET_BG_COLOR + RESET_TEXT_COLOR + "\n");
         army.append(String.format("%s", bPawnLine));
