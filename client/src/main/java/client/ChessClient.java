@@ -133,7 +133,6 @@ public class ChessClient {
             return "There are no games";
         }
         var result = new StringBuilder();
-        var gson = new Gson();
         result.append(String.format("%-15s %-10s %-20s %-20s\n",
                 "Game Name", "Game ID", "White Player", "Black Player"));
         for (GameData game : gamesList.games) {
