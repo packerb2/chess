@@ -129,10 +129,13 @@ public class ChessClient {
     public String listGames() throws DataAccessException {
         assertSignedIn();
         GameList gamesList = server.listGames();
+        if (gamesList == null) {
+            return "There are no games";
+        }
         var result = new StringBuilder();
         var gson = new Gson();
         for (GameData game : gamesList.games) {
-            result.append(gson.toJson(game)).append('\n');
+            result.append(String.format("%d - %s\n", game.gameID(), game.gameName()));
         }
         return result.toString();
     }
