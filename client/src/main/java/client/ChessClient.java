@@ -110,7 +110,7 @@ public class ChessClient {
         GameList gamesList = server.listGames();
         if (gamesList.games.isEmpty()) {return "No games have been created...";}
         var result = new StringBuilder();
-        result.append(String.format("%-15s %-10s %-20s %-20s\n", "Name", "Number", "White Player", "Black Player"));
+        result.append(String.format("%-10s %-15s %-20s %-20s\n", "Number", "Name", "White Player", "Black Player"));
         int i = 0;
         for (GameData game : gamesList.games) {
             i += 1;
@@ -119,8 +119,7 @@ public class ChessClient {
             if (black == null) {black = "~empty~";}
             String white = game.whiteUsername();
             if (white == null) {white = "~empty~";}
-            result.append(String.format("%-20s %-10d %-20s %-20s\n",
-                    game.gameName(), i, white, black));
+            result.append(String.format("%-10d %-15s %-20s %-20s\n", i, game.gameName(), white, black));
         }
         return result.toString();
     }
@@ -138,7 +137,7 @@ public class ChessClient {
             ChessGame.TeamColor color;
             if (params[1].equals("white")) {color = ChessGame.TeamColor.WHITE;}
             else if (params[1].equals("black")) {color = ChessGame.TeamColor.BLACK;}
-            else {throw new ClientException("Error: Color is invalid. Please enter with 'white' or 'black'");}
+            else {throw new ClientException("Error: Color is invalid. Please use 'white' or 'black'");}
             JoinGameData jd = new JoinGameData(id, color, new UserData(userName, password, null));
             ErrorObject error = server.joinGame(jd);
             if (error != null) {throw new ClientException(error.message);}
@@ -153,13 +152,13 @@ public class ChessClient {
         assertSignedIn();
         GameList gamesList = server.listGames();
         if (gamesList.games.isEmpty()) {return "No games have been created...";}
-        int id;
+        int num;
         try {
-            id = Integer.parseInt(params[0]);
+            num = Integer.parseInt(params[0]);
         } catch (Exception e) {throw new ClientException("Error: please use Game Number");}
         var result = new StringBuilder();
         for (GameData game : gamesList.games) {
-            if (game.gameID() == id) {
+            if (game.gameID() == num) {
                 String black = game.blackUsername();
                 if (black == null) {
                     black = "~empty~";
@@ -169,9 +168,10 @@ public class ChessClient {
                     white = "~empty~";
                 }
                 result.append(String.format("%20s\n%s" + SET_TEXT_COLOR_BLUE + "%20s\n", black, board(), white));
-            } else {result.append(String.format("Error: Game Number: %d does not exist", id));}
+                return result.toString();
+            }
         }
-        return result.toString();
+        return String.format("Error: Game Number: %d does not exist", num);
     }
 
     public String clear() throws ClientException {
