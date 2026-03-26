@@ -1,8 +1,7 @@
-package server;
+package client;
 
 //import chess.ChessGame;
 import com.google.gson.Gson;
-import dataaccess.*;
 
 //import io.javalin.http.Context;
 
@@ -24,13 +23,13 @@ public class ServerFacade {
         serverUrl = url;
     }
 
-    public void clear() throws DataAccessException {
+    public void clear() throws ClientException {
         var request = buildRequest("DELETE", "/db", null);
         sendRequest(request);
         auth = null;
     }
 
-    public void register(UserData user) throws DataAccessException {
+    public void register(UserData user) throws ClientException {
         try {
             var request = buildRequest("POST", "/user", user);
             var response = sendRequest(request);
@@ -38,12 +37,12 @@ public class ServerFacade {
             if (lr != null) {
                 auth = lr.authToken;
             }
-        } catch (DataAccessException e) {
-            throw new DataAccessException("could not register user");
+        } catch (ClientException e) {
+            throw new ClientException("could not register user");
         }
     }
 
-    public void login(UserData user) throws DataAccessException {
+    public void login(UserData user) throws ClientException {
         try {
             var request = buildRequest("POST", "/session", user);
             var response = sendRequest(request);
@@ -51,34 +50,34 @@ public class ServerFacade {
             if (lr != null) {
                 auth = lr.authToken;
             }
-        } catch (DataAccessException e) {
-            throw new DataAccessException("could not log in");
+        } catch (ClientException e) {
+            throw new ClientException("could not log in");
         }
     }
 
-    public void logout() throws DataAccessException {
+    public void logout() throws ClientException {
         var request = buildRequest("DELETE", "/session", null);
         sendRequest(request);
         auth = null;
     }
 
-    public GameList listGames() throws DataAccessException {
+    public GameList listGames() throws ClientException {
         try {
             var request = buildRequest("GET", "/game", null);
             var response = sendRequest(request);
             return handleResponse(response, GameList.class);
-        } catch (DataAccessException e) {
-            throw new DataAccessException(e.getMessage());
+        } catch (ClientException e) {
+            throw new ClientException(e.getMessage());
         }
     }
 
-    public GameIDs createGame(GameName name) throws DataAccessException {
+    public GameIDs createGame(GameName name) throws ClientException {
         var request = buildRequest("POST", "/game", name);
         var response = sendRequest(request);
         return handleResponse(response, GameIDs.class);
     }
 
-    public ErrorObject joinGame(JoinGameData info) throws DataAccessException {
+    public ErrorObject joinGame(JoinGameData info) throws ClientException {
         var request = buildRequest("PUT", "/game", info);
         var response = sendRequest(request);
         return handleResponse(response, ErrorObject.class);
@@ -102,24 +101,24 @@ public class ServerFacade {
         }
     }
 
-    private HttpResponse<String> sendRequest(HttpRequest request) throws DataAccessException {
+    private HttpResponse<String> sendRequest(HttpRequest request) throws ClientException {
         try {
             return client.send(request, HttpResponse.BodyHandlers.ofString());
         } catch (Exception ex) {
-            throw new DataAccessException(ex.getMessage());
+            throw new ClientException(ex.getMessage());
         }
     }
 
-    private <T> T handleResponse(HttpResponse<String> response, Class<T> responseClass) throws DataAccessException {
+    private <T> T handleResponse(HttpResponse<String> response, Class<T> responseClass) throws ClientException {
         var status = response.statusCode();
         if (!isSuccessful(status)) {
             var body = response.body();
             if (body != null) {
                 ErrorObject error = new Gson().fromJson(response.body(), ErrorObject.class);
-                throw new DataAccessException(error.message);
+                throw new ClientException(error.message);
             }
 
-            throw new DataAccessException("other failure: " + status);
+            throw new ClientException("other failure: " + status);
         }
 
         if (responseClass != null) {

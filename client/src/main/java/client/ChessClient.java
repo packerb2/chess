@@ -6,10 +6,8 @@ import java.util.Scanner;
 
 import chess.ChessGame;
 //import com.google.gson.Gson;
-import dataaccess.DataAccessException;
 import model.*;
 //import client.websocket.NotificationHandler;
-import server.ServerFacade;
 //import client.websocket.WebSocketFacade;
 //import webSocketMessages.Notification;
 
@@ -72,12 +70,12 @@ public class ChessClient {
                 case "quit" -> "quit";
                 default -> help();
             };
-        } catch (DataAccessException ex) {
+        } catch (ClientException ex) {
             return ex.getMessage();
         }
     }
 
-    public String register(String... params) throws DataAccessException {
+    public String register(String... params) throws ClientException {
         if (params.length == 3) {
             userName = params[0];
             password = params[1];
@@ -88,10 +86,10 @@ public class ChessClient {
             state = State.SIGNEDIN;
             return String.format("You registered and logged in as %s.", userName);
         }
-        throw new DataAccessException("Expected: <UserName, Password, Email>");
+        throw new ClientException("Expected: <UserName, Password, Email>");
     }
 
-    public String login(String... params) throws DataAccessException {
+    public String login(String... params) throws ClientException {
         if (params.length >= 1) {
             try {
                 userName = params[0];
@@ -100,30 +98,30 @@ public class ChessClient {
                 server.login(userNew);
                 state = State.SIGNEDIN;
                 return String.format("You logged in as %s.", userName);
-            } catch (DataAccessException e) {
-                throw new DataAccessException("Error: Could not login");
+            } catch (ClientException e) {
+                throw new ClientException("Error: Could not login");
             }
         }
-        throw new DataAccessException("Expected: <UserName, Password>");
+        throw new ClientException("Expected: <UserName, Password>");
     }
 
-    public String logout() throws DataAccessException {
+    public String logout() throws ClientException {
         assertSignedIn();
         server.logout();
         state = State.SIGNEDOUT;
         return "You logged out";
     }
 
-    public String createGame(String... params) throws DataAccessException {
+    public String createGame(String... params) throws ClientException {
         assertSignedIn();
         if (params.length >= 1) {
             GameIDs id = server.createGame(new GameName(params[0]));
             return String.format("%s game created with id: %d", params[0], id.gameID);
         }
-        throw new DataAccessException("Expected: <GameName>");
+        throw new ClientException("Expected: <GameName>");
     }
 
-    public String listGames() throws DataAccessException {
+    public String listGames() throws ClientException {
         assertSignedIn();
         GameList gamesList = server.listGames();
         if (gamesList.games.isEmpty()) {
@@ -147,7 +145,7 @@ public class ChessClient {
         return result.toString();
     }
 
-    public String joinGame(String... params) throws DataAccessException {
+    public String joinGame(String... params) throws ClientException {
         assertSignedIn();
         if (params.length == 2) {
             GameIDs id = new GameIDs(Integer.parseInt(params[0]));
@@ -159,19 +157,19 @@ public class ChessClient {
                 color = ChessGame.TeamColor.BLACK;
             }
             else {
-                throw new DataAccessException("Error: Color is invalid. Please enter with 'white' or 'black'");
+                throw new ClientException("Error: Color is invalid. Please enter with 'white' or 'black'");
             }
             JoinGameData jd = new JoinGameData(id.gameID, color, new UserData(userName, password, null));
             ErrorObject error = server.joinGame(jd);
             if (error != null) {
-                throw new DataAccessException(error.message);
+                throw new ClientException(error.message);
             }
             return String.format("You joined game %s as %s.", id, color);
         }
-        throw new DataAccessException("Expected: <GameID> <TeamColor>");
+        throw new ClientException("Expected: <GameID> <TeamColor>");
     }
 
-    public String clear() throws DataAccessException {
+    public String clear() throws ClientException {
         assertSignedIn();
         server.logout();
         state = State.SIGNEDOUT;
@@ -525,9 +523,9 @@ public class ChessClient {
                 """;
     }
 
-    private void assertSignedIn() throws DataAccessException {
+    private void assertSignedIn() throws ClientException {
         if (state == State.SIGNEDOUT) {
-            throw new DataAccessException("You must log in");
+            throw new ClientException("You must log in");
         }
     }
 }
