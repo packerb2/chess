@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Scanner;
 
 import chess.ChessGame;
-import com.google.gson.Gson;
+//import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import model.*;
 //import client.websocket.NotificationHandler;
@@ -17,7 +17,6 @@ import static ui.EscapeSequences.*;
 public class ChessClient {
     private String userName = null;
     private String password = null;
-    private String auth = null;
     private final ServerFacade server;
 //    private final WebSocketFacade ws;
     private State state = State.SIGNEDOUT;
@@ -83,8 +82,7 @@ public class ChessClient {
             password = params[1];
             String email = params[2];
             UserData userNew = new UserData(userName, password, email);
-            LoginReturn lr = server.register(userNew);
-            auth = lr.authToken;
+            server.register(userNew);
             server.login(userNew);
             state = State.SIGNEDIN;
             return String.format("You registered and logged in as %s.", userName);
@@ -98,8 +96,7 @@ public class ChessClient {
                 userName = params[0];
                 password = params[1];
                 UserData userNew = new UserData(userName, password, null);
-                LoginReturn lr = server.login(userNew);
-                auth = lr.authToken;
+                server.login(userNew);
                 state = State.SIGNEDIN;
                 return String.format("You logged in as %s.", userName);
             } catch (DataAccessException e) {
@@ -113,14 +110,13 @@ public class ChessClient {
         assertSignedIn();
         server.logout();
         state = State.SIGNEDOUT;
-        auth = null;
         return "You logged out";
     }
 
     public String createGame(String... params) throws DataAccessException {
         assertSignedIn();
         if (params.length >= 1) {
-            GameIDs id = server.createGame(new GameName(params[0]), auth);
+            GameIDs id = server.createGame(new GameName(params[0]));
             return String.format("%s game created with id: %d", params[0], id.gameID);
         }
         throw new DataAccessException("Expected: <GameName>");
@@ -152,8 +148,6 @@ public class ChessClient {
 
     public String joinGame(String... params) throws DataAccessException {
         assertSignedIn();
-        var request = new StringBuilder();
-        var gson = new Gson();
         if (params.length == 2) {
             GameIDs id = new GameIDs(Integer.parseInt(params[0]));
             ChessGame.TeamColor color;
@@ -167,8 +161,7 @@ public class ChessClient {
                 throw new DataAccessException("color is not correct");
             }
             JoinGameData jd = new JoinGameData(id.gameID, color, new UserData(userName, password, null));
-            request.append(gson.toJson(jd));
-            server.joinGame(request.toString());
+            server.joinGame(jd);
             return String.format("You joined game %s as %s.", id, color);
         }
         throw new DataAccessException("Expected: <GameID> <TeamColor>");
@@ -178,7 +171,6 @@ public class ChessClient {
         assertSignedIn();
         server.logout();
         state = State.SIGNEDOUT;
-        auth = null;
         server.clear();
         return "System has been cleared.";
     }
