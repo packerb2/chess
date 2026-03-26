@@ -1,8 +1,10 @@
 package client;
 
+import chess.ChessGame;
 import client.ClientException;
 import client.ServerFacade;
 import model.GameName;
+import model.JoinGameData;
 import model.UserData;
 import org.junit.jupiter.api.*;
 import server.Server;
@@ -102,6 +104,43 @@ public class ServerFacadeTests {
     public void createIncompleteTest() {
         assertDoesNotThrow(() -> facade.register(able));
         assertThrows(ClientException.class, () -> facade.createGame(oops));
+    }
+
+    @Test
+    public void playOneTest() {
+        assertDoesNotThrow(() -> facade.register(adam));
+        assertDoesNotThrow(() -> facade.createGame(friendly));
+        JoinGameData f = new JoinGameData(1, ChessGame.TeamColor.WHITE, adam);
+        assertDoesNotThrow(() -> facade.joinGame(f));
+    }
+
+    @Test
+    public void playTwoTest() {
+        assertDoesNotThrow(() -> facade.register(adam));
+        assertDoesNotThrow(() -> facade.createGame(friendly));
+        JoinGameData f = new JoinGameData(1, ChessGame.TeamColor.WHITE, adam);
+        assertDoesNotThrow(() -> facade.joinGame(f));
+        assertDoesNotThrow(() -> facade.logout());
+        assertDoesNotThrow(() -> facade.register(eve));
+        JoinGameData f2 = new JoinGameData(1, ChessGame.TeamColor.BLACK, eve);
+        assertDoesNotThrow(() -> facade.joinGame(f2));
+    }
+
+    @Test
+    public void playWasTakenTest() {
+        assertDoesNotThrow(() -> facade.register(adam));
+        assertDoesNotThrow(() -> facade.createGame(friendly));
+        JoinGameData f = new JoinGameData(1, ChessGame.TeamColor.WHITE, adam);
+        assertDoesNotThrow(() -> facade.joinGame(f));
+        assertThrows(ClientException.class, () -> facade.joinGame(f));
+        assertDoesNotThrow(() -> facade.logout());
+        assertDoesNotThrow(() -> facade.register(eve));
+        JoinGameData f2 = new JoinGameData(1, ChessGame.TeamColor.BLACK, eve);
+        assertDoesNotThrow(() -> facade.joinGame(f2));
+        assertDoesNotThrow(() -> facade.logout());
+        assertDoesNotThrow(() -> facade.register(able));
+        JoinGameData f3 = new JoinGameData(1, ChessGame.TeamColor.BLACK, able);
+        assertThrows(ClientException.class, () -> facade.joinGame(f3));
     }
 
 }
