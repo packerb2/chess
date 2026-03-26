@@ -47,8 +47,13 @@ public class ServerFacadeTests {
 
     @Test
     public void registerBadRequestTest() {
-        assertTrue(true);
-        //assertThrows(ClientException.class, () -> facade.register(cain));
+        assertThrows(ClientException.class, () -> facade.register(cain));
+    }
+
+    @Test
+    public void logoutWorkingTest() {
+        assertDoesNotThrow(() -> facade.register(adam));
+        assertDoesNotThrow(() -> facade.logout());
     }
 
 }
