@@ -99,7 +99,7 @@ public class ChessClient {
     public String createGame(String... params) throws ClientException {
         assertSignedIn();
         if (params.length >= 1) {
-            GameIDs id = server.createGame(new GameName(params[0]));
+            server.createGame(new GameName(params[0]));
             return String.format("Game '%s' has been created", params[0]);
         }
         throw new ClientException("Expected: <GameName>");
