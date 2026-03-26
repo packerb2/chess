@@ -135,7 +135,16 @@ public class ChessClient {
         var result = new StringBuilder();
         var gson = new Gson();
         for (GameData game : gamesList.games) {
-            result.append(String.format("%d - %s\n", game.gameID(), game.gameName()));
+            String black = game.blackUsername();
+            if (black == null) {
+                black = "~empty~";
+            }
+            String white = game.whiteUsername();
+            if (white == null) {
+                white = "~empty~";
+            }
+            result.append(String.format("ID #%d: %s - White Player: %s, Black Player: %s\n",
+                    game.gameID(), game.gameName(), white, black));
         }
         return result.toString();
     }
@@ -190,7 +199,7 @@ public class ChessClient {
     public String reverseBoard() {
         var board = new StringBuilder();
         var wArmy = whiteArmyReverse();
-        var middle = middle();
+        var middle = middleRev();
         var bArmy = blackArmyRev();
         var border = topBottomBorderRev();
         board.append(border);
@@ -277,18 +286,94 @@ public class ChessClient {
 
     public String middle() {
         var field = new StringBuilder();
-        var line3 = new StringBuilder();
-        var line4 = new StringBuilder();
-        line3.append(SET_BG_COLOR_WHITE + EMPTY);
-        line3.append(order1());
-        line3.append(SET_BG_COLOR_WHITE + EMPTY);
-        line3.append(RESET_BG_COLOR + "\n");
-        line4.append(SET_BG_COLOR_WHITE + EMPTY);
-        line4.append(order2());
-        line4.append(SET_BG_COLOR_WHITE + EMPTY);
-        line4.append(RESET_BG_COLOR + "\n");
-        field.append(String.format("%s%s%s%s", line3, line4, line3, line4));
+        var line3 = line3();
+        var line4 = line4();
+        var line5 = line5();
+        var line6 = line6();
+        field.append(String.format("%s%s%s%s", line3, line4, line5, line6));
         return String.format("%s", field);
+    }
+
+    public String middleRev() {
+        var field = new StringBuilder();
+        var line3 = line3Rev();
+        var line4 = line4Rev();
+        var line5 = line5Rev();
+        var line6 = line6Rev();
+        field.append(String.format("%s%s%s%s", line6, line5, line4, line3));
+        return String.format("%s", field);
+    }
+
+    public String line3() {
+        var line3 = new StringBuilder();
+        line3.append(SET_BG_COLOR_WHITE + " 3 ");
+        line3.append(order1());
+        line3.append(SET_BG_COLOR_WHITE + " 3 ");
+        line3.append(RESET_BG_COLOR + "\n");
+        return String.format("%s", line3);
+    }
+
+    public String line4() {
+        var line4 = new StringBuilder();
+        line4.append(SET_BG_COLOR_WHITE + " 4 ");
+        line4.append(order2());
+        line4.append(SET_BG_COLOR_WHITE + " 4 ");
+        line4.append(RESET_BG_COLOR + "\n");
+        return String.format("%s", line4);
+    }
+
+    public String line5() {
+        var line5 = new StringBuilder();
+        line5.append(SET_BG_COLOR_WHITE + " 5 ");
+        line5.append(order1());
+        line5.append(SET_BG_COLOR_WHITE + " 5 ");
+        line5.append(RESET_BG_COLOR + "\n");
+        return String.format("%s", line5);
+    }
+
+    public String line6() {
+        var line6 = new StringBuilder();
+        line6.append(SET_BG_COLOR_WHITE + " 6 ");
+        line6.append(order2());
+        line6.append(SET_BG_COLOR_WHITE + " 6 ");
+        line6.append(RESET_BG_COLOR + "\n");
+        return String.format("%s", line6);
+    }
+
+    public String line3Rev() {
+        var line3 = new StringBuilder();
+        line3.append(SET_BG_COLOR_WHITE + " 3 ");
+        line3.append(order2());
+        line3.append(SET_BG_COLOR_WHITE + " 3 ");
+        line3.append(RESET_BG_COLOR + "\n");
+        return String.format("%s", line3);
+    }
+
+    public String line4Rev() {
+        var line4 = new StringBuilder();
+        line4.append(SET_BG_COLOR_WHITE + " 4 ");
+        line4.append(order1());
+        line4.append(SET_BG_COLOR_WHITE + " 4 ");
+        line4.append(RESET_BG_COLOR + "\n");
+        return String.format("%s", line4);
+    }
+
+    public String line5Rev() {
+        var line5 = new StringBuilder();
+        line5.append(SET_BG_COLOR_WHITE + " 5 ");
+        line5.append(order2());
+        line5.append(SET_BG_COLOR_WHITE + " 5 ");
+        line5.append(RESET_BG_COLOR + "\n");
+        return String.format("%s", line5);
+    }
+
+    public String line6Rev() {
+        var line6 = new StringBuilder();
+        line6.append(SET_BG_COLOR_WHITE + " 6 ");
+        line6.append(order1());
+        line6.append(SET_BG_COLOR_WHITE + " 6 ");
+        line6.append(RESET_BG_COLOR + "\n");
+        return String.format("%s", line6);
     }
 
     public String order2() {
