@@ -1,8 +1,6 @@
 package client;
 
 import chess.ChessGame;
-import client.ClientException;
-import client.ServerFacade;
 import model.GameName;
 import model.JoinGameData;
 import model.UserData;
@@ -26,11 +24,10 @@ public class ServerFacadeTests {
     UserData cain3 = new UserData("cain", null, null);
     UserData nullUser = new UserData(null, null, null);
     GameName friendly = new GameName("friendly");
-    GameName competitive = new GameName("competitive");
     GameName oops = new GameName(null);
 
     @BeforeAll
-    public static void init() throws ClientException {
+    public static void init() {
         server = new Server();
         var port = server.run(0);
         System.out.println("Started test HTTP server on " + port);
