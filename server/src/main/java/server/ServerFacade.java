@@ -62,13 +62,13 @@ public class ServerFacade {
         auth = null;
     }
 
-    public GameList listGames() {
+    public GameList listGames() throws DataAccessException {
         try {
             var request = buildRequest("GET", "/game", null);
             var response = sendRequest(request);
             return handleResponse(response, GameList.class);
         } catch (DataAccessException e) {
-            return null;
+            throw new DataAccessException(e.getMessage());
         }
     }
 

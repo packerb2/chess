@@ -126,8 +126,8 @@ public class ChessClient {
     public String listGames() throws DataAccessException {
         assertSignedIn();
         GameList gamesList = server.listGames();
-        if (gamesList == null) {
-            return "There are no games";
+        if (gamesList.games.isEmpty()) {
+            return "No games have been created...";
         }
         var result = new StringBuilder();
         result.append(String.format("%-15s %-10s %-20s %-20s\n",
