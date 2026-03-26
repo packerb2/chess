@@ -23,10 +23,14 @@ public class ServerFacade {
         serverUrl = url;
     }
 
-    public void clear() throws ClientException {
-        var request = buildRequest("DELETE", "/db", null);
-        sendRequest(request);
-        auth = null;
+    public void clear() {
+        try {
+            var request = buildRequest("DELETE", "/db", null);
+            sendRequest(request);
+            auth = null;
+        } catch (ClientException e) {
+            return;
+        }
     }
 
     public void register(UserData user) throws ClientException {

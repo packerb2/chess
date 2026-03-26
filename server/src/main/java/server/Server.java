@@ -15,7 +15,7 @@ public class Server {
     private final Javalin javalin;
     private final Service service = new Service(new SQLUserDAO(), new SQLGameDAO(), new SQLAuthDAO());
 
-    private void clear(Context context) {
+    public void clear(Context context) {
         context.status(200);
         if (service.clear() == -1) {
             context.status(500);

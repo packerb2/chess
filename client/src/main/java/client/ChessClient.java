@@ -201,9 +201,10 @@ public class ChessClient {
     }
 
     public String clear() throws ClientException {
-        assertSignedIn();
-        server.logout();
-        state = State.SIGNEDOUT;
+        if (state == State.SIGNEDIN) {
+            server.logout();
+            state = State.SIGNEDOUT;
+        }
         server.clear();
         return "System has been cleared.";
     }
