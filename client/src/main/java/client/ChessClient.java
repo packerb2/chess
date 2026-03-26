@@ -1,7 +1,7 @@
 package client;
 
-import java.util.Arrays;
-import java.util.Scanner;
+import java.util.*;
+
 import chess.ChessGame;
 import model.*;
 import static ui.EscapeSequences.*;
@@ -11,6 +11,7 @@ public class ChessClient {
     private String password = null;
     private final ServerFacade server;
     private State state = State.SIGNEDOUT;
+    Map<Integer, Integer> ids = new HashMap<>();
 
     public ChessClient(String serverUrl) {
         server = new ServerFacade(serverUrl);
@@ -75,7 +76,7 @@ public class ChessClient {
     }
 
     public String login(String... params) throws ClientException {
-        if (params.length >= 1) {
+        if (params.length == 2) {
             try {
                 userName = params[0];
                 password = params[1];
@@ -99,7 +100,7 @@ public class ChessClient {
         assertSignedIn();
         if (params.length >= 1) {
             GameIDs id = server.createGame(new GameName(params[0]));
-            return String.format("%s game created with id: %d", params[0], id.gameID);
+            return String.format("Game '%s' has been created", params[0]);
         }
         throw new ClientException("Expected: <GameName>");
     }
@@ -109,14 +110,17 @@ public class ChessClient {
         GameList gamesList = server.listGames();
         if (gamesList.games.isEmpty()) {return "No games have been created...";}
         var result = new StringBuilder();
-        result.append(String.format("%-15s %-10s %-20s %-20s\n", "Name", "Game ID", "White Player", "Black Player"));
+        result.append(String.format("%-15s %-10s %-20s %-20s\n", "Name", "Number", "White Player", "Black Player"));
+        int i = 0;
         for (GameData game : gamesList.games) {
+            i += 1;
+            ids.put(i, game.gameID());
             String black = game.blackUsername();
             if (black == null) {black = "~empty~";}
             String white = game.whiteUsername();
             if (white == null) {white = "~empty~";}
             result.append(String.format("%-20s %-10d %-20s %-20s\n",
-                    game.gameName(), game.gameID(), white, black));
+                    game.gameName(), i, white, black));
         }
         return result.toString();
     }
@@ -124,26 +128,35 @@ public class ChessClient {
     public String joinGame(String... params) throws ClientException {
         assertSignedIn();
         if (params.length == 2) {
-            GameIDs id = new GameIDs(Integer.parseInt(params[0]));
+            int num;
+            try {
+                num = Integer.parseInt(params[0]);
+            } catch (Exception e) {throw new ClientException("Error: please use Game Number");}
+            listGames();
+            var id = ids.get(num);
+            if (id == null) {throw new ClientException("Error: Game Number was not found");}
             ChessGame.TeamColor color;
             if (params[1].equals("white")) {color = ChessGame.TeamColor.WHITE;}
             else if (params[1].equals("black")) {color = ChessGame.TeamColor.BLACK;}
             else {throw new ClientException("Error: Color is invalid. Please enter with 'white' or 'black'");}
-            JoinGameData jd = new JoinGameData(id.gameID, color, new UserData(userName, password, null));
+            JoinGameData jd = new JoinGameData(id, color, new UserData(userName, password, null));
             ErrorObject error = server.joinGame(jd);
             if (error != null) {throw new ClientException(error.message);}
             if (color == ChessGame.TeamColor.WHITE) {
                 return String.format("You joined game %s as %s.\n%s", id, color, board());
             } else {return String.format("You joined game %s as %s.\n%s", id, color, reverseBoard());}
         }
-        throw new ClientException("Expected: <GameID> <TeamColor>");
+        throw new ClientException("Expected: <GameNumber> <TeamColor>");
     }
 
     public String observe(String... params) throws ClientException {
         assertSignedIn();
         GameList gamesList = server.listGames();
         if (gamesList.games.isEmpty()) {return "No games have been created...";}
-        var id = Integer.parseInt(params[0]);
+        int id;
+        try {
+            id = Integer.parseInt(params[0]);
+        } catch (Exception e) {throw new ClientException("Error: please use Game Number");}
         var result = new StringBuilder();
         for (GameData game : gamesList.games) {
             if (game.gameID() == id) {
@@ -156,7 +169,7 @@ public class ChessClient {
                     white = "~empty~";
                 }
                 result.append(String.format("%20s\n%s" + SET_TEXT_COLOR_BLUE + "%20s\n", black, board(), white));
-            } else {result.append(String.format("Error: Game ID: %d does not exist", id));}
+            } else {result.append(String.format("Error: Game Number: %d does not exist", id));}
         }
         return result.toString();
     }
@@ -260,28 +273,19 @@ public class ChessClient {
 
     public String middle() {
         var field = new StringBuilder();
-        var line3 = line3();
-        var line4 = line4();
-        var line5 = line5();
-        var line6 = line6();
-        field.append(String.format("%s%s%s%s", line3, line4, line5, line6));
+        field.append(String.format("%s%s%s%s", line3(), line4(), line5(), line6()));
         return String.format("%s", field);
     }
 
     public String middleRev() {
         var field = new StringBuilder();
-        var line3 = line3Rev();
-        var line4 = line4Rev();
-        var line5 = line5Rev();
-        var line6 = line6Rev();
-        field.append(String.format("%s%s%s%s", line6, line5, line4, line3));
+        field.append(String.format("%s%s%s%s", line6Rev(), line5Rev(), line4Rev(), line3Rev()));
         return String.format("%s", field);
     }
 
     public String line3() {
         var line3 = new StringBuilder();
-        line3.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " 3 ");
-        line3.append(order1());
+        line3.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " 3 ").append(order1());
         line3.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " 3 ");
         line3.append(RESET_BG_COLOR + RESET_TEXT_COLOR + "\n");
         return String.format("%s", line3);
@@ -289,8 +293,7 @@ public class ChessClient {
 
     public String line4() {
         var line4 = new StringBuilder();
-        line4.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " 4 ");
-        line4.append(order2());
+        line4.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " 4 ").append(order2());
         line4.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " 4 ");
         line4.append(RESET_BG_COLOR + RESET_TEXT_COLOR + "\n");
         return String.format("%s", line4);
@@ -298,8 +301,7 @@ public class ChessClient {
 
     public String line5() {
         var line5 = new StringBuilder();
-        line5.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " 5 ");
-        line5.append(order1());
+        line5.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " 5 ").append(order1());
         line5.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " 5 ");
         line5.append(RESET_BG_COLOR + RESET_TEXT_COLOR + "\n");
         return String.format("%s", line5);
@@ -307,8 +309,7 @@ public class ChessClient {
 
     public String line6() {
         var line6 = new StringBuilder();
-        line6.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " 6 ");
-        line6.append(order2());
+        line6.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " 6 ").append(order2());
         line6.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " 6 ");
         line6.append(RESET_BG_COLOR + RESET_TEXT_COLOR + "\n");
         return String.format("%s", line6);
@@ -316,8 +317,7 @@ public class ChessClient {
 
     public String line3Rev() {
         var line3 = new StringBuilder();
-        line3.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " 3 ");
-        line3.append(order2());
+        line3.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " 3 ").append(order2());
         line3.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " 3 ");
         line3.append(RESET_BG_COLOR + RESET_TEXT_COLOR + "\n");
         return String.format("%s", line3);
@@ -325,8 +325,7 @@ public class ChessClient {
 
     public String line4Rev() {
         var line4 = new StringBuilder();
-        line4.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " 4 ");
-        line4.append(order1());
+        line4.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " 4 ").append(order1());
         line4.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " 4 ");
         line4.append(RESET_BG_COLOR + RESET_TEXT_COLOR + "\n");
         return String.format("%s", line4);
@@ -334,8 +333,7 @@ public class ChessClient {
 
     public String line5Rev() {
         var line5 = new StringBuilder();
-        line5.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " 5 ");
-        line5.append(order2());
+        line5.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " 5 ").append(order2());
         line5.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " 5 ");
         line5.append(RESET_BG_COLOR + RESET_TEXT_COLOR + "\n");
         return String.format("%s", line5);
@@ -343,8 +341,7 @@ public class ChessClient {
 
     public String line6Rev() {
         var line6 = new StringBuilder();
-        line6.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " 6 ");
-        line6.append(order1());
+        line6.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " 6 ").append(order1());
         line6.append(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " 6 ");
         line6.append(RESET_BG_COLOR + RESET_TEXT_COLOR + "\n");
         return String.format("%s", line6);
@@ -378,8 +375,8 @@ public class ChessClient {
         bBackLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_ROOK);
         bBackLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_KNIGHT);
         bBackLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_BISHOP);
-        bBackLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_KING);
-        bBackLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_QUEEN);
+        bBackLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_QUEEN);
+        bBackLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_KING);
         bBackLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_BISHOP);
         bBackLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_KNIGHT);
         bBackLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_ROOK);
@@ -397,8 +394,8 @@ public class ChessClient {
         bBackLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_ROOK);
         bBackLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_KNIGHT);
         bBackLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_BISHOP);
-        bBackLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_QUEEN);
-        bBackLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_KING);
+        bBackLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_KING);
+        bBackLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_QUEEN);
         bBackLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_BISHOP);
         bBackLine.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK + BLACK_KNIGHT);
         bBackLine.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + BLACK_ROOK);
@@ -482,8 +479,8 @@ public class ChessClient {
         return """
                 - create <GameName>
                 - list
-                - play <GameID> <TeamColor>
-                - observe <GameID>
+                - play <GameNumber> <TeamColor>
+                - observe <GameNumber>
                 - logout
                 - help
                 - quit
