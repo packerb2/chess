@@ -134,6 +134,8 @@ public class ChessClient {
         }
         var result = new StringBuilder();
         var gson = new Gson();
+        result.append(String.format("%-15s %-10s %-20s %-20s\n",
+                "Game Name", "Game ID", "White Player", "Black Player"));
         for (GameData game : gamesList.games) {
             String black = game.blackUsername();
             if (black == null) {
@@ -143,8 +145,8 @@ public class ChessClient {
             if (white == null) {
                 white = "~empty~";
             }
-            result.append(String.format("ID #%d: %s - White Player: %s, Black Player: %s\n",
-                    game.gameID(), game.gameName(), white, black));
+            result.append(String.format("%-20s %-10d %-20s %-20s\n",
+                    game.gameName(), game.gameID(), white, black));
         }
         return result.toString();
     }
