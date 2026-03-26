@@ -55,8 +55,6 @@ public class ChessClient {
                 case "play" -> joinGame(params);
                 case "observe" -> observe(params);
                 case "clear" -> clear();
-                case "board" -> board();
-                case "rev" -> reverseBoard();
                 default -> help();
             };
         } catch (ClientException ex) {return ex.getMessage();}
@@ -178,7 +176,7 @@ public class ChessClient {
         var middle = middle();
         var bArmy = blackArmy();
         var border = topBottomBorder();
-        board.append(border).append(wArmy).append(middle).append(bArmy).append(border);
+        board.append(border).append(bArmy).append(middle).append(wArmy).append(border);
         return String.format("%s", board);
     }
 
