@@ -81,4 +81,11 @@ public class ServerFacadeTests {
         assertThrows(ClientException.class, () -> facade.login(cain3));
     }
 
+    @Test
+    public void clearWorkingTest() {
+        assertDoesNotThrow(() -> facade.register(adam));
+        assertDoesNotThrow(() -> facade.clear());
+        assertThrows(ClientException.class, () -> facade.login(adam));
+    }
+
 }
