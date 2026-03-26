@@ -18,7 +18,9 @@ public class ServerFacadeTests {
     UserData adam = new UserData("adam", "first", "email");
     UserData eve = new UserData("eve", "second", "other");
     UserData able = new UserData("able", "third", "thing");
-    UserData cain = new UserData("cain", null, null);
+    UserData cain1 = new UserData("cain", "bad", "wrong");
+    UserData cain2 = new UserData("cain", "bad", null);
+    UserData cain3 = new UserData("cain", null, null);
     UserData nullUser = new UserData(null, null, null);
 
     @BeforeAll
@@ -47,13 +49,36 @@ public class ServerFacadeTests {
 
     @Test
     public void registerBadRequestTest() {
-        assertThrows(ClientException.class, () -> facade.register(cain));
+        assertThrows(ClientException.class, () -> facade.register(cain2));
+        assertThrows(ClientException.class, () -> facade.register(cain3));
+        assertThrows(ClientException.class, () -> facade.register(nullUser));
     }
 
     @Test
     public void logoutWorkingTest() {
         assertDoesNotThrow(() -> facade.register(adam));
         assertDoesNotThrow(() -> facade.logout());
+    }
+
+    @Test
+    public void loginWorkingTest() {
+        assertDoesNotThrow(() -> facade.register(adam));
+        assertDoesNotThrow(() -> facade.logout());
+        assertDoesNotThrow(() -> facade.login(adam));
+    }
+
+    @Test
+    public void loginNotExistTest() {
+        assertDoesNotThrow(() -> facade.register(adam));
+        assertDoesNotThrow(() -> facade.logout());
+        assertThrows(ClientException.class, () -> facade.login(eve));
+    }
+
+    @Test
+    public void loginIncompleteTest() {
+        assertDoesNotThrow(() -> facade.register(cain1));
+        assertDoesNotThrow(() -> facade.logout());
+        assertThrows(ClientException.class, () -> facade.login(cain3));
     }
 
 }
