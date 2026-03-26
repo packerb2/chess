@@ -18,6 +18,7 @@ public class ServerFacade {
 
     private final HttpClient client = HttpClient.newHttpClient();
     private final String serverUrl;
+    private String auth = null;
 
     public ServerFacade(String url) {
         serverUrl = url;
@@ -63,7 +64,8 @@ public class ServerFacade {
         }
     }
 
-    public GameIDs createGame(GameName name) throws DataAccessException {
+    public GameIDs createGame(GameName name, String a) throws DataAccessException {
+        auth = a;
         var request = buildRequest("POST", "/game", name);
         var response = sendRequest(request);
         return handleResponse(response, GameIDs.class);
@@ -78,8 +80,8 @@ public class ServerFacade {
         var request = HttpRequest.newBuilder()
                 .uri(URI.create(serverUrl + path))
                 .method(method, makeRequestBody(body));
-        if (body != null) {
-            request.setHeader("Content-Type", "application/json");
+        if (auth != null) {
+            request.setHeader("Authorization", auth);
         }
         return request.build();
     }
