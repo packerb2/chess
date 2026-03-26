@@ -143,4 +143,21 @@ public class ServerFacadeTests {
         assertThrows(ClientException.class, () -> facade.joinGame(f3));
     }
 
+    @Test
+    public void listTest() {
+        assertDoesNotThrow(() -> facade.register(adam));
+        assertDoesNotThrow(() -> facade.createGame(friendly));
+        assertDoesNotThrow(() -> facade.listGames());
+    }
+
+    @Test
+    public void listEmptyTest() {
+        assertDoesNotThrow(() -> facade.register(adam));
+        try {
+            assertTrue(facade.listGames().games.isEmpty());
+        } catch (Exception e) {
+            fail();
+        }
+    }
+
 }
