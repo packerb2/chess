@@ -155,7 +155,7 @@ public class ChessClient {
                 if (white == null) {
                     white = "~empty~";
                 }
-                result.append(String.format("%s\n%s" + SET_TEXT_COLOR_BLUE + "%s\n", black, board(), white));
+                result.append(String.format("%20s\n%s" + SET_TEXT_COLOR_BLUE + "%20s\n", black, board(), white));
             } else {result.append(String.format("Error: Game ID: %d does not exist", id));}
         }
         return result.toString();
@@ -480,10 +480,10 @@ public class ChessClient {
                     """;
         }
         return """
-                - create game <GameName>
-                - list games
-                - play game <GameID> <TeamColor>
-                - observe games <GameID>
+                - create <GameName>
+                - list
+                - play <GameID> <TeamColor>
+                - observe <GameID>
                 - logout
                 - help
                 - quit
