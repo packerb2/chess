@@ -2,6 +2,7 @@ package client;
 
 import client.ClientException;
 import client.ServerFacade;
+import model.GameName;
 import model.UserData;
 import org.junit.jupiter.api.*;
 import server.Server;
@@ -22,6 +23,9 @@ public class ServerFacadeTests {
     UserData cain2 = new UserData("cain", "bad", null);
     UserData cain3 = new UserData("cain", null, null);
     UserData nullUser = new UserData(null, null, null);
+    GameName friendly = new GameName("friendly");
+    GameName competitive = new GameName("competitive");
+    GameName oops = new GameName(null);
 
     @BeforeAll
     public static void init() throws ClientException {
@@ -86,6 +90,18 @@ public class ServerFacadeTests {
         assertDoesNotThrow(() -> facade.register(adam));
         assertDoesNotThrow(() -> facade.clear());
         assertThrows(ClientException.class, () -> facade.login(adam));
+    }
+
+    @Test
+    public void createTest() {
+        assertDoesNotThrow(() -> facade.register(adam));
+        assertDoesNotThrow(() -> facade.createGame(friendly));
+    }
+
+    @Test
+    public void createIncompleteTest() {
+        assertDoesNotThrow(() -> facade.register(able));
+        assertThrows(ClientException.class, () -> facade.createGame(oops));
     }
 
 }
