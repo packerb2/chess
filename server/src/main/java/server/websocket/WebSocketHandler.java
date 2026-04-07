@@ -1,5 +1,6 @@
 package server.websocket;
 
+import chess.ChessMove;
 import com.google.gson.Gson;
 import io.javalin.websocket.WsCloseContext;
 import io.javalin.websocket.WsCloseHandler;
@@ -29,10 +30,10 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         try {
             UserGameCommand action = new Gson().fromJson(ctx.message(), UserGameCommand.class);
             switch (action.getCommandType()) {
-                case CONNECT -> connect(action.CommandType(), ctx.session);
-                case LEAVE -> leave(action.CommandType(), ctx.session);
-                case RESIGN -> resign(action.CommandType(), ctx.session);
-                case MAKE_MOVE -> makeMove(action.CommandType(), ctx.session);
+                case CONNECT -> connect(action.getAuthToken(), ctx.session);
+                case LEAVE -> leave(action.getAuthToken(), ctx.session);
+                case RESIGN -> resign(action.getAuthToken(), ctx.session);
+                case MAKE_MOVE -> makeMove(action.getAuthToken(), ctx.session);
             }
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -44,37 +45,29 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         System.out.println("Websocket closed");
     }
 
-    private void connect(String visitorName, Session session) throws IOException {
+    private void connect(String auth, Session session) throws IOException {
         connections.add(session);
-        var message = String.format("%s is in the shop", visitorName);
+        var message = String.format("placeholder_string %s", auth);
         var notification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, message);
         connections.broadcast(session, notification);
     }
 
-    public void leave(String petName, String sound) throws Exception{
-        try {
-            var message = String.format("%s says %s", petName, sound);
-            var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
-            connections.broadcast(null, notification);
-        } catch (Exception ex) {
-            throw ex;
-        }
+    public void leave(String auth, Session session) {
+        var message = String.format("placeholder_string %s", auth);
+        var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
+        connections.broadcast(null, notification);
     }
 
-    private void resign(String visitorName, Session session) throws IOException {
-        var message = String.format("%s left the shop", visitorName);
+    private void resign(String auth, Session session) {
+        var message = String.format("placeholder_string %s", auth);
         var notification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, message);
         connections.broadcast(session, notification);
         connections.remove(session);
     }
 
-    public void makeMove(String petName, String sound) throws Exception{
-        try {
-            var message = String.format("%s says %s", petName, sound);
-            var notification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, message);
-            connections.broadcast(null, notification);
-        } catch (Exception ex) {
-            throw ex;
-        }
+    public void makeMove(String auth, Session session) {
+        var message = String.format("placeholder_string %s", auth);
+        var notification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, message);
+        connections.broadcast(null, notification);
     }
 }
