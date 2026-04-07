@@ -7,6 +7,7 @@ import io.javalin.*;
 import io.javalin.http.Context;
 
 import model.*;
+import server.websocket.WebSocketHandler;
 import service.*;
 
 
@@ -14,6 +15,7 @@ public class Server {
 
     private final Javalin javalin;
     private final Service service = new Service(new SQLUserDAO(), new SQLGameDAO(), new SQLAuthDAO());
+    private final WebSocketHandler webSocketHandler = new WebSocketHandler();
 
     public void clear(Context context) {
         context.status(200);
@@ -163,7 +165,12 @@ public class Server {
                 .get("/game", this::listGames)
                 .post("/game", this::createGame)
                 .put("/game", this::joinGame)
-                .delete("/db", this::clear);
+                .delete("/db", this::clear)
+                .ws("/ws", ws -> {
+                    ws.onConnect(webSocketHandler);
+                    ws.onMessage(webSocketHandler);
+                    ws.onClose(webSocketHandler);
+                });
     }
 
     public int run(int desiredPort) {
