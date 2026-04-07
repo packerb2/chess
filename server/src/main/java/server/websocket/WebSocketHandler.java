@@ -52,20 +52,20 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         connections.broadcast(session, notification);
     }
 
-    public void leave(String auth, Session session) {
+    public void leave(String auth, Session session) throws IOException {
         var message = String.format("placeholder_string %s", auth);
         var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
         connections.broadcast(null, notification);
     }
 
-    private void resign(String auth, Session session) {
+    private void resign(String auth, Session session) throws IOException {
         var message = String.format("placeholder_string %s", auth);
         var notification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, message);
         connections.broadcast(session, notification);
         connections.remove(session);
     }
 
-    public void makeMove(String auth, Session session) {
+    public void makeMove(String auth, Session session) throws IOException {
         var message = String.format("placeholder_string %s", auth);
         var notification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, message);
         connections.broadcast(null, notification);
