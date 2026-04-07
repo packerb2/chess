@@ -70,4 +70,18 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         var notification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, message);
         connections.broadcast(null, notification);
     }
+
+    public void help() throws IOException {
+        var message = """
+        valid arguments include:
+        - Help
+        - Redraw Chess Board
+        - Leave
+        - Make Move
+        - Resign
+        - Highlight Legal Moves
+        """;
+        var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
+        connections.broadcast(null, notification);
+    }
 }

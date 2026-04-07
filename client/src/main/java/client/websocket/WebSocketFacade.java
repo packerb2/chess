@@ -1,8 +1,9 @@
 
 package client.websocket;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
-import websocket.commands.UserGameCommand;
+import websocket.commands.*;
 import websocket.messages.ServerMessage;
 
 import jakarta.websocket.*;
@@ -46,7 +47,7 @@ public class WebSocketFacade extends Endpoint {
 
     public void connectToGame(String auth, Integer id) throws Exception {
         try {
-            var action = new UserGameCommand(UserGameCommand.CommandType.CONNECT, auth, id);
+            var action = new Connect(auth, id);
             this.session.getBasicRemote().sendText(new Gson().toJson(action));
         } catch (IOException ex) {
             throw new Exception();
@@ -55,7 +56,7 @@ public class WebSocketFacade extends Endpoint {
 
     public void resignFromGame(String auth, Integer id) throws Exception {
         try {
-            var action = new UserGameCommand(UserGameCommand.CommandType.RESIGN, auth, id);
+            var action = new Resign(auth, id);
             this.session.getBasicRemote().sendText(new Gson().toJson(action));
         } catch (IOException ex) {
             throw new Exception();
@@ -64,7 +65,7 @@ public class WebSocketFacade extends Endpoint {
 
     public void leaveGame(String auth, Integer id) throws Exception {
         try {
-            var action = new UserGameCommand(UserGameCommand.CommandType.LEAVE, auth, id);
+            var action = new Leave(auth, id);
             this.session.getBasicRemote().sendText(new Gson().toJson(action));
         } catch (IOException ex) {
             throw new Exception();
@@ -73,7 +74,7 @@ public class WebSocketFacade extends Endpoint {
 
     public void movePiece(String auth, Integer id) throws Exception {
         try {
-            var action = new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE, auth, id);
+            var action = new Move(auth, id);
             this.session.getBasicRemote().sendText(new Gson().toJson(action));
         } catch (IOException ex) {
             throw new Exception();

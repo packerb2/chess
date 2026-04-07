@@ -3,18 +3,25 @@ package client;
 import java.util.*;
 
 import chess.ChessGame;
+import client.websocket.NotificationHandler;
+import client.websocket.WebSocketFacade;
 import model.*;
+import websocket.messages.ServerMessage;
+
 import static ui.EscapeSequences.*;
 
-public class ChessClient {
+public class ChessClient implements NotificationHandler {
     private String userName = null;
     private String password = null;
+    private String authToken = null;
     private final ServerFacade server;
     private State state = State.SIGNEDOUT;
     Map<Integer, Integer> ids = new HashMap<>();
+    private final WebSocketFacade ws;
 
-    public ChessClient(String serverUrl) {
+    public ChessClient(String serverUrl) throws Exception {
         server = new ServerFacade(serverUrl);
+        ws = new WebSocketFacade(serverUrl, this);
     }
 
     public void run() {
@@ -58,7 +65,7 @@ public class ChessClient {
                 case "clear" -> clear();
                 default -> help();
             };
-        } catch (ClientException ex) {return ex.getMessage();}
+        } catch (Exception ex) {return ex.getMessage();}
     }
 
     public String register(String... params) throws ClientException {
@@ -68,7 +75,8 @@ public class ChessClient {
             String email = params[2];
             UserData userNew = new UserData(userName, password, email);
             server.register(userNew);
-            server.login(userNew);
+            AuthData auth = server.login(userNew);
+            authToken = auth.token();
             state = State.SIGNEDIN;
             return String.format("You registered and logged in as %s.", userName);
         }
@@ -81,7 +89,8 @@ public class ChessClient {
                 userName = params[0];
                 password = params[1];
                 UserData userNew = new UserData(userName, password, null);
-                server.login(userNew);
+                AuthData auth = server.login(userNew);
+                authToken = auth.token();
                 state = State.SIGNEDIN;
                 return String.format("You logged in as %s.", userName);
             } catch (ClientException e) {throw new ClientException("Error: Could not login");}
@@ -92,6 +101,7 @@ public class ChessClient {
     public String logout() throws ClientException {
         assertSignedIn();
         server.logout();
+        authToken = null;
         state = State.SIGNEDOUT;
         return "You logged out";
     }
@@ -124,23 +134,36 @@ public class ChessClient {
         return result.toString();
     }
 
-    public String joinGame(String... params) throws ClientException {
+    public String joinGame(String... params) throws Exception {
         assertSignedIn();
         if (params.length == 2) {
             int num;
             try {
                 num = Integer.parseInt(params[0]);
-            } catch (Exception e) {throw new ClientException("Error: please use Game Number");}
+            } catch (Exception e) {
+                throw new ClientException("Error: please use Game Number");
+            }
             listGames();
             var id = ids.get(num);
-            if (id == null) {throw new ClientException("Error: Game Number was not found");}
+            if (id == null) {
+                throw new ClientException("Error: Game Number was not found");
+            }
             ChessGame.TeamColor color;
-            if (params[1].equals("white")) {color = ChessGame.TeamColor.WHITE;}
-            else if (params[1].equals("black")) {color = ChessGame.TeamColor.BLACK;}
-            else {throw new ClientException("Error: Color is invalid. Please use 'white' or 'black'");}
+            if (params[1].equals("white")) {
+                color = ChessGame.TeamColor.WHITE;
+            }
+            else if (params[1].equals("black")) {
+                color = ChessGame.TeamColor.BLACK;
+            }
+            else {
+                throw new ClientException("Error: Color is invalid. Please use 'white' or 'black'");
+            }
             JoinGameData jd = new JoinGameData(id, color, new UserData(userName, password, null));
             ErrorObject error = server.joinGame(jd);
-            if (error != null) {throw new ClientException(error.message);}
+            if (error != null) {
+                throw new ClientException(error.message);
+            }
+            ws.connectToGame(authToken, id);
             if (color == ChessGame.TeamColor.WHITE) {
                 return String.format("You joined game %s as %s.\n%s", id, color, board());
             } else {return String.format("You joined game %s as %s.\n%s", id, color, reverseBoard());}
@@ -491,5 +514,10 @@ public class ChessClient {
         if (state == State.SIGNEDOUT) {
             throw new ClientException("You must log in");
         }
+    }
+
+    @Override
+    public void notify(ServerMessage notification) {
+
     }
 }
