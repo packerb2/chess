@@ -22,6 +22,7 @@ public class ChessClient implements NotificationHandler {
     Map<Integer, Integer> ids = new HashMap<>();
     private final WebSocketFacade ws;
     private Integer playing;
+    private ChessGame.TeamColor color;
 
     public ChessClient(String serverUrl) throws Exception {
         server = new ServerFacade(serverUrl);
@@ -156,7 +157,6 @@ public class ChessClient implements NotificationHandler {
             if (id == null) {
                 throw new ClientException("Error: Game Number was not found");
             }
-            ChessGame.TeamColor color;
             if (params[1].equals("white")) {
                 color = ChessGame.TeamColor.WHITE;
             }
@@ -194,9 +194,12 @@ public class ChessClient implements NotificationHandler {
                 if (!game.game().playing) {
                     throw new ClientException("This game has been finished.");
                 }
-                ws.movePiece(authToken, id, moveRequest);
+                if (game.game().getTeamTurn() != color) {
+                    throw new ClientException("Those ain't your pieces.");
+                }
                 try {
                     game.game().makeMove(moveRequest);
+                    ws.movePiece(authToken, id, moveRequest);
                 } catch (InvalidMoveException e) {
                     throw new ClientException("Not a valid move");
                 }

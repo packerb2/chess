@@ -31,6 +31,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     private final ConnectionManager connections = new ConnectionManager();
     private final Service service;
     private GameData currentGame;
+    private ChessGame.TeamColor color;
 
     public WebSocketHandler(Service service) {
         this.service = service;
@@ -65,7 +66,6 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     private void connect(String auth, Integer id, Session session) throws IOException, DataAccessException {
         //use auth to find player and color in game id
         GameData inGame = null;
-        ChessGame.TeamColor color = null;
         AuthData authData = service.authData().getKey(auth);
         if (authData == null) {
             var error = new Error("Error: unauthorized");
@@ -112,6 +112,10 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 var error = new Error("Error: this game is over");
                 session.getRemote().sendString(new Gson().toJson(error));
             }
+//            if (!currentGame.game().getTeamTurn().equals(color)) {
+//                var error = new Error("Error: those ain't your pieces");
+//                session.getRemote().sendString(new Gson().toJson(error));
+//            }
             else {
                 try {
                     currentGame.game().makeMove(move);
