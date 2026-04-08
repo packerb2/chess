@@ -1,6 +1,7 @@
 package server.websocket;
 
 import chess.ChessGame;
+import chess.ChessMove;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import io.javalin.websocket.WsCloseContext;
@@ -47,7 +48,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 case CONNECT -> connect(action.getAuthToken(), action.getGameID(), ctx.session);
                 case LEAVE -> leave(action.getAuthToken(), ctx.session);
                 case RESIGN -> resign(action.getAuthToken(), ctx.session);
-                case MAKE_MOVE -> makeMove(action.getAuthToken(), ctx.session);
+                case MAKE_MOVE -> makeMove(action.getAuthToken(), action.getMove(), ctx.session);
             }
         } catch (IOException | DataAccessException ex) {
             ex.printStackTrace();
@@ -97,6 +98,12 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
     }
 
+    public void makeMove(String auth, ChessMove move, Session session) throws IOException {
+        var message = String.format("placeholder_string %s", auth);
+        var notification = new Notification(message);
+        connections.broadcast(session, notification);
+    }
+
     public void leave(String auth, Session session) throws IOException {
         var message = String.format("placeholder_string %s", auth);
         var notification = new Notification(message);
@@ -108,12 +115,6 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         var notification = new Notification(message);
         connections.broadcast(session, notification);
         connections.remove(session);
-    }
-
-    public void makeMove(String auth, Session session) throws IOException {
-        var message = String.format("placeholder_string %s", auth);
-        var notification = new Notification(message);
-        connections.broadcast(null, notification);
     }
 
     public void help() throws IOException {
