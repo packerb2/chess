@@ -185,6 +185,8 @@ public class ChessClient implements NotificationHandler {
         // get the game and have it make a move.
         // update the found game with the new moved game
         // call the websocket
+            // ^use as guidline for updating database for leave^
+        // add a "finished" boolean to the games. set to false when resign is called. add a check to each related game call to see if game is still being played
     }
 
     public String observe(String... params) throws ClientException {
