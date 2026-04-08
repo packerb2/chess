@@ -14,6 +14,7 @@ import model.GameList;
 import org.eclipse.jetty.websocket.api.Session;
 import org.jetbrains.annotations.NotNull;
 import websocket.commands.UserGameCommand;
+import websocket.messages.Error;
 import websocket.messages.LoadGame;
 import websocket.messages.Notification;
 import websocket.messages.ServerMessage;
@@ -58,6 +59,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     private void connect(String auth, Integer id, Session session) throws IOException, DataAccessException {
+        //use auth to find player and color in game id
         GameData inGame = null;
         ChessGame.TeamColor color = null;
         String user = service.authData().getKey(auth).username();
@@ -74,31 +76,37 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 }
             }
         }
-        //use auth to find player and color in game id
-        connections.add(session);
-        var loadGame = new LoadGame(inGame);
-        session.getRemote().sendString(new Gson().toJson(loadGame));
-        var broadcast = String.format("%s joined game %d as %s", user, id, color);
-        var notification = new Notification(broadcast);
-        connections.broadcast(session, notification);
+
+        if (inGame == null) {
+            var error = new Error("Error: game was not found");
+            session.getRemote().sendString(new Gson().toJson(error));
+        }
+        else {
+            connections.add(session);
+            var loadGame = new LoadGame(inGame);
+            session.getRemote().sendString(new Gson().toJson(loadGame));
+            var broadcast = String.format("%s joined game %d as %s", user, id, color);
+            var notification = new Notification(broadcast);
+            connections.broadcast(session, notification);
+        }
     }
 
     public void leave(String auth, Session session) throws IOException {
         var message = String.format("placeholder_string %s", auth);
-        var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
+        var notification = new Notification(message);
         connections.broadcast(null, notification);
     }
 
     private void resign(String auth, Session session) throws IOException {
         var message = String.format("placeholder_string %s", auth);
-        var notification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, message);
+        var notification = new Notification(message);
         connections.broadcast(session, notification);
         connections.remove(session);
     }
 
     public void makeMove(String auth, Session session) throws IOException {
         var message = String.format("placeholder_string %s", auth);
-        var notification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, message);
+        var notification = new Notification(message);
         connections.broadcast(null, notification);
     }
 
@@ -112,7 +120,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         - Resign
         - Highlight Legal Moves
         """;
-        var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
+        var notification = new Notification(message);
         connections.broadcast(null, notification);
     }
 }
