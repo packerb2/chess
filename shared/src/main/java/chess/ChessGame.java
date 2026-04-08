@@ -14,11 +14,13 @@ public class ChessGame {
 
     private ChessBoard currentBoard;
     private TeamColor teamTurn;
+    public boolean playing;
 
     public ChessGame() {
         this.currentBoard = new ChessBoard();
         currentBoard.resetBoard();
         this.teamTurn = TeamColor.WHITE;
+        this.playing = true;
     }
 
     /**
@@ -134,10 +136,20 @@ public class ChessGame {
         currentBoard.addPiece(move.getEndPosition(), piece);
         currentBoard.addPiece(move.getStartPosition(), null);
         if (turn == TeamColor.WHITE) {
-            setTeamTurn(TeamColor.BLACK);
+            if (isInCheckmate(TeamColor.BLACK)) {
+                playing = false;
+            }
+            else {
+                setTeamTurn(TeamColor.BLACK);
+            }
         }
         else {
-            setTeamTurn(TeamColor.WHITE);
+            if (isInCheckmate(TeamColor.WHITE)) {
+                playing = false;
+            }
+            else {
+                setTeamTurn(TeamColor.WHITE);
+            }
         }
     }
 
@@ -197,7 +209,10 @@ public class ChessGame {
      */
     public boolean isInCheckmate(TeamColor teamColor) {
         if (isInCheck(teamColor)) {
-            return isSurrounded(teamColor);
+            if (isSurrounded(teamColor)) {
+                playing = false;
+                return true;
+            }
         }
         return false;
     }
@@ -211,7 +226,10 @@ public class ChessGame {
      */
     public boolean isInStalemate(TeamColor teamColor) {
         if (!isInCheck(teamColor)) {
-            return isSurrounded(teamColor);
+            if (isSurrounded(teamColor)) {
+                playing = false;
+                return true;
+            }
         }
         return false;
     }

@@ -108,13 +108,24 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             session.getRemote().sendString(new Gson().toJson(error));
         }
         else {
-            currentGame.game().makeMove(move);
-            var loadGame = new LoadGame(currentGame);
-            session.getRemote().sendString(new Gson().toJson(loadGame));
-            connections.broadcast(session, loadGame);
-            var message = String.format("Move was made: %s", move);
-            var notification = new Notification(message);
-            connections.broadcast(session, notification);
+            if (!currentGame.game().playing) {
+                var error = new Error("Error: this game is over");
+                session.getRemote().sendString(new Gson().toJson(error));
+            }
+            else {
+                currentGame.game().makeMove(move);
+                var loadGame = new LoadGame(currentGame);
+                session.getRemote().sendString(new Gson().toJson(loadGame));
+                connections.broadcast(session, loadGame);
+                var message = String.format("Move was made: %s", move);
+                var notification = new Notification(message);
+                connections.broadcast(session, notification);
+                if (!currentGame.game().playing) {
+                    var endMessage = String.format("Checkmate. %s WINS", currentGame.game().getTeamTurn());
+                    var finalNotification = new Notification(endMessage);
+                    connections.broadcast(null, finalNotification);
+                }
+            }
         }
     }
 

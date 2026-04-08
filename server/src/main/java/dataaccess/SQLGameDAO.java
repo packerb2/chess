@@ -65,7 +65,7 @@ public class SQLGameDAO implements GameDAO {
                 String blackUser = rs.getString("blackUsername");
                 String gameName = rs.getString("gameName");
                 if (gameID == id) {
-                    return new GameData(id, whiteUser, blackUser, gameName, new ChessGame(), true);
+                    return new GameData(id, whiteUser, blackUser, gameName, new ChessGame());
                 }
             }
         } catch (DataAccessException | SQLException e) {
@@ -106,7 +106,7 @@ public class SQLGameDAO implements GameDAO {
                         String whiteUser = rs.getString("whiteUsername");
                         String blackUser = rs.getString("blackUsername");
                         String gameName = rs.getString("gameName");
-                        result.add(new GameData(id, whiteUser, blackUser, gameName, new ChessGame(), true));
+                        result.add(new GameData(id, whiteUser, blackUser, gameName, new ChessGame()));
                     }
                     return result;
                 }

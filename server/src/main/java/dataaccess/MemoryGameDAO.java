@@ -22,7 +22,7 @@ public class MemoryGameDAO implements GameDAO {
     public Integer createGame(String gameName) {
         Random random = new Random();
         id = random.nextInt(999999999 - 100000000) + 100000000;
-        GameData game = new GameData(id, null, null, gameName, new ChessGame(), true);
+        GameData game = new GameData(id, null, null, gameName, new ChessGame());
         games.add(game);
         return id;
     }
@@ -44,15 +44,11 @@ public class MemoryGameDAO implements GameDAO {
     public void updatePlayer(int gameID, ChessGame.TeamColor color, String username) {
         GameData game = getGame(gameID);
         if (color == ChessGame.TeamColor.WHITE) {
-            GameData gameUpdated = new GameData(
-                    gameID, username, game.blackUsername(), game.gameName(), game.game(), game.playing()
-            );
+            GameData gameUpdated = new GameData(gameID, username, game.blackUsername(), game.gameName(), game.game());
             games.add(gameUpdated);
         }
         else if (color == ChessGame.TeamColor.BLACK) {
-            GameData gameUpdated = new GameData(
-                    gameID, game.whiteUsername(), username, game.gameName(), game.game(), game.playing()
-            );
+            GameData gameUpdated = new GameData(gameID, game.whiteUsername(), username, game.gameName(), game.game());
             games.add(gameUpdated);
         }
         games.remove(game);

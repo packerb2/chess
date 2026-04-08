@@ -191,8 +191,14 @@ public class ChessClient implements NotificationHandler {
         GameList gamesList = server.listGames();
         for (GameData game : gamesList.games) {
             if (Objects.equals(game.gameID(), id)) {
+                if (!game.game().playing) {
+                    throw new ClientException("This game has been finished.");
+                }
                 game.game().makeMove(moveRequest);
                 ws.movePiece(authToken, id, moveRequest);
+                if (!game.game().playing) {
+                    throw new ClientException("Game Over.");
+                }
             }
         }
         // find game with matching id
