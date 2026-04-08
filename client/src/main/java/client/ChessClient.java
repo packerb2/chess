@@ -3,8 +3,11 @@ package client;
 import java.util.*;
 
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.InvalidMoveException;
 import client.websocket.NotificationHandler;
 import client.websocket.WebSocketFacade;
+import com.google.gson.Gson;
 import model.*;
 import websocket.messages.ServerMessage;
 
@@ -66,10 +69,10 @@ public class ChessClient implements NotificationHandler {
                 case "observe" -> observe(params);
                 case "clear" -> clear();
                 case "move" -> move(params);
-                case "leave" -> leave();
-                case "resign" -> resign();
-                case "highlight" -> highlight();
-                case "redraw" -> redraw();
+//                case "leave" -> leave();
+//                case "resign" -> resign();
+//                case "highlight" -> highlight();
+//                case "redraw" -> redraw();
                 default -> help();
             };
         } catch (Exception ex) {return ex.getMessage();}
@@ -177,15 +180,26 @@ public class ChessClient implements NotificationHandler {
         throw new ClientException("Expected: <GameNumber> <TeamColor>");
     }
 
-    public void move(String... params) throws ClientException {
+    public void move(String... params) throws Exception {
         assertSignedIn();
         assertPlaying();
+        if (params.length < 1) {
+            throw new ClientException("Please try again and enter the desired move");
+        }
         Integer id = playing;
+        ChessMove moveRequest = new Gson().fromJson(params[0], ChessMove.class);
+        GameList gamesList = server.listGames();
+        for (GameData game : gamesList.games) {
+            if (Objects.equals(game.gameID(), id)) {
+                game.game().makeMove(moveRequest);
+                ws.movePiece(authToken, id, moveRequest);
+            }
+        }
         // find game with matching id
         // get the game and have it make a move.
         // update the found game with the new moved game
         // call the websocket
-            // ^use as guidline for updating database for leave^
+            // ^use as guideline for updating database for leave^
         // add a "finished" boolean to the games. set to false when resign is called. add a check to each related game call to see if game is still being played
     }
 

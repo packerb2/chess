@@ -54,6 +54,15 @@ public class WebSocketFacade extends Endpoint {
         }
     }
 
+    public void movePiece(String auth, Integer id, ChessMove move) throws Exception {
+        try {
+            var action = new Move(auth, id, move);
+            this.session.getBasicRemote().sendText(new Gson().toJson(action));
+        } catch (IOException ex) {
+            throw new Exception();
+        }
+    }
+
     public void resignFromGame(String auth, Integer id) throws Exception {
         try {
             var action = new Resign(auth, id);
@@ -66,15 +75,6 @@ public class WebSocketFacade extends Endpoint {
     public void leaveGame(String auth, Integer id) throws Exception {
         try {
             var action = new Leave(auth, id);
-            this.session.getBasicRemote().sendText(new Gson().toJson(action));
-        } catch (IOException ex) {
-            throw new Exception();
-        }
-    }
-
-    public void movePiece(String auth, Integer id, ChessMove move) throws Exception {
-        try {
-            var action = new Move(auth, id, move);
             this.session.getBasicRemote().sendText(new Gson().toJson(action));
         } catch (IOException ex) {
             throw new Exception();

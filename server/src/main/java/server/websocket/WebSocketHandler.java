@@ -30,7 +30,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     private final ConnectionManager connections = new ConnectionManager();
     private final Service service;
-    private ChessGame currentGame = new ChessGame();
+    private GameData currentGame;
 
     public WebSocketHandler(Service service) {
         this.service = service;
@@ -91,8 +91,8 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 session.getRemote().sendString(new Gson().toJson(error));
             } else {
                 connections.add(session);
-                currentGame = inGame.game();
-                var loadGame = new LoadGame(inGame);
+                currentGame = inGame;
+                var loadGame = new LoadGame(currentGame);
                 session.getRemote().sendString(new Gson().toJson(loadGame));
                 var broadcast = String.format("%s joined game %d as %s", user, id, color);
                 var notification = new Notification(broadcast);
@@ -102,10 +102,20 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     public void makeMove(String auth, ChessMove move, Session session) throws IOException, InvalidMoveException {
-        currentGame.makeMove(move);
-        var message = String.format("placeholder_string %s", auth);
-        var notification = new Notification(message);
-        connections.broadcast(session, notification);
+        AuthData authData = service.authData().getKey(auth);
+        if (authData == null) {
+            var error = new Error("Error: unauthorized");
+            session.getRemote().sendString(new Gson().toJson(error));
+        }
+        else {
+            currentGame.game().makeMove(move);
+            var loadGame = new LoadGame(currentGame);
+            session.getRemote().sendString(new Gson().toJson(loadGame));
+            connections.broadcast(session, loadGame);
+            var message = String.format("Move was made: %s", move);
+            var notification = new Notification(message);
+            connections.broadcast(session, notification);
+        }
     }
 
     public void leave(String auth, Session session) throws IOException {
