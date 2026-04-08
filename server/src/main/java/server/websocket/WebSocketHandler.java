@@ -9,6 +9,7 @@ import io.javalin.websocket.WsConnectContext;
 import io.javalin.websocket.WsConnectHandler;
 import io.javalin.websocket.WsMessageContext;
 import io.javalin.websocket.WsMessageHandler;
+import model.AuthData;
 import model.GameData;
 import model.GameList;
 import org.eclipse.jetty.websocket.api.Session;
@@ -62,32 +63,37 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         //use auth to find player and color in game id
         GameData inGame = null;
         ChessGame.TeamColor color = null;
-        String user = service.authData().getKey(auth).username();
-        String games = service.listGames(auth);
-        GameList gamesList = new Gson().fromJson(games, GameList.class);
-        for (GameData game : gamesList.games) {
-            if (Objects.equals(game.gameID(), id)) {
-                inGame = game;
-                if (game.whiteUsername().equals(user)) {
-                    color = ChessGame.TeamColor.WHITE;
-                }
-                else if (game.blackUsername().equals(user)) {
-                    color = ChessGame.TeamColor.BLACK;
-                }
-            }
-        }
-
-        if (inGame == null) {
-            var error = new Error("Error: game was not found");
+        AuthData authData = service.authData().getKey(auth);
+        if (authData == null) {
+            var error = new Error("Error: unauthorized");
             session.getRemote().sendString(new Gson().toJson(error));
         }
         else {
-            connections.add(session);
-            var loadGame = new LoadGame(inGame);
-            session.getRemote().sendString(new Gson().toJson(loadGame));
-            var broadcast = String.format("%s joined game %d as %s", user, id, color);
-            var notification = new Notification(broadcast);
-            connections.broadcast(session, notification);
+            String user = authData.username();
+            String games = service.listGames(auth);
+            GameList gamesList = new Gson().fromJson(games, GameList.class);
+            for (GameData game : gamesList.games) {
+                if (Objects.equals(game.gameID(), id)) {
+                    inGame = game;
+                    if (game.whiteUsername().equals(user)) {
+                        color = ChessGame.TeamColor.WHITE;
+                    } else if (game.blackUsername().equals(user)) {
+                        color = ChessGame.TeamColor.BLACK;
+                    }
+                }
+            }
+
+            if (inGame == null) {
+                var error = new Error("Error: game was not found");
+                session.getRemote().sendString(new Gson().toJson(error));
+            } else {
+                connections.add(session);
+                var loadGame = new LoadGame(inGame);
+                session.getRemote().sendString(new Gson().toJson(loadGame));
+                var broadcast = String.format("%s joined game %d as %s", user, id, color);
+                var notification = new Notification(broadcast);
+                connections.broadcast(session, notification);
+            }
         }
     }
 
