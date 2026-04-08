@@ -71,7 +71,7 @@ public class ChessClient implements NotificationHandler {
                 case "clear" -> clear();
                 case "move" -> move(params);
 //                case "leave" -> leave();
-//                case "resign" -> resign();
+                case "resign" -> resign();
 //                case "highlight" -> highlight();
 //                case "redraw" -> redraw();
                 default -> help();
@@ -216,7 +216,24 @@ public class ChessClient implements NotificationHandler {
         // add a "finished" boolean to the games. set to false when resign is called. add a check to each related game call to see if game is still being played
     }
 
-    public String observe(String... params) throws ClientException {
+    public String resign() throws Exception {
+        Scanner confirm = new Scanner(System.in);
+        System.out.println("Are you sure you want to resign and forfeit the game? Enter `Yes` to confirm");
+        String response = confirm.nextLine();
+        if (Objects.equals(response, "Yes")) {
+            GameList gamesList = server.listGames();
+            for (GameData game : gamesList.games) {
+                if (Objects.equals(game.gameID(), playing)) {
+                    game.game().endGame();
+                }
+            }
+            ws.resignFromGame(authToken, playing);
+            return String.format("You have resigned from game %d.", playing);
+        }
+        return "Resignation cancelled. Have fun!";
+    }
+
+    public String observe(String... params) throws Exception {
         assertSignedIn();
         GameList gamesList = server.listGames();
         if (gamesList.games.isEmpty()) {return "No games have been created...";}
@@ -235,6 +252,7 @@ public class ChessClient implements NotificationHandler {
                 if (white == null) {
                     white = "~empty~";
                 }
+                ws.connectToGame(authToken, playing);
                 result.append(String.format("%20s\n%s" + SET_TEXT_COLOR_BLUE + "%20s\n", black, board(), white));
                 return result.toString();
             }

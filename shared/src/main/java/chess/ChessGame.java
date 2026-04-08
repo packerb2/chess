@@ -23,6 +23,8 @@ public class ChessGame {
         this.playing = true;
     }
 
+    public void endGame() {playing = false;}
+
     /**
      * @return Which team's turn it is
      */

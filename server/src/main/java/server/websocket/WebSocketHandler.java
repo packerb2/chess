@@ -32,6 +32,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     private final Service service;
     private GameData currentGame;
     private ChessGame.TeamColor color;
+    private boolean observing = false;
 
     public WebSocketHandler(Service service) {
         this.service = service;
@@ -92,6 +93,9 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             } else {
                 connections.add(session);
                 currentGame = inGame;
+                if (color.equals(null)) {
+                    observing = true;
+                }
                 var loadGame = new LoadGame(currentGame);
                 session.getRemote().sendString(new Gson().toJson(loadGame));
                 var broadcast = String.format("%s joined game %d as %s", user, id, color);
@@ -116,6 +120,10 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 //                var error = new Error("Error: those ain't your pieces");
 //                session.getRemote().sendString(new Gson().toJson(error));
 //            }
+            if (observing) {
+                var error = new Error("Error: you are an observer");
+                session.getRemote().sendString(new Gson().toJson(error));
+            }
             else {
                 try {
                     currentGame.game().makeMove(move);
@@ -145,23 +153,24 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     private void resign(String auth, Session session) throws IOException {
-        var message = String.format("placeholder_string %s", auth);
-        var notification = new Notification(message);
-        connections.broadcast(session, notification);
-        connections.remove(session);
-    }
-
-    public void help() throws IOException {
-        var message = """
-        valid arguments include:
-        - Help
-        - Redraw Chess Board
-        - Leave
-        - Make Move
-        - Resign
-        - Highlight Legal Moves
-        """;
-        var notification = new Notification(message);
-        connections.broadcast(null, notification);
+        AuthData authData = service.authData().getKey(auth);
+        if (authData == null) {
+            var error = new Error("Error: unauthorized");
+            session.getRemote().sendString(new Gson().toJson(error));
+        }
+        else {
+            if (observing) {
+                var error = new Error("Error: you are an observer");
+                session.getRemote().sendString(new Gson().toJson(error));
+            }
+            else {
+                String user = authData.username();
+                var message = String.format("%s has resigned.", user);
+                var notification = new Notification(message);
+                currentGame.game().endGame();
+                connections.broadcast(null, notification);
+                connections.remove(session);
+            }
+        }
     }
 }
