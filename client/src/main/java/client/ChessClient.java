@@ -194,8 +194,12 @@ public class ChessClient implements NotificationHandler {
                 if (!game.game().playing) {
                     throw new ClientException("This game has been finished.");
                 }
-                game.game().makeMove(moveRequest);
                 ws.movePiece(authToken, id, moveRequest);
+                try {
+                    game.game().makeMove(moveRequest);
+                } catch (InvalidMoveException e) {
+                    throw new ClientException("Not a valid move");
+                }
                 if (!game.game().playing) {
                     throw new ClientException("Game Over.");
                 }
