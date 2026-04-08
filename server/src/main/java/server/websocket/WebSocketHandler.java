@@ -1,23 +1,35 @@
 package server.websocket;
 
-import chess.ChessMove;
+import chess.ChessGame;
 import com.google.gson.Gson;
+import dataaccess.DataAccessException;
 import io.javalin.websocket.WsCloseContext;
 import io.javalin.websocket.WsCloseHandler;
 import io.javalin.websocket.WsConnectContext;
 import io.javalin.websocket.WsConnectHandler;
 import io.javalin.websocket.WsMessageContext;
 import io.javalin.websocket.WsMessageHandler;
+import model.GameData;
+import model.GameList;
 import org.eclipse.jetty.websocket.api.Session;
 import org.jetbrains.annotations.NotNull;
 import websocket.commands.UserGameCommand;
+import websocket.messages.LoadGame;
+import websocket.messages.Notification;
 import websocket.messages.ServerMessage;
+import service.Service;
 
 import java.io.IOException;
+import java.util.Objects;
 
 public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
 
     private final ConnectionManager connections = new ConnectionManager();
+    private final Service service;
+
+    public WebSocketHandler(Service service) {
+        this.service = service;
+    }
 
     @Override
     public void handleConnect(WsConnectContext ctx) {
@@ -30,12 +42,12 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         try {
             UserGameCommand action = new Gson().fromJson(ctx.message(), UserGameCommand.class);
             switch (action.getCommandType()) {
-                case CONNECT -> connect(action.getAuthToken(), ctx.session);
+                case CONNECT -> connect(action.getAuthToken(), action.getGameID(), ctx.session);
                 case LEAVE -> leave(action.getAuthToken(), ctx.session);
                 case RESIGN -> resign(action.getAuthToken(), ctx.session);
                 case MAKE_MOVE -> makeMove(action.getAuthToken(), ctx.session);
             }
-        } catch (IOException ex) {
+        } catch (IOException | DataAccessException ex) {
             ex.printStackTrace();
         }
     }
@@ -45,10 +57,29 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         System.out.println("Websocket closed");
     }
 
-    private void connect(String auth, Session session) throws IOException {
+    private void connect(String auth, Integer id, Session session) throws IOException, DataAccessException {
+        GameData inGame = null;
+        ChessGame.TeamColor color = null;
+        String user = service.authData().getKey(auth).username();
+        String games = service.listGames(auth);
+        GameList gamesList = new Gson().fromJson(games, GameList.class);
+        for (GameData game : gamesList.games) {
+            if (Objects.equals(game.gameID(), id)) {
+                inGame = game;
+                if (game.whiteUsername().equals(user)) {
+                    color = ChessGame.TeamColor.WHITE;
+                }
+                else if (game.blackUsername().equals(user)) {
+                    color = ChessGame.TeamColor.BLACK;
+                }
+            }
+        }
+        //use auth to find player and color in game id
         connections.add(session);
-        var message = String.format("placeholder_string %s", auth);
-        var notification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, message);
+        var loadGame = new LoadGame(inGame);
+        session.getRemote().sendString(new Gson().toJson(loadGame));
+        var broadcast = String.format("%s joined game %d as %s", user, id, color);
+        var notification = new Notification(broadcast);
         connections.broadcast(session, notification);
     }
 

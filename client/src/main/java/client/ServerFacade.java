@@ -6,6 +6,8 @@ import com.google.gson.Gson;
 //import io.javalin.http.Context;
 
 import model.*;
+import websocket.messages.LoadGame;
+import websocket.messages.ServerMessage;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -29,7 +31,7 @@ public class ServerFacade {
         auth = null;
     }
 
-    public void register(UserData user) throws ClientException {
+    public String register(UserData user) throws ClientException {
         try {
             var request = buildRequest("POST", "/user", user);
             var response = sendRequest(request);
@@ -37,12 +39,13 @@ public class ServerFacade {
             if (lr != null) {
                 auth = lr.authToken;
             }
+            return auth;
         } catch (ClientException e) {
             throw new ClientException("could not register user");
         }
     }
 
-    public void login(UserData user) throws ClientException {
+    public String login(UserData user) throws ClientException {
         try {
             var request = buildRequest("POST", "/session", user);
             var response = sendRequest(request);
@@ -50,6 +53,7 @@ public class ServerFacade {
             if (lr != null) {
                 auth = lr.authToken;
             }
+            return auth;
         } catch (ClientException e) {
             throw new ClientException("could not log in");
         }

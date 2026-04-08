@@ -75,8 +75,7 @@ public class ChessClient implements NotificationHandler {
             String email = params[2];
             UserData userNew = new UserData(userName, password, email);
             server.register(userNew);
-            AuthData auth = server.login(userNew);
-            authToken = auth.token();
+            authToken = server.login(userNew);
             state = State.SIGNEDIN;
             return String.format("You registered and logged in as %s.", userName);
         }
@@ -89,8 +88,7 @@ public class ChessClient implements NotificationHandler {
                 userName = params[0];
                 password = params[1];
                 UserData userNew = new UserData(userName, password, null);
-                AuthData auth = server.login(userNew);
-                authToken = auth.token();
+                authToken = server.login(userNew);
                 state = State.SIGNEDIN;
                 return String.format("You logged in as %s.", userName);
             } catch (ClientException e) {throw new ClientException("Error: Could not login");}

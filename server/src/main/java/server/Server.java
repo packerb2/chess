@@ -15,7 +15,7 @@ public class Server {
 
     private final Javalin javalin;
     private final Service service = new Service(new SQLUserDAO(), new SQLGameDAO(), new SQLAuthDAO());
-    private final WebSocketHandler webSocketHandler = new WebSocketHandler();
+    private final WebSocketHandler webSocketHandler = new WebSocketHandler(service);
 
     public void clear(Context context) {
         context.status(200);
