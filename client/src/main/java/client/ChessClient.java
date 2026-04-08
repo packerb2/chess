@@ -18,10 +18,12 @@ public class ChessClient implements NotificationHandler {
     private State state = State.SIGNEDOUT;
     Map<Integer, Integer> ids = new HashMap<>();
     private final WebSocketFacade ws;
+    private Integer playing;
 
     public ChessClient(String serverUrl) throws Exception {
         server = new ServerFacade(serverUrl);
         ws = new WebSocketFacade(serverUrl, this);
+        playing = null;
     }
 
     public void run() {
@@ -63,6 +65,11 @@ public class ChessClient implements NotificationHandler {
                 case "play" -> joinGame(params);
                 case "observe" -> observe(params);
                 case "clear" -> clear();
+                case "move" -> move(params);
+                case "leave" -> leave();
+                case "resign" -> resign();
+                case "highlight" -> highlight();
+                case "redraw" -> redraw();
                 default -> help();
             };
         } catch (Exception ex) {return ex.getMessage();}
@@ -162,11 +169,22 @@ public class ChessClient implements NotificationHandler {
                 throw new ClientException(error.message);
             }
             ws.connectToGame(authToken, id);
+            playing = id;
             if (color == ChessGame.TeamColor.WHITE) {
                 return String.format("You joined game %s as %s.\n%s", id, color, board());
             } else {return String.format("You joined game %s as %s.\n%s", id, color, reverseBoard());}
         }
         throw new ClientException("Expected: <GameNumber> <TeamColor>");
+    }
+
+    public void move(String... params) throws ClientException {
+        assertSignedIn();
+        assertPlaying();
+        Integer id = playing;
+        // find game with matching id
+        // get the game and have it make a move.
+        // update the found game with the new moved game
+        // call the websocket
     }
 
     public String observe(String... params) throws ClientException {
@@ -511,6 +529,12 @@ public class ChessClient implements NotificationHandler {
     private void assertSignedIn() throws ClientException {
         if (state == State.SIGNEDOUT) {
             throw new ClientException("You must log in");
+        }
+    }
+
+    private void assertPlaying() throws ClientException {
+        if (playing == null) {
+            throw new ClientException("You must be in a game");
         }
     }
 

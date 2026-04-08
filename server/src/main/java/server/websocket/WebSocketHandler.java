@@ -2,6 +2,7 @@ package server.websocket;
 
 import chess.ChessGame;
 import chess.ChessMove;
+import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import io.javalin.websocket.WsCloseContext;
@@ -29,6 +30,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     private final ConnectionManager connections = new ConnectionManager();
     private final Service service;
+    private ChessGame currentGame = new ChessGame();
 
     public WebSocketHandler(Service service) {
         this.service = service;
@@ -50,7 +52,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 case RESIGN -> resign(action.getAuthToken(), ctx.session);
                 case MAKE_MOVE -> makeMove(action.getAuthToken(), action.getMove(), ctx.session);
             }
-        } catch (IOException | DataAccessException ex) {
+        } catch (IOException | DataAccessException | InvalidMoveException ex) {
             ex.printStackTrace();
         }
     }
@@ -89,6 +91,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 session.getRemote().sendString(new Gson().toJson(error));
             } else {
                 connections.add(session);
+                currentGame = inGame.game();
                 var loadGame = new LoadGame(inGame);
                 session.getRemote().sendString(new Gson().toJson(loadGame));
                 var broadcast = String.format("%s joined game %d as %s", user, id, color);
@@ -98,7 +101,8 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
     }
 
-    public void makeMove(String auth, ChessMove move, Session session) throws IOException {
+    public void makeMove(String auth, ChessMove move, Session session) throws IOException, InvalidMoveException {
+        currentGame.makeMove(move);
         var message = String.format("placeholder_string %s", auth);
         var notification = new Notification(message);
         connections.broadcast(session, notification);
