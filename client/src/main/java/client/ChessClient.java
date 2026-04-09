@@ -180,7 +180,7 @@ public class ChessClient implements NotificationHandler {
         throw new ClientException("Expected: <GameNumber> <TeamColor>");
     }
 
-    public void move(String... params) throws Exception {
+    public String move(String... params) throws Exception {
         assertSignedIn();
         assertPlaying();
         if (params.length < 1) {
@@ -200,14 +200,16 @@ public class ChessClient implements NotificationHandler {
                 try {
                     game.game().makeMove(moveRequest);
                     ws.movePiece(authToken, id, moveRequest);
+                    if (!game.game().playing) {
+                        return String.format("You made move %s. Game Over.", moveRequest);
+                    }
+                    return String.format("You made move %s", moveRequest);
                 } catch (InvalidMoveException e) {
                     throw new ClientException("Not a valid move");
                 }
-                if (!game.game().playing) {
-                    throw new ClientException("Game Over.");
-                }
             }
         }
+        throw new ClientException("unable to make move");
         // find game with matching id
         // get the game and have it make a move.
         // update the found game with the new moved game
@@ -228,6 +230,7 @@ public class ChessClient implements NotificationHandler {
                 }
             }
         }
+        throw new ClientException("Unable to Leave");
     }
 
     public String resign() throws Exception {
