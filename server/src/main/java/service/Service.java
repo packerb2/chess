@@ -153,4 +153,19 @@ public record Service(UserDAO userData, GameDAO gameData, AuthDAO authData) {
             }
         }
     }
+
+    public void removePlayer(Integer gameID, ChessGame.TeamColor color, String token) throws DataAccessException {
+        try {
+            if (!authData.findKey(token)) {
+                throw new DataAccessException("NA");
+            }
+            gameData.updatePlayer(gameID, color, null);
+        } catch (DataAccessException e) {
+            if (e.getMessage().equals("NA")) {
+                throw e;
+            } else {
+                throw new DataAccessException("Server Error");
+            }
+        }
+    }
 }

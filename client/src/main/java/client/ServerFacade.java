@@ -87,6 +87,12 @@ public class ServerFacade {
         return handleResponse(response, ErrorObject.class);
     }
 
+    public ErrorObject leaveGame(JoinGameData info) throws ClientException {
+        var request = buildRequest("PUT", "/game", info);
+        var response = sendRequest(request);
+        return handleResponse(response, ErrorObject.class);
+    }
+
     private HttpRequest buildRequest(String method, String path, Object body) {
         var request = HttpRequest.newBuilder()
                 .uri(URI.create(serverUrl + path))

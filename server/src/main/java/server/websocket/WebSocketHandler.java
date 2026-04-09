@@ -147,9 +147,26 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     public void leave(String auth, Session session) throws IOException {
-        var message = String.format("placeholder_string %s", auth);
-        var notification = new Notification(message);
-        connections.broadcast(null, notification);
+        AuthData authData = service.authData().getKey(auth);
+        if (authData == null) {
+            var error = new Error("Error: unauthorized");
+            session.getRemote().sendString(new Gson().toJson(error));
+        }
+        else {
+            if (this.observing) {
+                this.currentGame = null;
+                this.observing = false;
+                this.color = null;
+            }
+            else {
+                String user = authData.username();
+                this.currentGame = null;
+                this.color = null;
+                var message = String.format("%s has left the game. Waiting for new player...", user);
+                var notification = new Notification(message);
+                connections.broadcast(session, notification);
+            }
+        }
     }
 
     private void resign(String auth, Session session) throws IOException {

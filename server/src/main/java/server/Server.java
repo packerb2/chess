@@ -155,6 +155,23 @@ public class Server {
         }
     }
 
+    private void leaveGame(Context context) {
+        try {
+            JoinGameData setUpInfo = new Gson().fromJson(context.body(), JoinGameData.class);
+            String token = context.header("authorization");
+            context.status(200);
+            service.removePlayer(setUpInfo.gameID(), setUpInfo.playerColor(), token);
+        } catch (DataAccessException e) {
+            if (e.getMessage().equals("NA")) {
+                context.status(401);
+                context.result(new Gson().toJson(new ErrorObject("Error: Unauthorized Joining")));
+            } else {
+                context.status(500);
+                context.result(new Gson().toJson(new ErrorObject("Error: System Error in JoinGame")));
+            }
+        }
+    }
+
     public Server() {
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
 
@@ -165,6 +182,7 @@ public class Server {
                 .get("/game", this::listGames)
                 .post("/game", this::createGame)
                 .put("/game", this::joinGame)
+                .delete("/game", this::leaveGame)
                 .delete("/db", this::clear)
                 .ws("/ws", ws -> {
                     ws.onConnect(webSocketHandler);

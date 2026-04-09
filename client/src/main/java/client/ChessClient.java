@@ -70,7 +70,7 @@ public class ChessClient implements NotificationHandler {
                 case "observe" -> observe(params);
                 case "clear" -> clear();
                 case "move" -> move(params);
-//                case "leave" -> leave();
+                case "leave" -> leave();
                 case "resign" -> resign();
 //                case "highlight" -> highlight();
 //                case "redraw" -> redraw();
@@ -214,6 +214,20 @@ public class ChessClient implements NotificationHandler {
         // call the websocket
             // ^use as guideline for updating database for leave^
         // add a "finished" boolean to the games. set to false when resign is called. add a check to each related game call to see if game is still being played
+    }
+
+    public String leave() throws Exception {
+        GameList gamesList = server.listGames();
+        for (GameData game : gamesList.games) {
+            if (Objects.equals(game.gameID(), playing)) {
+                if (game.whiteUsername().equals(userName)) {
+                    JoinGameData ld = new JoinGameData(playing, color, new UserData(userName, password, null));
+                    server.leaveGame(ld);
+                    ws.leaveGame(authToken, playing);
+                    return String.format("You have left game %d", playing);
+                }
+            }
+        }
     }
 
     public String resign() throws Exception {
