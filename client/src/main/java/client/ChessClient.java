@@ -2,9 +2,7 @@ package client;
 
 import java.util.*;
 
-import chess.ChessGame;
-import chess.ChessMove;
-import chess.InvalidMoveException;
+import chess.*;
 import client.websocket.NotificationHandler;
 import client.websocket.WebSocketFacade;
 import com.google.gson.Gson;
@@ -210,12 +208,8 @@ public class ChessClient implements NotificationHandler {
             }
         }
         throw new ClientException("unable to make move");
-        // find game with matching id
-        // get the game and have it make a move.
-        // update the found game with the new moved game
-        // call the websocket
-            // ^use as guideline for updating database for leave^
-        // add a "finished" boolean to the games. set to false when resign is called. add a check to each related game call to see if game is still being played
+        // have move call websocket and send info there
+        // have websocket call service, check there whether player or observer
     }
 
     public String leave() throws Exception {
@@ -284,6 +278,47 @@ public class ChessClient implements NotificationHandler {
         }
         server.clear();
         return "System has been cleared.";
+    }
+
+    public String redraw(String... params) throws Exception {
+        assertSignedIn();
+        if (params.length == 1) {
+            int num;
+            try {
+                num = Integer.parseInt(params[0]);
+            } catch (Exception e) {
+                throw new ClientException("Error: please use Game Number");
+            }
+            GameList gamesList = server.listGames();
+            for (GameData game : gamesList.games) {
+                if (Objects.equals(game.gameID(), num)) {
+                    ChessBoard boardData = game.game().getBoard();
+                    if (game.blackUsername().equals(userName)) {
+                        return "implement black's view";
+                    }
+                    else {
+                        var board = new StringBuilder();
+                        var border = topBottomBorder();
+                        board.append(border);
+                        for (int i = 0; i < 8; i++) {
+                            board.append(String.format(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " %d ", i));
+                            for (int n = 0; n < 8; n++) {
+                                ChessPiece piece = boardData.getPiece(new ChessPosition(i, n));
+                                if (piece.getPieceType().equals(ChessPiece.PieceType.PAWN)) {
+                                    if (piece.getTeamColor().equals(ChessGame.TeamColor.WHITE)) {
+
+                                        board.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + WHITE_PAWN);
+                                    }
+                                }
+                            }
+                            board.append(String.format(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " %d ", i));
+                        }
+                        board.append(border);
+                    }
+                }
+            }
+        }
+        throw new ClientException("Expected: <GameNumber>");
     }
 
     public String board() {
