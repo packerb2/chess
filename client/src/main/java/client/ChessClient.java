@@ -71,7 +71,7 @@ public class ChessClient implements NotificationHandler {
                 case "leave" -> leave();
                 case "resign" -> resign();
 //                case "highlight" -> highlight();
-//                case "redraw" -> redraw();
+                case "redraw" -> redraw(params);
                 default -> help();
             };
         } catch (Exception ex) {return ex.getMessage();}
@@ -293,28 +293,67 @@ public class ChessClient implements NotificationHandler {
             for (GameData game : gamesList.games) {
                 if (Objects.equals(game.gameID(), num)) {
                     ChessBoard boardData = game.game().getBoard();
-                    if (game.blackUsername().equals(userName)) {
-                        return "implement black's view";
+                    var board = new StringBuilder();
+                    if (game.blackUsername() != null && game.blackUsername().equals(userName)) {
+                        return "have not implemented black's view";
                     }
                     else {
-                        var board = new StringBuilder();
                         var border = topBottomBorder();
                         board.append(border);
-                        for (int i = 0; i < 8; i++) {
+                        for (int i = 8; i >= 1; i--) {
                             board.append(String.format(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " %d ", i));
-                            for (int n = 0; n < 8; n++) {
+                            for (int n = 8; n >= 1; n--) {
+                                String bgColor = SET_BG_COLOR_LIGHT_GREY;
+                                if ((i%2==0) == (n%2==0)) {
+                                    bgColor = SET_BG_COLOR_DARK_GREY;
+                                }
                                 ChessPiece piece = boardData.getPiece(new ChessPosition(i, n));
-                                if (piece.getPieceType().equals(ChessPiece.PieceType.PAWN)) {
+                                if (piece == null) {
+                                    board.append(bgColor).append(SET_TEXT_COLOR_WHITE).append(EMPTY);
+                                }
+                                else if (piece.getPieceType().equals(ChessPiece.PieceType.PAWN)) {
                                     if (piece.getTeamColor().equals(ChessGame.TeamColor.WHITE)) {
-
-                                        board.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + WHITE_PAWN);
-                                    }
+                                        board.append(bgColor).append(SET_TEXT_COLOR_WHITE).append(WHITE_PAWN);
+                                    } else {
+                                        board.append(bgColor).append(SET_TEXT_COLOR_BLACK).append(BLACK_PAWN);}
+                                }
+                                else if (piece.getPieceType().equals(ChessPiece.PieceType.ROOK)) {
+                                    if (piece.getTeamColor().equals(ChessGame.TeamColor.WHITE)) {
+                                        board.append(bgColor).append(SET_TEXT_COLOR_WHITE).append(WHITE_ROOK);
+                                    } else {
+                                        board.append(bgColor).append(SET_TEXT_COLOR_BLACK).append(BLACK_ROOK);}
+                                }
+                                else if (piece.getPieceType().equals(ChessPiece.PieceType.KNIGHT)) {
+                                    if (piece.getTeamColor().equals(ChessGame.TeamColor.WHITE)) {
+                                        board.append(bgColor).append(SET_TEXT_COLOR_WHITE).append(WHITE_KNIGHT);
+                                    } else {
+                                        board.append(bgColor).append(SET_TEXT_COLOR_BLACK).append(BLACK_KNIGHT);}
+                                }
+                                else if (piece.getPieceType().equals(ChessPiece.PieceType.BISHOP)) {
+                                    if (piece.getTeamColor().equals(ChessGame.TeamColor.WHITE)) {
+                                        board.append(bgColor).append(SET_TEXT_COLOR_WHITE).append(WHITE_BISHOP);
+                                    } else {
+                                        board.append(bgColor).append(SET_TEXT_COLOR_BLACK).append(BLACK_BISHOP);}
+                                }
+                                else if (piece.getPieceType().equals(ChessPiece.PieceType.QUEEN)) {
+                                    if (piece.getTeamColor().equals(ChessGame.TeamColor.WHITE)) {
+                                        board.append(bgColor).append(SET_TEXT_COLOR_WHITE).append(WHITE_QUEEN);
+                                    } else {
+                                        board.append(bgColor).append(SET_TEXT_COLOR_BLACK).append(BLACK_QUEEN);}
+                                }
+                                else if (piece.getPieceType().equals(ChessPiece.PieceType.KING)) {
+                                    if (piece.getTeamColor().equals(ChessGame.TeamColor.WHITE)) {
+                                        board.append(bgColor).append(SET_TEXT_COLOR_WHITE).append(WHITE_KING);
+                                    } else {
+                                        board.append(bgColor).append(SET_TEXT_COLOR_BLACK).append(BLACK_KING);}
                                 }
                             }
                             board.append(String.format(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " %d ", i));
+                            board.append(RESET_BG_COLOR + RESET_TEXT_COLOR + "\n");
                         }
                         board.append(border);
                     }
+                    return String.format("%s", board);
                 }
             }
         }
