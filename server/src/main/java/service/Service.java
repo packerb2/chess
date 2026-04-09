@@ -173,15 +173,21 @@ public record Service(UserDAO userData, GameDAO gameData, AuthDAO authData) {
         }
     }
 
-    public void surrender (Integer gameID, String token) throws DataAccessException {
+    public void surrender (Integer gameID, String user, String token) throws DataAccessException {
         try {
             if (!authData.findKey(token)) {
                 throw new DataAccessException("NA");
             }
             GameData gd = gameData.getGame(gameID);
+            if (!Objects.equals(gd.blackUsername(), user) && !Objects.equals(gd.whiteUsername(), user)) {
+                throw new DataAccessException("OE");
+            }
+            if (!gd.game().playing) {
+                throw new DataAccessException("GE");
+            }
             gd.game().endGame();
         } catch (DataAccessException e) {
-            if (e.getMessage().equals("NA")) {
+            if (e.getMessage().equals("NA") || e.getMessage().equals("OE") || e.getMessage().equals("GE")) {
                 throw e;
             } else {
                 throw new DataAccessException("Server Error");

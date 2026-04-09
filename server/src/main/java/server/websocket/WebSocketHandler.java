@@ -162,12 +162,26 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             session.getRemote().sendString(new Gson().toJson(error));
         }
         else {
-            String user = authData.username();
-            service.surrender(id, auth);
-            var message = String.format("%s has resigned.", user);
-            var notification = new Notification(message);
-            connections.broadcast(null, notification);
-            connections.remove(session);
+            try {
+                String user = authData.username();
+                service.surrender(id, user, auth);
+                var message = String.format("%s has resigned.", user);
+                var notification = new Notification(message);
+                connections.broadcast(null, notification);
+                connections.remove(session);
+            } catch (DataAccessException e) {
+                Error error;
+                if (e.getMessage().equals("OE")) {
+                    error = new Error("Error: observer cannot resign.");
+                }
+                else if (e.getMessage().equals("GE")) {
+                    error = new Error("Error: Game has already ended.");
+                }
+                else {
+                    error = new Error("Error: system error while resigning.");
+                }
+                session.getRemote().sendString(new Gson().toJson(error));
+            }
         }
     }
 }
