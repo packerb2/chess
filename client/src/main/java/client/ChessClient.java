@@ -201,21 +201,12 @@ public class ChessClient implements NotificationHandler {
         GameList gamesList = server.listGames();
         for (GameData game : gamesList.games) {
             if (Objects.equals(game.gameID(), id)) {
-                if (!game.game().playing) {
-                    throw new ClientException("This game has been finished.");
-                }
-                if (game.game().getTeamTurn() != color) {
-                    throw new ClientException("Those ain't your pieces.");
-                }
                 try {
                     ChessPiece piece = game.game().getBoard().getPiece(start);
                     if (piece == null) {throw new ClientException("There is no piece there");}
                     ChessMove moveRequest = new ChessMove(start, end, null);
-                    game.game().makeMove(moveRequest);
+//                    game.game().makeMove(moveRequest);
                     ws.movePiece(authToken, id, moveRequest);
-                    if (!game.game().playing) {
-                        return String.format("You made move %s. Game Over.", moveRequest);
-                    }
                     return String.format("You made move %s", moveRequest);
                 } catch (InvalidMoveException e) {
                     throw new ClientException("Not a valid move");

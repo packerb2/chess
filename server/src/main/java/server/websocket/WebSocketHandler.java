@@ -30,9 +30,9 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     private final ConnectionManager connections = new ConnectionManager();
     private final Service service;
-    private GameData currentGame;
-    private ChessGame.TeamColor color;
-    private boolean observing = false;
+//    private GameData currentGame;
+//    private ChessGame.TeamColor color;
+//    private boolean observing = false;
 
     public WebSocketHandler(Service service) {
         this.service = service;
@@ -52,7 +52,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 case CONNECT -> connect(action.getAuthToken(), action.getGameID(), ctx.session);
                 case LEAVE -> leave(action.getAuthToken(), ctx.session);
                 case RESIGN -> resign(action.getAuthToken(), ctx.session);
-                case MAKE_MOVE -> makeMove(action.getAuthToken(), action.getMove(), ctx.session);
+                case MAKE_MOVE -> makeMove(action.getAuthToken(), action.getGameID(), action.getMove(), ctx.session);
             }
         } catch (IOException | DataAccessException | InvalidMoveException ex) {
             ex.printStackTrace();
@@ -76,6 +76,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             String user = authData.username();
             String games = service.listGames(auth);
             GameList gamesList = new Gson().fromJson(games, GameList.class);
+            ChessGame.TeamColor color = null;
             for (GameData game : gamesList.games) {
                 if (Objects.equals(game.gameID(), id)) {
                     inGame = game;
@@ -92,54 +93,51 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 session.getRemote().sendString(new Gson().toJson(error));
             } else {
                 connections.add(session);
-                currentGame = inGame;
-                if (color.equals(null)) {
-                    observing = true;
-                }
-                var loadGame = new LoadGame(currentGame);
+                var loadGame = new LoadGame(inGame);
                 session.getRemote().sendString(new Gson().toJson(loadGame));
                 var broadcast = String.format("%s joined game %d as %s", user, id, color);
+                if (color == null) {
+                    broadcast = String.format("%s joined game %d as an observer", user, id);
+                }
                 var notification = new Notification(broadcast);
                 connections.broadcast(session, notification);
             }
         }
     }
 
-    public void makeMove(String auth, ChessMove move, Session session) throws IOException, InvalidMoveException {
+    public void makeMove(String auth, Integer id, ChessMove move, Session session) throws IOException, InvalidMoveException {
         AuthData authData = service.authData().getKey(auth);
         if (authData == null) {
             var error = new Error("Error: unauthorized");
             session.getRemote().sendString(new Gson().toJson(error));
         }
         else {
-            if (!currentGame.game().playing) {
-                var error = new Error("Error: this game is over");
-                session.getRemote().sendString(new Gson().toJson(error));
-            }
-//            if (!currentGame.game().getTeamTurn().equals(color)) {
-//                var error = new Error("Error: those ain't your pieces");
-//                session.getRemote().sendString(new Gson().toJson(error));
-//            }
-            else if (observing) {
-                var error = new Error("Error: you are an observer");
-                session.getRemote().sendString(new Gson().toJson(error));
-            }
-            else {
-                try {
-                    currentGame.game().makeMove(move);
-                    var loadGame = new LoadGame(currentGame);
+            try {
+                GameData game = service.movePiece(id, move, auth);
+                var loadGame = new LoadGame(game);
+                session.getRemote().sendString(new Gson().toJson(loadGame));
+                connections.broadcast(session, loadGame);
+                var message = String.format("Move was made: %s", move);
+                var notification = new Notification(message);
+                connections.broadcast(session, notification);
+                if (!game.game().playing) {
                     session.getRemote().sendString(new Gson().toJson(loadGame));
-                    connections.broadcast(session, loadGame);
-                    var message = String.format("Move was made: %s", move);
-                    var notification = new Notification(message);
-                    connections.broadcast(session, notification);
-                    if (!currentGame.game().playing) {
-                        var endMessage = String.format("Checkmate. %s WINS", currentGame.game().getTeamTurn());
-                        var finalNotification = new Notification(endMessage);
-                        connections.broadcast(null, finalNotification);
-                    }
-                } catch (InvalidMoveException e) {
-                    var error = new Error("Error: please enter a valid move");
+                    connections.broadcast(null, loadGame);
+                    var endMessage = String.format("Checkmate. %s WINS", game.game().getTeamTurn());
+                    var finalNotification = new Notification(endMessage);
+                    connections.broadcast(null, finalNotification);
+                }
+            } catch (DataAccessException e) {
+                if (e.getMessage().equals("GE")) {
+                    var error = new Error("Error: this game has ended.");
+                    session.getRemote().sendString(new Gson().toJson(error));
+                }
+                if (e.getMessage().equals("NYP")) {
+                    var error = new Error("Error: those are not your pieces.");
+                    session.getRemote().sendString(new Gson().toJson(error));
+                }
+                if (e.getMessage().equals("IM")) {
+                    var error = new Error("Error: that is not a valid move.");
                     session.getRemote().sendString(new Gson().toJson(error));
                 }
             }
@@ -153,19 +151,10 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             session.getRemote().sendString(new Gson().toJson(error));
         }
         else {
-            if (this.observing) {
-                this.currentGame = null;
-                this.observing = false;
-                this.color = null;
-            }
-            else {
-                String user = authData.username();
-                this.currentGame = null;
-                this.color = null;
-                var message = String.format("%s has left the game. Waiting for new player...", user);
-                var notification = new Notification(message);
-                connections.broadcast(session, notification);
-            }
+            String user = authData.username();
+            var message = String.format("%s has left the game. Waiting for new player...", user);
+            var notification = new Notification(message);
+            connections.broadcast(session, notification);
         }
     }
 
@@ -175,19 +164,10 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             var error = new Error("Error: unauthorized");
             session.getRemote().sendString(new Gson().toJson(error));
         }
-        else if (observing) {
-            var error = new Error("Error: you are an observer");
-            session.getRemote().sendString(new Gson().toJson(error));
-        }
-        else if (!currentGame.game().playing) {
-            var error = new Error("Error: this game has already ended");
-            session.getRemote().sendString(new Gson().toJson(error));
-        }
         else {
             String user = authData.username();
             var message = String.format("%s has resigned.", user);
             var notification = new Notification(message);
-            currentGame.game().endGame();
             connections.broadcast(null, notification);
             connections.remove(session);
         }

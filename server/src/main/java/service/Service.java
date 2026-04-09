@@ -1,10 +1,14 @@
 package service;
 
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.UserDAO;
 import dataaccess.*;
 import model.*;
+
+import java.util.Objects;
 
 public record Service(UserDAO userData, GameDAO gameData, AuthDAO authData) {
 
@@ -166,6 +170,41 @@ public record Service(UserDAO userData, GameDAO gameData, AuthDAO authData) {
             } else {
                 throw new DataAccessException("Server Error");
             }
+        }
+    }
+
+    public GameData movePiece(Integer gameID, ChessMove move, String token) throws DataAccessException {
+        try {
+            if (!authData.findKey(token)) {
+                throw new DataAccessException("NA");
+            }
+            AuthData auth = authData().getKey(token);
+            String user = auth.username();
+            GameData gd = gameData.getGame(gameID);
+            ChessGame game = gd.game();
+            if (!game.playing) {
+                throw new DataAccessException("GE");
+            }
+            if (game.getTeamTurn() == ChessGame.TeamColor.WHITE) {
+                if (!Objects.equals(gd.whiteUsername(), user)) {
+                    throw new DataAccessException("NYP");
+                }
+            }
+            else {
+                if (!Objects.equals(gd.blackUsername(), user)) {
+                    throw new DataAccessException("NYP");
+                }
+            }
+            gd.game().makeMove(move);
+            return gd;
+        } catch (DataAccessException e) {
+            if (e.getMessage().equals("NA")) {
+                throw e;
+            } else {
+                throw new DataAccessException("Server Error");
+            }
+        } catch (InvalidMoveException e) {
+            throw new DataAccessException("IM");
         }
     }
 }
