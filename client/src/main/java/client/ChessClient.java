@@ -5,7 +5,6 @@ import java.util.*;
 import chess.*;
 import client.websocket.NotificationHandler;
 import client.websocket.WebSocketFacade;
-import com.google.gson.Gson;
 import model.*;
 import websocket.messages.ServerMessage;
 
@@ -205,7 +204,6 @@ public class ChessClient implements NotificationHandler {
                     ChessPiece piece = game.game().getBoard().getPiece(start);
                     if (piece == null) {throw new ClientException("There is no piece there");}
                     ChessMove moveRequest = new ChessMove(start, end, null);
-//                    game.game().makeMove(moveRequest);
                     ws.movePiece(authToken, id, moveRequest);
                     return String.format("You made move %s", moveRequest);
                 } catch (InvalidMoveException e) {
@@ -238,12 +236,6 @@ public class ChessClient implements NotificationHandler {
         System.out.println("Are you sure you want to resign and forfeit the game? Enter `Yes` to confirm");
         String response = confirm.nextLine();
         if (Objects.equals(response, "Yes")) {
-            GameList gamesList = server.listGames();
-            for (GameData game : gamesList.games) {
-                if (Objects.equals(game.gameID(), playing)) {
-                    game.game().endGame();
-                }
-            }
             ws.resignFromGame(authToken, playing);
             return String.format("You have resigned from game %d.", playing);
         }

@@ -30,9 +30,6 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     private final ConnectionManager connections = new ConnectionManager();
     private final Service service;
-//    private GameData currentGame;
-//    private ChessGame.TeamColor color;
-//    private boolean observing = false;
 
     public WebSocketHandler(Service service) {
         this.service = service;
@@ -51,7 +48,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             switch (action.getCommandType()) {
                 case CONNECT -> connect(action.getAuthToken(), action.getGameID(), ctx.session);
                 case LEAVE -> leave(action.getAuthToken(), ctx.session);
-                case RESIGN -> resign(action.getAuthToken(), ctx.session);
+                case RESIGN -> resign(action.getAuthToken(), action.getGameID(), ctx.session);
                 case MAKE_MOVE -> makeMove(action.getAuthToken(), action.getGameID(), action.getMove(), ctx.session);
             }
         } catch (IOException | DataAccessException | InvalidMoveException ex) {
@@ -158,7 +155,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
     }
 
-    private void resign(String auth, Session session) throws IOException {
+    private void resign(String auth, Integer id, Session session) throws IOException, DataAccessException {
         AuthData authData = service.authData().getKey(auth);
         if (authData == null) {
             var error = new Error("Error: unauthorized");
@@ -166,6 +163,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
         else {
             String user = authData.username();
+            service.surrender(id, auth);
             var message = String.format("%s has resigned.", user);
             var notification = new Notification(message);
             connections.broadcast(null, notification);

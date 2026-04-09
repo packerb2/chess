@@ -173,6 +173,22 @@ public record Service(UserDAO userData, GameDAO gameData, AuthDAO authData) {
         }
     }
 
+    public void surrender (Integer gameID, String token) throws DataAccessException {
+        try {
+            if (!authData.findKey(token)) {
+                throw new DataAccessException("NA");
+            }
+            GameData gd = gameData.getGame(gameID);
+            gd.game().endGame();
+        } catch (DataAccessException e) {
+            if (e.getMessage().equals("NA")) {
+                throw e;
+            } else {
+                throw new DataAccessException("Server Error");
+            }
+        }
+    }
+
     public GameData movePiece(Integer gameID, ChessMove move, String token) throws DataAccessException {
         try {
             if (!authData.findKey(token)) {
@@ -198,7 +214,7 @@ public record Service(UserDAO userData, GameDAO gameData, AuthDAO authData) {
             gd.game().makeMove(move);
             return gd;
         } catch (DataAccessException e) {
-            if (e.getMessage().equals("NA")) {
+            if (e.getMessage().equals("NA") || e.getMessage().equals("GE") || e.getMessage().equals("NYP")) {
                 throw e;
             } else {
                 throw new DataAccessException("Server Error");
