@@ -1,6 +1,7 @@
 package dataaccess;
 
 import chess.ChessGame;
+import com.google.gson.Gson;
 import model.GameData;
 
 import java.sql.Connection;
@@ -113,6 +114,20 @@ public class SQLGameDAO implements GameDAO {
             }
         } catch (DataAccessException | SQLException e) {
             throw new DataAccessException("Error retrieving game list");
+        }
+    }
+
+    public void updateGame(int id, ChessGame game) throws DataAccessException {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            var statement = "UPDATE games SET gameData=? WHERE gameID=?";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                String gameString = new Gson().toJson(game);
+                ps.setString(1, gameString);
+                ps.setInt(2, id);
+                ps.executeUpdate();
+            }
+        } catch (DataAccessException | SQLException e) {
+            throw new DataAccessException("could not update game");
         }
     }
 }

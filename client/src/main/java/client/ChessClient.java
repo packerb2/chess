@@ -221,7 +221,7 @@ public class ChessClient implements NotificationHandler {
         for (GameData game : gamesList.games) {
             if (Objects.equals(game.gameID(), playing)) {
                 if (game.whiteUsername().equals(userName)) {
-                    JoinGameData ld = new JoinGameData(playing, color, new UserData(userName, password, null));
+                    JoinGameData ld = new JoinGameData(playing, color, new UserData(null, null, null));
                     server.leaveGame(ld);
                     ws.leaveGame(authToken, playing);
                     return String.format("You have left game %d", playing);

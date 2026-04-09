@@ -5,6 +5,7 @@ import chess.ChessMove;
 import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
+import dataaccess.SQLGameDAO;
 import io.javalin.websocket.WsCloseContext;
 import io.javalin.websocket.WsCloseHandler;
 import io.javalin.websocket.WsConnectContext;
@@ -30,6 +31,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     private final ConnectionManager connections = new ConnectionManager();
     private final Service service;
+    final SQLGameDAO gameDAO = new SQLGameDAO();
 
     public WebSocketHandler(Service service) {
         this.service = service;
@@ -47,7 +49,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             UserGameCommand action = new Gson().fromJson(ctx.message(), UserGameCommand.class);
             switch (action.getCommandType()) {
                 case CONNECT -> connect(action.getAuthToken(), action.getGameID(), ctx.session);
-                case LEAVE -> leave(action.getAuthToken(), ctx.session);
+                case LEAVE -> leave(action.getAuthToken(), action.getGameID(), ctx.session);
                 case RESIGN -> resign(action.getAuthToken(), action.getGameID(), ctx.session);
                 case MAKE_MOVE -> makeMove(action.getAuthToken(), action.getGameID(), action.getMove(), ctx.session);
             }
@@ -141,7 +143,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
     }
 
-    public void leave(String auth, Session session) throws IOException {
+    public void leave(String auth, Integer id, Session session) throws IOException, DataAccessException {
         AuthData authData = service.authData().getKey(auth);
         if (authData == null) {
             var error = new Error("Error: unauthorized");
@@ -149,9 +151,26 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
         else {
             String user = authData.username();
-            var message = String.format("%s has left the game. Waiting for new player...", user);
+            String games = service.listGames(auth);
+            GameList gamesList = new Gson().fromJson(games, GameList.class);
+            ChessGame.TeamColor color = null;
+            for (GameData game : gamesList.games) {
+                if (Objects.equals(game.gameID(), id)) {
+                    if (game.whiteUsername() != null && game.whiteUsername().equals(user)) {
+                        color = ChessGame.TeamColor.WHITE;
+                    } else if (game.blackUsername() != null && game.blackUsername().equals(user)) {
+                        color = ChessGame.TeamColor.BLACK;
+                    }
+                }
+            }
+            var message = String.format("%s has left the game.", user);
+            if (color != null) {
+                service.removePlayer(id, color, auth);
+                message = String.format("%s has left the game. Waiting for new player...", user);
+            }
             var notification = new Notification(message);
             connections.broadcast(session, notification);
+            connections.remove(session);
         }
     }
 
