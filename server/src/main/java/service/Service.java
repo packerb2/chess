@@ -186,6 +186,7 @@ public record Service(UserDAO userData, GameDAO gameData, AuthDAO authData) {
                 throw new DataAccessException("GE");
             }
             gd.game().endGame();
+            gameData.updateGame(gd.gameID(), gd.game());
         } catch (DataAccessException e) {
             if (e.getMessage().equals("NA") || e.getMessage().equals("OE") || e.getMessage().equals("GE")) {
                 throw e;
@@ -218,6 +219,7 @@ public record Service(UserDAO userData, GameDAO gameData, AuthDAO authData) {
                 }
             }
             gd.game().makeMove(move);
+            gameData.updateGame(gd.gameID(), gd.game());
             return gd;
         } catch (DataAccessException e) {
             if (e.getMessage().equals("NA") || e.getMessage().equals("GE") || e.getMessage().equals("NYP")) {

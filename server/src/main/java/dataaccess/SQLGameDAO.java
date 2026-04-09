@@ -34,11 +34,13 @@ public class SQLGameDAO implements GameDAO {
     @Override
     public Integer createGame(String gameName) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()) {
-            var statement = "INSERT INTO games (whiteUsername, blackUsername, gameName) VALUES (?, ?, ?)";
+            String gameString = new Gson().toJson(new ChessGame());
+            var statement = "INSERT INTO games (whiteUsername, blackUsername, gameName, gameData) VALUES (?, ?, ?, ?)";
             PreparedStatement ps = conn.prepareStatement(statement);
             ps.setString(1, null);
             ps.setString(2, null);
             ps.setString(3, gameName);
+            ps.setString(4, gameString);
             ps.executeUpdate();
             var statement2 = "SELECT gameID FROM games WHERE gameName=?";
             PreparedStatement ps2 = conn.prepareStatement(statement2);
@@ -56,7 +58,7 @@ public class SQLGameDAO implements GameDAO {
     @Override
     public GameData getGame(int gameID) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT gameID, whiteUsername, blackUsername, gameName FROM games WHERE gameID=?";
+            var statement = "SELECT gameID, whiteUsername, blackUsername, gameName, gameData FROM games WHERE gameID=?";
             PreparedStatement ps = conn.prepareStatement(statement);
             ps.setInt(1, gameID);
             ResultSet rs = ps.executeQuery();
@@ -65,8 +67,10 @@ public class SQLGameDAO implements GameDAO {
                 String whiteUser = rs.getString("whiteUsername");
                 String blackUser = rs.getString("blackUsername");
                 String gameName = rs.getString("gameName");
+                String gameData = rs.getString("gameData");
                 if (gameID == id) {
-                    return new GameData(id, whiteUser, blackUser, gameName, new ChessGame());
+                    ChessGame game = new Gson().fromJson(gameData, ChessGame.class);
+                    return new GameData(id, whiteUser, blackUser, gameName, game);
                 }
             }
         } catch (DataAccessException | SQLException e) {
@@ -117,6 +121,7 @@ public class SQLGameDAO implements GameDAO {
         }
     }
 
+    @Override
     public void updateGame(int id, ChessGame game) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()) {
             var statement = "UPDATE games SET gameData=? WHERE gameID=?";
