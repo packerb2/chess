@@ -120,7 +120,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 //                var error = new Error("Error: those ain't your pieces");
 //                session.getRemote().sendString(new Gson().toJson(error));
 //            }
-            if (observing) {
+            else if (observing) {
                 var error = new Error("Error: you are an observer");
                 session.getRemote().sendString(new Gson().toJson(error));
             }
@@ -158,19 +158,21 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             var error = new Error("Error: unauthorized");
             session.getRemote().sendString(new Gson().toJson(error));
         }
+        else if (observing) {
+            var error = new Error("Error: you are an observer");
+            session.getRemote().sendString(new Gson().toJson(error));
+        }
+        else if (!currentGame.game().playing) {
+            var error = new Error("Error: this game has already ended");
+            session.getRemote().sendString(new Gson().toJson(error));
+        }
         else {
-            if (observing) {
-                var error = new Error("Error: you are an observer");
-                session.getRemote().sendString(new Gson().toJson(error));
-            }
-            else {
-                String user = authData.username();
-                var message = String.format("%s has resigned.", user);
-                var notification = new Notification(message);
-                currentGame.game().endGame();
-                connections.broadcast(null, notification);
-                connections.remove(session);
-            }
+            String user = authData.username();
+            var message = String.format("%s has resigned.", user);
+            var notification = new Notification(message);
+            currentGame.game().endGame();
+            connections.broadcast(null, notification);
+            connections.remove(session);
         }
     }
 }
