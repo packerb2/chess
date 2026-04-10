@@ -112,7 +112,12 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         else {
             try {
                 String user = authData.username();
+                String opponent;
                 GameData game = service.movePiece(id, move, auth);
+                if (game.whiteUsername().equals(user)) {
+                    opponent = game.blackUsername();
+                }
+                else {opponent = game.whiteUsername();}
                 var loadGame = new LoadGame(game);
                 session.getRemote().sendString(new Gson().toJson(loadGame));
                 connections.broadcast(session, loadGame);
@@ -122,21 +127,21 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 if (!game.game().playing && (game.game().whiteCheck || game.game().blackCheck)) {
                     session.getRemote().sendString(new Gson().toJson(loadGame));
                     connections.broadcast(null, loadGame);
-                    var checkmate = String.format("Checkmate. %s WINS", user);
+                    var checkmate = String.format("Game Over. %s is in Checkmate. %s WINS", opponent, user);
                     var checkmateNotification = new Notification(checkmate);
                     connections.broadcast(null, checkmateNotification);
                 }
                 if (game.game().playing && (game.game().whiteCheck || game.game().blackCheck)) {
                     session.getRemote().sendString(new Gson().toJson(loadGame));
                     connections.broadcast(null, loadGame);
-                    var check = "Check";
+                    var check = String.format("%s is in Check", opponent);
                     var checkNotification = new Notification(check);
-                    connections.broadcast(session, checkNotification);
+                    connections.broadcast(null, checkNotification);
                 }
                 if (!game.game().playing && !game.game().whiteCheck && !game.game().blackCheck) {
                     session.getRemote().sendString(new Gson().toJson(loadGame));
                     connections.broadcast(null, loadGame);
-                    var stale = "Stalemate. It's a draw...";
+                    var stale = "Game Over. Stalemate.";
                     var stalemateNotification = new Notification(stale);
                     connections.broadcast(null, stalemateNotification);
                 }
