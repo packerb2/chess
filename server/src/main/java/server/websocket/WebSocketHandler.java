@@ -112,6 +112,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
         else {
             try {
+                String user = authData.username();
                 GameData game = service.movePiece(id, move, auth);
                 var loadGame = new LoadGame(game);
                 session.getRemote().sendString(new Gson().toJson(loadGame));
@@ -119,12 +120,26 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 var message = String.format("Move was made: %s", move);
                 var notification = new Notification(message);
                 connections.broadcast(session, notification);
-                if (!game.game().playing) {
+                if (!game.game().playing && (game.game().whiteCheck || game.game().blackCheck)) {
                     session.getRemote().sendString(new Gson().toJson(loadGame));
                     connections.broadcast(null, loadGame);
-                    var endMessage = String.format("Checkmate. %s WINS", game.game().getTeamTurn());
-                    var finalNotification = new Notification(endMessage);
-                    connections.broadcast(null, finalNotification);
+                    var checkmate = String.format("Checkmate. %s WINS", user);
+                    var checkmateNotification = new Notification(checkmate);
+                    connections.broadcast(null, checkmateNotification);
+                }
+                if (game.game().playing && (game.game().whiteCheck || game.game().blackCheck)) {
+                    session.getRemote().sendString(new Gson().toJson(loadGame));
+                    connections.broadcast(null, loadGame);
+                    var check = "Check";
+                    var checkNotification = new Notification(check);
+                    connections.broadcast(session, checkNotification);
+                }
+                if (!game.game().playing && !game.game().whiteCheck && !game.game().blackCheck) {
+                    session.getRemote().sendString(new Gson().toJson(loadGame));
+                    connections.broadcast(null, loadGame);
+                    var stale = "Stalemate. It's a draw...";
+                    var stalemateNotification = new Notification(stale);
+                    connections.broadcast(null, stalemateNotification);
                 }
             } catch (DataAccessException e) {
                 if (e.getMessage().equals("GE")) {

@@ -15,12 +15,16 @@ public class ChessGame {
     private ChessBoard currentBoard;
     private TeamColor teamTurn;
     public boolean playing;
+    public boolean whiteCheck;
+    public boolean blackCheck;
 
     public ChessGame() {
         this.currentBoard = new ChessBoard();
         currentBoard.resetBoard();
         this.teamTurn = TeamColor.WHITE;
         this.playing = true;
+        this.whiteCheck = false;
+        this.blackCheck = false;
     }
 
     public void endGame() {playing = false;}
@@ -138,20 +142,22 @@ public class ChessGame {
         currentBoard.addPiece(move.getEndPosition(), piece);
         currentBoard.addPiece(move.getStartPosition(), null);
         if (turn == TeamColor.WHITE) {
-            if (isInCheckmate(TeamColor.BLACK)) {
+            if (isInCheckmate(TeamColor.BLACK) || isInStalemate(TeamColor.BLACK)) {
                 playing = false;
             }
             else {
                 setTeamTurn(TeamColor.BLACK);
             }
+            blackCheck = isInCheck(TeamColor.BLACK);
         }
         else {
-            if (isInCheckmate(TeamColor.WHITE)) {
+            if (isInCheckmate(TeamColor.WHITE) || isInStalemate(TeamColor.WHITE)) {
                 playing = false;
             }
             else {
                 setTeamTurn(TeamColor.WHITE);
             }
+            whiteCheck = isInCheck(TeamColor.WHITE);
         }
     }
 
