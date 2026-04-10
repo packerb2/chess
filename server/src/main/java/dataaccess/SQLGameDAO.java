@@ -105,7 +105,7 @@ public class SQLGameDAO implements GameDAO {
     public ArrayList<GameData> getGamesList() throws DataAccessException {
         ArrayList<GameData> result = new ArrayList<>();
         try (Connection conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT gameID, whiteUsername, blackUsername, gameName FROM games";
+            var statement = "SELECT gameID, whiteUsername, blackUsername, gameName, gameData FROM games";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
@@ -113,7 +113,9 @@ public class SQLGameDAO implements GameDAO {
                         String whiteUser = rs.getString("whiteUsername");
                         String blackUser = rs.getString("blackUsername");
                         String gameName = rs.getString("gameName");
-                        result.add(new GameData(id, whiteUser, blackUser, gameName, new ChessGame()));
+                        String gameString = rs.getString("gameData");
+                        ChessGame game = new Gson().fromJson(gameString, ChessGame.class);
+                        result.add(new GameData(id, whiteUser, blackUser, gameName, game));
                     }
                     return result;
                 }

@@ -141,6 +141,8 @@ public class ChessGame {
         }
         currentBoard.addPiece(move.getEndPosition(), piece);
         currentBoard.addPiece(move.getStartPosition(), null);
+        blackCheck = false;
+        whiteCheck = false;
         if (turn == TeamColor.WHITE) {
             if (isInCheckmate(TeamColor.BLACK) || isInStalemate(TeamColor.BLACK)) {
                 playing = false;

@@ -26,14 +26,14 @@ public class ChessClient implements NotificationHandler {
         server = new ServerFacade(serverUrl);
         ws = new WebSocketFacade(serverUrl, this);
         playing = null;
-        alphaOrder.put("a", 1);
-        alphaOrder.put("b", 2);
-        alphaOrder.put("c", 3);
-        alphaOrder.put("d", 4);
-        alphaOrder.put("e", 5);
-        alphaOrder.put("f", 6);
-        alphaOrder.put("g", 7);
-        alphaOrder.put("h", 8);
+        alphaOrder.put("a", 8);
+        alphaOrder.put("b", 7);
+        alphaOrder.put("c", 6);
+        alphaOrder.put("d", 5);
+        alphaOrder.put("e", 4);
+        alphaOrder.put("f", 3);
+        alphaOrder.put("g", 2);
+        alphaOrder.put("h", 1);
     }
 
     public void run() {
@@ -189,13 +189,13 @@ public class ChessClient implements NotificationHandler {
         assertPlaying();
         if (params.length < 4) {
             throw new ClientException(
-                    "Error: Expected <startInt> <startChar> <endInt> <endChar> <Promotion (if applicable)>");
+                    "Error: Expected <startChar> <startInt> <endChar> <endInt> <Promotion (if applicable)>");
         }
         try {
-            Integer startRow = alphaOrder.get(params[1]);
-            Integer endRow = alphaOrder.get(params[3]);
-            ChessPosition start = new ChessPosition(Integer.parseInt(params[0]), startRow);
-            ChessPosition end = new ChessPosition(Integer.parseInt(params[2]), endRow);
+            Integer startRow = alphaOrder.get(params[0]);
+            Integer endRow = alphaOrder.get(params[2]);
+            ChessPosition start = new ChessPosition(Integer.parseInt(params[1]), startRow);
+            ChessPosition end = new ChessPosition(Integer.parseInt(params[3]), endRow);
             ChessPiece.PieceType promotion = null;
             if (params.length == 5) {
                 if (params[4].equals("rook")) {
@@ -229,7 +229,7 @@ public class ChessClient implements NotificationHandler {
             }
         } catch (Exception e) {
             throw new ClientException(
-                    "Error: " + e.getMessage() + " Expected <startInt> <startChar> <endInt> <endChar> <Promotion (if applicable)>");
+                    "Error: " + e.getMessage() + " Expected <startChar> <startInt> <endChar> <endInt> <Promotion (if applicable)>");
         }
         throw new ClientException("Error: unable to find game");
     }
