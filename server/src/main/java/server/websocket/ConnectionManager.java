@@ -9,12 +9,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class ConnectionManager {
-//    public final ConcurrentHashMap<Session, Session> connections = new ConcurrentHashMap<>();
     public final ArrayList<Session> connectionNew = new ArrayList<>();
     public final HashMap<Integer, ArrayList<Session>> room = new HashMap<>();
 
     public void add(Session session, Integer id) {
-//        connections.put(session, session);
         ArrayList<Session> connection = room.get(id);
         if (connection == null) {
             connection = connectionNew;

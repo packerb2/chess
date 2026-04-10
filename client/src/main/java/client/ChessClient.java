@@ -159,7 +159,7 @@ public class ChessClient implements NotificationHandler {
                 throw new ClientException("Error: please use Game Number");
             }
             listGames();
-            var id = ids.get(num);
+            Integer id = ids.get(num);
             if (id == null) {
                 throw new ClientException("Error: Game Number was not found");
             }
