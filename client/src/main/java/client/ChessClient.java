@@ -79,7 +79,7 @@ public class ChessClient implements NotificationHandler {
                 case "leave" -> leave();
                 case "resign" -> resign();
                 case "highlight" -> highlight(params);
-                case "redraw" -> redraw(params);
+                case "redraw" -> redraw();
                 default -> help();
             };
         } catch (Exception ex) {return ex.getMessage();}
@@ -221,6 +221,8 @@ public class ChessClient implements NotificationHandler {
     }
 
     public String leave() throws Exception {
+        assertSignedIn();
+        assertPlaying();
         GameList gamesList = server.listGames();
         for (GameData game : gamesList.games) {
             if (Objects.equals(game.gameID(), playing)) {
@@ -236,6 +238,8 @@ public class ChessClient implements NotificationHandler {
     }
 
     public String resign() throws Exception {
+        assertSignedIn();
+        assertPlaying();
         Scanner confirm = new Scanner(System.in);
         System.out.println("Are you sure you want to resign and forfeit the game? Enter `Yes` to confirm");
         String response = confirm.nextLine();
@@ -282,22 +286,13 @@ public class ChessClient implements NotificationHandler {
         return "System has been cleared.";
     }
 
-    public String redraw(String... params) throws Exception {
+    public String redraw() throws Exception {
         assertSignedIn();
-        if (params.length == 1) {
-            int num;
-            try {
-                num = Integer.parseInt(params[0]);
-            } catch (Exception e) {
-                throw new ClientException("Error: please use Game Number");
-            }
+        assertPlaying();
             GameList gamesList = server.listGames();
-            if (gamesList.games.isEmpty()) {
-                return "No games have been created...";
-            }
             var result = new StringBuilder();
             for (GameData game : gamesList.games) {
-                if (game.gameID() == num) {
+                if (Objects.equals(game.gameID(), playing)) {
                     String black = game.blackUsername();
                     if (black == null) {
                         black = "~empty~";
@@ -308,21 +303,20 @@ public class ChessClient implements NotificationHandler {
                     }
                     if (black.equals(userName)) {
                         result.append(String.format(
-                                "%20s\n%s" + SET_TEXT_COLOR_BLUE + "%20s\n", white, board(num), black));
+                                "%20s\n%s" + SET_TEXT_COLOR_BLUE + "%20s\n", white, board(playing), black));
                         return result.toString();
                     }
                     result.append(String.format(
-                            "%20s\n%s" + SET_TEXT_COLOR_BLUE + "%20s\n", black, board(num), white));
+                            "%20s\n%s" + SET_TEXT_COLOR_BLUE + "%20s\n", black, board(playing), white));
                     return result.toString();
                 }
             }
-            return String.format("Error: Game Number: %d does not exist", num);
-        }
-        throw new ClientException("Error: expected <GameID>");
+            return String.format("Error: Game Number: %d does not exist", playing);
     }
 
     public String highlight(String... params) throws Exception {
         assertSignedIn();
+        assertPlaying();
         if (params.length == 2) {
             Integer id = playing;
             Integer startRow = alphaOrder.get(params[1]);
@@ -549,6 +543,17 @@ public class ChessClient implements NotificationHandler {
                     - help
                     - quit
                     """;
+        }
+        if (playing != null) {
+            return """
+                - move <startInt> <startLetter> <endInt> <endLetter> <Promotion (if applicable)>
+                - leave
+                - resign
+                - highlight <startInt> <startLetter>
+                - redraw
+                - help
+                - quit
+                """;
         }
         return """
                 - create <GameName>
