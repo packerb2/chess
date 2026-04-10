@@ -188,20 +188,28 @@ public class ChessClient implements NotificationHandler {
         assertSignedIn();
         assertPlaying();
         if (params.length < 4) {
-            throw new ClientException("Error: Enter the desired move as <startInt> <startChar> <endInt> <endChar>");
+            throw new ClientException(
+                    "Error: Expected <startInt> <startChar> <endInt> <endChar> <Promotion (if applicable)>");
         }
         Integer id = playing;
         Integer startRow = alphaOrder.get(params[1]);
         Integer endRow = alphaOrder.get(params[3]);
         ChessPosition start = new ChessPosition(startRow, Integer.parseInt(params[0]));
         ChessPosition end = new ChessPosition(endRow, Integer.parseInt(params[2]));
+        ChessPiece.PieceType promotion = null;
+        if (params.length == 5) {
+            if (params[4].equals("rook")) {promotion = ChessPiece.PieceType.ROOK;}
+            if (params[4].equals("knight")) {promotion = ChessPiece.PieceType.KNIGHT;}
+            if (params[4].equals("bishop")) {promotion = ChessPiece.PieceType.BISHOP;}
+            if (params[4].equals("queen")) {promotion = ChessPiece.PieceType.QUEEN;}
+        }
         GameList gamesList = server.listGames();
         for (GameData game : gamesList.games) {
             if (Objects.equals(game.gameID(), id)) {
                 try {
                     ChessPiece piece = game.game().getBoard().getPiece(start);
                     if (piece == null) {throw new ClientException("There is no piece there");}
-                    ChessMove moveRequest = new ChessMove(start, end, null);
+                    ChessMove moveRequest = new ChessMove(start, end, promotion);
                     ws.movePiece(authToken, id, moveRequest);
                     return String.format("You made move %s", moveRequest);
                 } catch (InvalidMoveException e) {

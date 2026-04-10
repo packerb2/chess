@@ -139,6 +139,14 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                     var error = new Error("Error: that is not a valid move.");
                     session.getRemote().sendString(new Gson().toJson(error));
                 }
+                if (e.getMessage().equals("P")) {
+                    var error = new Error("Error: Please include a valid promotion.");
+                    session.getRemote().sendString(new Gson().toJson(error));
+                }
+                if (e.getMessage().equals("DNP")) {
+                    var error = new Error("Error: This piece cannot promote.");
+                    session.getRemote().sendString(new Gson().toJson(error));
+                }
             }
         }
     }

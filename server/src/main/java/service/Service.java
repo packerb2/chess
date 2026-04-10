@@ -2,6 +2,7 @@ package service;
 
 import chess.ChessGame;
 import chess.ChessMove;
+import chess.ChessPiece;
 import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.UserDAO;
@@ -218,11 +219,30 @@ public record Service(UserDAO userData, GameDAO gameData, AuthDAO authData) {
                     throw new DataAccessException("NYP");
                 }
             }
+            ChessPiece piece = gd.game().getBoard().getPiece(move.getStartPosition());
+            if (piece.getPieceType().equals(ChessPiece.PieceType.PAWN)) {
+                if ((piece.getTeamColor().equals(ChessGame.TeamColor.WHITE) && move.getEndPosition().getRow() == 8)
+                || (piece.getTeamColor().equals(ChessGame.TeamColor.BLACK) && move.getEndPosition().getRow() == 1)) {
+                    if (move.getPromotionPiece() == null) {
+                        throw new DataAccessException("P");
+                    }
+                }
+            }
+            if (!piece.getPieceType().equals(ChessPiece.PieceType.PAWN)
+                    || (move.getEndPosition().getRow() != 8 || move.getEndPosition().getRow() != 1)) {
+                if (move.getPromotionPiece() != null) {
+                    throw new DataAccessException("DNP");
+                }
+            }
             gd.game().makeMove(move);
             gameData.updateGame(gd.gameID(), gd.game());
             return gd;
         } catch (DataAccessException e) {
-            if (e.getMessage().equals("NA") || e.getMessage().equals("GE") || e.getMessage().equals("NYP")) {
+            if (e.getMessage().equals("NA")
+                    || e.getMessage().equals("GE")
+                    || e.getMessage().equals("NYP")
+                    || e.getMessage().equals("P")
+                    || e.getMessage().equals("DNP")) {
                 throw e;
             } else {
                 throw new DataAccessException("Server Error");
