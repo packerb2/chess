@@ -21,7 +21,6 @@ import websocket.commands.UserGameCommand;
 import websocket.messages.Error;
 import websocket.messages.LoadGame;
 import websocket.messages.Notification;
-import websocket.messages.ServerMessage;
 import service.Service;
 
 import java.io.IOException;
@@ -117,7 +116,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 var loadGame = new LoadGame(game);
                 session.getRemote().sendString(new Gson().toJson(loadGame));
                 connections.broadcast(session, loadGame);
-                var message = String.format("Move was made: %s", move);
+                var message = String.format("%s moved a move: %s", user, move);
                 var notification = new Notification(message);
                 connections.broadcast(session, notification);
                 if (!game.game().playing && (game.game().whiteCheck || game.game().blackCheck)) {
@@ -186,7 +185,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                     }
                 }
             }
-            var message = String.format("%s has left the game.", user);
+            var message = String.format("%s is no longer observing the game.", user);
             if (color != null) {
                 service.removePlayer(id, color, auth);
                 message = String.format("%s has left the game. Waiting for new player...", user);
