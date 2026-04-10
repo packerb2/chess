@@ -78,7 +78,7 @@ public class ChessClient implements NotificationHandler {
                 case "move" -> move(params);
                 case "leave" -> leave();
                 case "resign" -> resign();
-//                case "highlight" -> highlight();
+                case "highlight" -> highlight(params);
                 case "redraw" -> redraw(params);
                 default -> help();
             };
@@ -210,8 +210,6 @@ public class ChessClient implements NotificationHandler {
             }
         }
         throw new ClientException("unable to make move");
-        // have move call websocket and send info there
-        // have websocket call service, check there whether player or observer
     }
 
     public String leave() throws Exception {
@@ -315,6 +313,43 @@ public class ChessClient implements NotificationHandler {
         throw new ClientException("Error: expected <GameID>");
     }
 
+    public String highlight(String... params) throws Exception {
+        assertSignedIn();
+        if (params.length == 2) {
+            Integer id = playing;
+            Integer startRow = alphaOrder.get(params[1]);
+            ChessPosition start = new ChessPosition(startRow, Integer.parseInt(params[0]));
+            GameList gamesList = server.listGames();
+            if (gamesList.games.isEmpty()) {
+                return "No games have been created...";
+            }
+            var result = new StringBuilder();
+            for (GameData game : gamesList.games) {
+                if (Objects.equals(game.gameID(), id)) {
+                    Collection<ChessMove> moves = game.game().validMoves(start);
+                    String black = game.blackUsername();
+                    if (black == null) {
+                        black = "~empty~";
+                    }
+                    String white = game.whiteUsername();
+                    if (white == null) {
+                        white = "~empty~";
+                    }
+                    if (black.equals(userName)) {
+                        result.append(String.format(
+                                "%20s\n%s" + SET_TEXT_COLOR_BLUE + "%20s\n", white, highlightBoard(id, moves, start), black));
+                        return result.toString();
+                    }
+                    result.append(String.format(
+                            "%20s\n%s" + SET_TEXT_COLOR_BLUE + "%20s\n", black, highlightBoard(id, moves, start), white));
+                    return result.toString();
+                }
+            }
+            return String.format("Error: Game Number: %d does not exist", id);
+        }
+        throw new ClientException("Error: expected <startInt> <startChar>");
+    }
+
     public String board(int id) throws ClientException {
         GameList gamesList = server.listGames();
         for (GameData game : gamesList.games) {
@@ -331,7 +366,7 @@ public class ChessClient implements NotificationHandler {
                             if ((i%2==0) == (n%2==0)) {
                                 bgColor = SET_BG_COLOR_DARK_GREY;
                             }
-                            board.append(addPiece(i, n, boardData, bgColor));
+                            board.append(addPiece(i, n, boardData, bgColor, game.game()));
                         }
                         board.append(String.format(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " %d ", i));
                         board.append(RESET_BG_COLOR + RESET_TEXT_COLOR + "\n");
@@ -347,7 +382,7 @@ public class ChessClient implements NotificationHandler {
                             if ((i%2==0) == (n%2==0)) {
                                 bgColor = SET_BG_COLOR_DARK_GREY;
                             }
-                            board.append(addPiece(i, n, boardData, bgColor));
+                            board.append(addPiece(i, n, boardData, bgColor, game.game()));
                         }
                         board.append(String.format(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " %d ", i));
                         board.append(RESET_BG_COLOR + RESET_TEXT_COLOR + "\n");
@@ -360,7 +395,62 @@ public class ChessClient implements NotificationHandler {
         throw new ClientException("Expected: <GameNumber>");
     }
 
-    public String addPiece(int row, int col, ChessBoard boardData, String bgColor) {
+    public String highlightBoard(int id, Collection<ChessMove> moves, ChessPosition start) throws ClientException {
+        GameList gamesList = server.listGames();
+        for (GameData game : gamesList.games) {
+            if (Objects.equals(game.gameID(), id)) {
+                ChessBoard boardData = game.game().getBoard();
+                var board = new StringBuilder();
+                if (game.blackUsername() != null && game.blackUsername().equals(userName) &&
+                        (game.whiteUsername() == null || !game.whiteUsername().equals(userName))) {
+                    board.append(topBottomBorderRev());
+                    for (int i = 1; i <= 8; i++) {
+                        board.append(String.format(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " %d ", i));
+                        for (int n = 1; n <= 8; n++) {
+                            ChessMove spot = new ChessMove(start, new ChessPosition(i, n), null);
+                            String bgColor = SET_BG_COLOR_LIGHT_GREY;
+                            if (moves.contains(spot)) {
+                                bgColor = SET_BG_COLOR_GREEN;
+                            }
+                            if ((i%2==0) == (n%2==0)) {
+                                bgColor = SET_BG_COLOR_DARK_GREY;
+                                if (moves.contains(spot)) {
+                                    bgColor = SET_BG_COLOR_DARK_GREEN;
+                                }
+                            }
+                            if (new ChessPosition(i, n).equals(start)) {
+                                bgColor = SET_BG_COLOR_YELLOW;
+                            }
+                            board.append(addPiece(i, n, boardData, bgColor, game.game()));
+                        }
+                        board.append(String.format(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " %d ", i));
+                        board.append(RESET_BG_COLOR + RESET_TEXT_COLOR + "\n");
+                    }
+                    board.append(topBottomBorderRev());
+                }
+                else {
+                    board.append(topBottomBorder());
+                    for (int i = 8; i >= 1; i--) {
+                        board.append(String.format(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " %d ", i));
+                        for (int n = 8; n >= 1; n--) {
+                            String bgColor = SET_BG_COLOR_LIGHT_GREY;
+                            if ((i%2==0) == (n%2==0)) {
+                                bgColor = SET_BG_COLOR_DARK_GREY;
+                            }
+                            board.append(addPiece(i, n, boardData, bgColor, game.game()));
+                        }
+                        board.append(String.format(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " %d ", i));
+                        board.append(RESET_BG_COLOR + RESET_TEXT_COLOR + "\n");
+                    }
+                    board.append(topBottomBorder());
+                }
+                return String.format("%s", board);
+            }
+        }
+        throw new ClientException("Expected: <GameNumber>");
+    }
+
+    public String addPiece(int row, int col, ChessBoard boardData, String bgColor, ChessGame game) {
         var space = new StringBuilder();
         ChessPiece piece = boardData.getPiece(new ChessPosition(row, col));
         if (piece == null) {
@@ -398,8 +488,14 @@ public class ChessClient implements NotificationHandler {
         }
         else if (piece.getPieceType().equals(ChessPiece.PieceType.KING)) {
             if (piece.getTeamColor().equals(ChessGame.TeamColor.WHITE)) {
+                if (game.isInCheckmate(ChessGame.TeamColor.WHITE)) {
+                    bgColor = SET_BG_COLOR_RED;
+                }
                 space.append(bgColor).append(SET_TEXT_COLOR_WHITE).append(WHITE_KING);
             } else {
+                if (game.isInCheckmate(ChessGame.TeamColor.BLACK)) {
+                    bgColor = SET_BG_COLOR_RED;
+                }
                 space.append(bgColor).append(SET_TEXT_COLOR_BLACK).append(BLACK_KING);}
         }
         return String.format("%s", space);
