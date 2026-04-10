@@ -89,9 +89,9 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             for (GameData game : gamesList.games) {
                 if (Objects.equals(game.gameID(), id)) {
                     inGame = game;
-                    if (game.whiteUsername().equals(user)) {
+                    if (Objects.equals(game.whiteUsername(), user)) {
                         color = ChessGame.TeamColor.WHITE;
-                    } else if (game.blackUsername().equals(user)) {
+                    } else if (Objects.equals(game.blackUsername(), user)) {
                         color = ChessGame.TeamColor.BLACK;
                     }
                 }
@@ -147,7 +147,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 var notification = new Notification(message);
                 connections.broadcast(session, notification, id);
                 if (!game.game().playing && (game.game().whiteCheck || game.game().blackCheck)) {
-                    var checkmate = String.format("Game Over. %s is in Checkmate. %s WINS", opponent, user);
+                    var checkmate = String.format("Game Over. %s is in Checkmate. %s WINS!", opponent, user);
                     var checkmateNotification = new Notification(checkmate);
                     connections.broadcast(null, checkmateNotification, id);
                 }

@@ -240,12 +240,10 @@ public class ChessClient implements NotificationHandler {
         GameList gamesList = server.listGames();
         for (GameData game : gamesList.games) {
             if (Objects.equals(game.gameID(), playing)) {
-                if (game.whiteUsername().equals(userName)) {
-                    JoinGameData ld = new JoinGameData(playing, color, new UserData(null, null, null));
-                    server.leaveGame(ld);
-                    ws.leaveGame(authToken, playing);
-                    return String.format("You have left game %d", playing);
-                }
+                JoinGameData ld = new JoinGameData(playing, color, new UserData(null, null, null));
+                server.leaveGame(ld);
+                ws.leaveGame(authToken, playing);
+                return String.format("You have left game %d", playing);
             }
         }
         throw new ClientException("Unable to Leave");
@@ -333,8 +331,8 @@ public class ChessClient implements NotificationHandler {
         assertPlaying();
         if (params.length == 2) {
             Integer id = playing;
-            Integer startRow = alphaOrder.get(params[1]);
-            ChessPosition start = new ChessPosition(startRow, Integer.parseInt(params[0]));
+            Integer startRow = alphaOrder.get(params[0]);
+            ChessPosition start = new ChessPosition(Integer.parseInt(params[1]), startRow);
             GameList gamesList = server.listGames();
             if (gamesList.games.isEmpty()) {
                 return "No games have been created...";
@@ -343,6 +341,9 @@ public class ChessClient implements NotificationHandler {
             for (GameData game : gamesList.games) {
                 if (Objects.equals(game.gameID(), id)) {
                     Collection<ChessMove> moves = game.game().validMoves(start);
+                    if (moves == null) {
+                        throw new ClientException("There is no piece there");
+                    }
                     String black = game.blackUsername();
                     if (black == null) {
                         black = "~empty~";
@@ -423,14 +424,14 @@ public class ChessClient implements NotificationHandler {
                     for (int i = 1; i <= 8; i++) {
                         board.append(String.format(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " %d ", i));
                         for (int n = 1; n <= 8; n++) {
-                            ChessMove spot = new ChessMove(start, new ChessPosition(i, n), null);
+                            ChessMove option = new ChessMove(start, new ChessPosition(i, n), null);
                             String bgColor = SET_BG_COLOR_LIGHT_GREY;
-                            if (moves.contains(spot)) {
+                            if (moves.contains(option)) {
                                 bgColor = SET_BG_COLOR_GREEN;
                             }
                             if ((i%2==0) == (n%2==0)) {
                                 bgColor = SET_BG_COLOR_DARK_GREY;
-                                if (moves.contains(spot)) {
+                                if (moves.contains(option)) {
                                     bgColor = SET_BG_COLOR_DARK_GREEN;
                                 }
                             }
@@ -449,9 +450,19 @@ public class ChessClient implements NotificationHandler {
                     for (int i = 8; i >= 1; i--) {
                         board.append(String.format(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " %d ", i));
                         for (int n = 8; n >= 1; n--) {
+                            ChessMove option = new ChessMove(start, new ChessPosition(i, n), null);
                             String bgColor = SET_BG_COLOR_LIGHT_GREY;
+                            if (moves.contains(option)) {
+                                bgColor = SET_BG_COLOR_GREEN;
+                            }
                             if ((i%2==0) == (n%2==0)) {
                                 bgColor = SET_BG_COLOR_DARK_GREY;
+                                if (moves.contains(option)) {
+                                    bgColor = SET_BG_COLOR_DARK_GREEN;
+                                }
+                            }
+                            if (new ChessPosition(i, n).equals(start)) {
+                                bgColor = SET_BG_COLOR_YELLOW;
                             }
                             board.append(addPiece(i, n, boardData, bgColor, game.game()));
                         }
@@ -504,12 +515,12 @@ public class ChessClient implements NotificationHandler {
         }
         else if (piece.getPieceType().equals(ChessPiece.PieceType.KING)) {
             if (piece.getTeamColor().equals(ChessGame.TeamColor.WHITE)) {
-                if (game.isInCheckmate(ChessGame.TeamColor.WHITE)) {
+                if (game.isInCheck(ChessGame.TeamColor.WHITE)) {
                     bgColor = SET_BG_COLOR_RED;
                 }
                 space.append(bgColor).append(SET_TEXT_COLOR_WHITE).append(WHITE_KING);
             } else {
-                if (game.isInCheckmate(ChessGame.TeamColor.BLACK)) {
+                if (game.isInCheck(ChessGame.TeamColor.BLACK)) {
                     bgColor = SET_BG_COLOR_RED;
                 }
                 space.append(bgColor).append(SET_TEXT_COLOR_BLACK).append(BLACK_KING);}
@@ -599,6 +610,13 @@ public class ChessClient implements NotificationHandler {
         }
         if (notification.getServerMessageType().equals(ServerMessage.ServerMessageType.ERROR)) {
             System.out.println(notification.getServerErrorMessage());
+        }
+        if (notification.getServerMessageType().equals(ServerMessage.ServerMessageType.LOAD_GAME)) {
+            try {
+                System.out.println(redraw());
+            } catch (Exception e) {
+                System.out.println("There was an error displaying updated game.");
+            }
         }
     }
 }

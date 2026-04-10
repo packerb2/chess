@@ -4,7 +4,6 @@ import chess.ChessGame;
 import com.google.gson.Gson;
 import model.GameData;
 
-import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
