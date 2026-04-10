@@ -90,7 +90,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 var error = new Error("Error: game was not found");
                 session.getRemote().sendString(new Gson().toJson(error));
             } else {
-                connections.add(session);
+                connections.add(session, id);
                 var loadGame = new LoadGame(inGame);
                 session.getRemote().sendString(new Gson().toJson(loadGame));
                 var broadcast = String.format("%s joined game %d as %s", user, id, color);
@@ -98,7 +98,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                     broadcast = String.format("%s joined game %d as an observer", user, id);
                 }
                 var notification = new Notification(broadcast);
-                connections.broadcast(session, notification);
+                connections.broadcast(session, notification, id);
             }
         }
     }
@@ -120,30 +120,24 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 else {opponent = game.whiteUsername();}
                 var loadGame = new LoadGame(game);
                 session.getRemote().sendString(new Gson().toJson(loadGame));
-                connections.broadcast(session, loadGame);
+                connections.broadcast(session, loadGame, id);
                 var message = String.format("%s moved a move: %s", user, move);
                 var notification = new Notification(message);
-                connections.broadcast(session, notification);
+                connections.broadcast(session, notification, id);
                 if (!game.game().playing && (game.game().whiteCheck || game.game().blackCheck)) {
-                    session.getRemote().sendString(new Gson().toJson(loadGame));
-                    connections.broadcast(null, loadGame);
                     var checkmate = String.format("Game Over. %s is in Checkmate. %s WINS", opponent, user);
                     var checkmateNotification = new Notification(checkmate);
-                    connections.broadcast(null, checkmateNotification);
+                    connections.broadcast(null, checkmateNotification, id);
                 }
                 if (game.game().playing && (game.game().whiteCheck || game.game().blackCheck)) {
-                    session.getRemote().sendString(new Gson().toJson(loadGame));
-                    connections.broadcast(null, loadGame);
                     var check = String.format("%s is in Check", opponent);
                     var checkNotification = new Notification(check);
-                    connections.broadcast(null, checkNotification);
+                    connections.broadcast(null, checkNotification, id);
                 }
                 if (!game.game().playing && !game.game().whiteCheck && !game.game().blackCheck) {
-                    session.getRemote().sendString(new Gson().toJson(loadGame));
-                    connections.broadcast(null, loadGame);
                     var stale = "Game Over. Stalemate.";
                     var stalemateNotification = new Notification(stale);
-                    connections.broadcast(null, stalemateNotification);
+                    connections.broadcast(null, stalemateNotification, id);
                 }
             } catch (DataAccessException e) {
                 if (e.getMessage().equals("GE")) {
@@ -196,8 +190,8 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 message = String.format("%s has left the game. Waiting for new player...", user);
             }
             var notification = new Notification(message);
-            connections.broadcast(session, notification);
-            connections.remove(session);
+            connections.broadcast(session, notification, id);
+            connections.remove(session, id);
         }
     }
 
@@ -213,8 +207,8 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 service.surrender(id, user, auth);
                 var message = String.format("%s has resigned.", user);
                 var notification = new Notification(message);
-                connections.broadcast(null, notification);
-                connections.remove(session);
+                connections.broadcast(null, notification, id);
+                connections.remove(session, id);
             } catch (DataAccessException e) {
                 Error error;
                 if (e.getMessage().equals("OE")) {

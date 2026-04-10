@@ -191,7 +191,6 @@ public class ChessClient implements NotificationHandler {
             throw new ClientException(
                     "Error: Expected <startInt> <startChar> <endInt> <endChar> <Promotion (if applicable)>");
         }
-        Integer id = playing;
         Integer startRow = alphaOrder.get(params[1]);
         Integer endRow = alphaOrder.get(params[3]);
         ChessPosition start = new ChessPosition(startRow, Integer.parseInt(params[0]));
@@ -205,19 +204,19 @@ public class ChessClient implements NotificationHandler {
         }
         GameList gamesList = server.listGames();
         for (GameData game : gamesList.games) {
-            if (Objects.equals(game.gameID(), id)) {
+            if (Objects.equals(game.gameID(), playing)) {
                 try {
                     ChessPiece piece = game.game().getBoard().getPiece(start);
                     if (piece == null) {throw new ClientException("There is no piece there");}
                     ChessMove moveRequest = new ChessMove(start, end, promotion);
-                    ws.movePiece(authToken, id, moveRequest);
-                    return String.format("You made move %s", moveRequest);
+                    ws.movePiece(authToken, playing, moveRequest);
+                    return String.format("You moved from %s%s to %s%s", params[0], params[1], params[2], params[3]);
                 } catch (InvalidMoveException e) {
                     throw new ClientException("Not a valid move");
                 }
             }
         }
-        throw new ClientException("unable to make move");
+        throw new ClientException("unable to find game");
     }
 
     public String leave() throws Exception {

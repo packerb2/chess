@@ -4,6 +4,7 @@ import chess.ChessGame;
 import com.google.gson.Gson;
 import model.GameData;
 
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -50,6 +51,7 @@ public class SQLGameDAO implements GameDAO {
                 return rs.getInt("gameID");
             }
         } catch (DataAccessException | SQLException e) {
+            System.out.println("Error In SQLGameDAO: " + e.getMessage());
             throw new DataAccessException("Error creating game");
         }
         return null;
