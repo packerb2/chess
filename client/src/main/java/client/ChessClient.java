@@ -191,32 +191,47 @@ public class ChessClient implements NotificationHandler {
             throw new ClientException(
                     "Error: Expected <startInt> <startChar> <endInt> <endChar> <Promotion (if applicable)>");
         }
-        Integer startRow = alphaOrder.get(params[1]);
-        Integer endRow = alphaOrder.get(params[3]);
-        ChessPosition start = new ChessPosition(startRow, Integer.parseInt(params[0]));
-        ChessPosition end = new ChessPosition(endRow, Integer.parseInt(params[2]));
-        ChessPiece.PieceType promotion = null;
-        if (params.length == 5) {
-            if (params[4].equals("rook")) {promotion = ChessPiece.PieceType.ROOK;}
-            if (params[4].equals("knight")) {promotion = ChessPiece.PieceType.KNIGHT;}
-            if (params[4].equals("bishop")) {promotion = ChessPiece.PieceType.BISHOP;}
-            if (params[4].equals("queen")) {promotion = ChessPiece.PieceType.QUEEN;}
-        }
-        GameList gamesList = server.listGames();
-        for (GameData game : gamesList.games) {
-            if (Objects.equals(game.gameID(), playing)) {
-                try {
-                    ChessPiece piece = game.game().getBoard().getPiece(start);
-                    if (piece == null) {throw new ClientException("There is no piece there");}
-                    ChessMove moveRequest = new ChessMove(start, end, promotion);
-                    ws.movePiece(authToken, playing, moveRequest);
-                    return String.format("You moved from %s%s to %s%s", params[0], params[1], params[2], params[3]);
-                } catch (InvalidMoveException e) {
-                    throw new ClientException("Not a valid move");
+        try {
+            Integer startRow = alphaOrder.get(params[1]);
+            Integer endRow = alphaOrder.get(params[3]);
+            ChessPosition start = new ChessPosition(Integer.parseInt(params[0]), startRow);
+            ChessPosition end = new ChessPosition(Integer.parseInt(params[2]), endRow);
+            ChessPiece.PieceType promotion = null;
+            if (params.length == 5) {
+                if (params[4].equals("rook")) {
+                    promotion = ChessPiece.PieceType.ROOK;
+                }
+                if (params[4].equals("knight")) {
+                    promotion = ChessPiece.PieceType.KNIGHT;
+                }
+                if (params[4].equals("bishop")) {
+                    promotion = ChessPiece.PieceType.BISHOP;
+                }
+                if (params[4].equals("queen")) {
+                    promotion = ChessPiece.PieceType.QUEEN;
                 }
             }
+            GameList gamesList = server.listGames();
+            for (GameData game : gamesList.games) {
+                if (Objects.equals(game.gameID(), playing)) {
+                    try {
+                        ChessPiece piece = game.game().getBoard().getPiece(start);
+                        if (piece == null) {
+                            throw new ClientException("There is no piece there");
+                        }
+                        ChessMove moveRequest = new ChessMove(start, end, promotion);
+                        ws.movePiece(authToken, playing, moveRequest);
+                        return String.format("Moving from %s%s to %s%s", params[0], params[1], params[2], params[3]);
+                    } catch (InvalidMoveException e) {
+                        throw new ClientException("Not a valid move");
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new ClientException(
+                    "Error: " + e.getMessage() + " Expected <startInt> <startChar> <endInt> <endChar> <Promotion (if applicable)>");
         }
-        throw new ClientException("unable to find game");
+        throw new ClientException("Error: unable to find game");
     }
 
     public String leave() throws Exception {
@@ -244,7 +259,7 @@ public class ChessClient implements NotificationHandler {
         String response = confirm.nextLine();
         if (Objects.equals(response, "Yes")) {
             ws.resignFromGame(authToken, playing);
-            return String.format("You have resigned from game %d.", playing);
+            return String.format("Resigning you from game %d...", playing);
         }
         return "Resignation cancelled. Have fun!";
     }
@@ -579,6 +594,11 @@ public class ChessClient implements NotificationHandler {
 
     @Override
     public void notify(ServerMessage notification) {
-
+        if (notification.getServerMessageType().equals(ServerMessage.ServerMessageType.NOTIFICATION)) {
+            System.out.println(notification.getServerMessage());
+        }
+        if (notification.getServerMessageType().equals(ServerMessage.ServerMessageType.ERROR)) {
+            System.out.println(notification.getServerErrorMessage());
+        }
     }
 }

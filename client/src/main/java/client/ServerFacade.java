@@ -88,7 +88,7 @@ public class ServerFacade {
     }
 
     public ErrorObject leaveGame(JoinGameData info) throws ClientException {
-        var request = buildRequest("PUT", "/game", info);
+        var request = buildRequest("DELETE", "/game", info);
         var response = sendRequest(request);
         return handleResponse(response, ErrorObject.class);
     }

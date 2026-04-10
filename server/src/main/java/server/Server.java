@@ -164,10 +164,10 @@ public class Server {
         } catch (DataAccessException e) {
             if (e.getMessage().equals("NA")) {
                 context.status(401);
-                context.result(new Gson().toJson(new ErrorObject("Error: Unauthorized Joining")));
+                context.result(new Gson().toJson(new ErrorObject("Error: Unauthorized in Leave Game")));
             } else {
                 context.status(500);
-                context.result(new Gson().toJson(new ErrorObject("Error: System Error in JoinGame")));
+                context.result(new Gson().toJson(new ErrorObject("Error: System Error in LeaveGame")));
             }
         }
     }

@@ -24,6 +24,8 @@ import websocket.messages.Notification;
 import service.Service;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
@@ -31,9 +33,18 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     private final ConnectionManager connections = new ConnectionManager();
     private final Service service;
     final SQLGameDAO gameDAO = new SQLGameDAO();
+    Map<Integer, String> alphaBack = new HashMap<>();
 
     public WebSocketHandler(Service service) {
         this.service = service;
+        alphaBack.put(1, "a");
+        alphaBack.put(2, "b");
+        alphaBack.put(3, "c");
+        alphaBack.put(4, "d");
+        alphaBack.put(5, "e");
+        alphaBack.put(6, "f");
+        alphaBack.put(7, "g");
+        alphaBack.put(8, "h");
     }
 
     @Override
@@ -103,6 +114,16 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
     }
 
+    private String moveResponse(ChessMove move) {
+        Integer startRow = move.getStartPosition().getRow();
+        Integer startCol = move.getEndPosition().getColumn();
+        Integer endRow = move.getEndPosition().getRow();
+        Integer endCol = move.getEndPosition().getColumn();
+        String startChar = alphaBack.get(startCol);
+        String endChar = alphaBack.get(endCol);
+        return String.format("%d%s to %d%s", startRow, startChar, endRow, endChar);
+    }
+
     public void makeMove(String auth, Integer id, ChessMove move, Session session) throws IOException, InvalidMoveException {
         AuthData authData = service.authData().getKey(auth);
         if (authData == null) {
@@ -121,7 +142,8 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 var loadGame = new LoadGame(game);
                 session.getRemote().sendString(new Gson().toJson(loadGame));
                 connections.broadcast(session, loadGame, id);
-                var message = String.format("%s moved a move: %s", user, move);
+                String moveString = moveResponse(move);
+                var message = String.format("%s moved a move: %s", user, moveString);
                 var notification = new Notification(message);
                 connections.broadcast(session, notification, id);
                 if (!game.game().playing && (game.game().whiteCheck || game.game().blackCheck)) {
@@ -145,7 +167,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                     session.getRemote().sendString(new Gson().toJson(error));
                 }
                 if (e.getMessage().equals("NYP")) {
-                    var error = new Error("Error: those are not your pieces.");
+                    var error = new Error("Error: It is not your turn.");
                     session.getRemote().sendString(new Gson().toJson(error));
                 }
                 if (e.getMessage().equals("IM")) {
