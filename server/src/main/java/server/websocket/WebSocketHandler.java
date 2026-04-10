@@ -143,7 +143,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 session.getRemote().sendString(new Gson().toJson(loadGame));
                 connections.broadcast(session, loadGame, id);
                 String moveString = moveResponse(move);
-                var message = String.format("%s moved a move: %s", user, moveString);
+                var message = String.format("%s made a move from %s", user, moveString);
                 var notification = new Notification(message);
                 connections.broadcast(session, notification, id);
                 if (!game.game().playing && (game.game().whiteCheck || game.game().blackCheck)) {
@@ -206,7 +206,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                     }
                 }
             }
-            var message = String.format("%s is no longer observing the game.", user);
+            var message = String.format("%s has left.", user);
             if (color != null) {
                 service.removePlayer(id, color, auth);
                 message = String.format("%s has left the game. Waiting for new player...", user);

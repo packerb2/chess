@@ -229,7 +229,7 @@ public record Service(UserDAO userData, GameDAO gameData, AuthDAO authData) {
                 }
             }
             if (!piece.getPieceType().equals(ChessPiece.PieceType.PAWN)
-                    || (move.getEndPosition().getRow() != 8 || move.getEndPosition().getRow() != 1)) {
+                    || (move.getEndPosition().getRow() != 8 && move.getEndPosition().getRow() != 1)) {
                 if (move.getPromotionPiece() != null) {
                     throw new DataAccessException("DNP");
                 }
