@@ -116,7 +116,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     private String moveResponse(ChessMove move) {
         Integer startRow = move.getStartPosition().getRow();
-        Integer startCol = move.getEndPosition().getColumn();
+        Integer startCol = move.getStartPosition().getColumn();
         Integer endRow = move.getEndPosition().getRow();
         Integer endCol = move.getEndPosition().getColumn();
         String startChar = alphaBack.get(startCol);
