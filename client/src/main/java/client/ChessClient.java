@@ -161,15 +161,20 @@ public class ChessClient implements NotificationHandler {
             }GameList gamesList = server.listGames();
             for (GameData game : gamesList.games) {
                 if (Objects.equals(game.gameID(), playing)) {
-                    try {ChessPiece piece = game.game().getBoard().getPiece(start);
-                        if (piece == null) {throw new ClientException("There is no piece there");}
-                        ChessMove moveRequest = new ChessMove(start, end, promotion);
-                        ws.movePiece(authToken, playing, moveRequest);
+                    try {getPieceToMove(game, start, end, promotion);
                         return String.format("Moving from %s%s to %s%s", params[0], params[1], params[2], params[3]);
                     } catch (InvalidMoveException e) {throw new ClientException("Not a valid move");}}}
         } catch (Exception e) {throw new ClientException(
                     "Error: Expected <startChar> <startInt> <endChar> <endInt> <Promotion (if applicable)>");
         } throw new ClientException("Error: unable to find game");}
+
+    public void getPieceToMove(GameData game, ChessPosition start, ChessPosition end, ChessPiece.PieceType promotion)
+            throws Exception {
+        ChessPiece piece = game.game().getBoard().getPiece(start);
+        if (piece == null) {throw new ClientException("There is no piece there");}
+        ChessMove moveRequest = new ChessMove(start, end, promotion);
+        ws.movePiece(authToken, playing, moveRequest);
+    }
 
     public String leave() throws Exception {
         assertSignedIn();
@@ -274,22 +279,28 @@ public class ChessClient implements NotificationHandler {
                 var board = new StringBuilder();
                 if (game.blackUsername() != null && game.blackUsername().equals(userName) &&
                         (game.whiteUsername() == null || !game.whiteUsername().equals(userName))) {
-                    board.append(topBottomBorderRev());
-                    for (int i = 1; i <= 8; i++) {
-                        board.append(String.format(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " %d ", i));
-                        for (int n = 1; n <= 8; n++) {boardBack(i, n, board, boardData, game);}
-                        board.append(String.format(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " %d ", i));
-                        board.append(RESET_BG_COLOR + RESET_TEXT_COLOR + "\n");
-                    } board.append(topBottomBorderRev());
-                } else {board.append(topBottomBorder());
-                    for (int i = 8; i >= 1; i--) {
-                        board.append(String.format(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " %d ", i));
-                        for (int n = 8; n >= 1; n--) {boardBack(i, n, board, boardData, game);}
-                        board.append(String.format(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " %d ", i));
-                        board.append(RESET_BG_COLOR + RESET_TEXT_COLOR + "\n");
-                    } board.append(topBottomBorder());
+                    iterateBoardBackward(board, boardData, game);
+                } else {iterateBoardForward(board, boardData, game);
                 } return String.format("%s", board);}
         } throw new ClientException("Expected: <GameNumber>");}
+
+    public void iterateBoardForward(StringBuilder board, ChessBoard boardData, GameData game) {
+        board.append(topBottomBorder());
+        for (int i = 8; i >= 1; i--) {
+            board.append(String.format(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " %d ", i));
+            for (int n = 8; n >= 1; n--) {boardBack(i, n, board, boardData, game);}
+            board.append(String.format(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " %d ", i));
+            board.append(RESET_BG_COLOR + RESET_TEXT_COLOR + "\n");
+        } board.append(topBottomBorder());}
+
+    public void iterateBoardBackward(StringBuilder board, ChessBoard boardData, GameData game) {
+        board.append(topBottomBorderRev());
+        for (int i = 1; i <= 8; i++) {
+            board.append(String.format(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " %d ", i));
+            for (int n = 1; n <= 8; n++) {boardBack(i, n, board, boardData, game);}
+            board.append(String.format(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " %d ", i));
+            board.append(RESET_BG_COLOR + RESET_TEXT_COLOR + "\n");
+        } board.append(topBottomBorderRev());}
 
     public void boardBack(Integer i, Integer n, StringBuilder board, ChessBoard boardData, GameData game) {
         String bgColor = SET_BG_COLOR_LIGHT_GREY;
@@ -304,22 +315,32 @@ public class ChessClient implements NotificationHandler {
                 var board = new StringBuilder();
                 if (game.blackUsername() != null && game.blackUsername().equals(userName) &&
                         (game.whiteUsername() == null || !game.whiteUsername().equals(userName))) {
-                    board.append(topBottomBorderRev());
-                    for (int i = 1; i <= 8; i++) {
-                        board.append(String.format(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " %d ", i));
-                        for (int n = 1; n <= 8; n++) {getBackColor(start, i, n, moves, board, boardData, game);}
-                        board.append(String.format(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " %d ", i));
-                        board.append(RESET_BG_COLOR + RESET_TEXT_COLOR + "\n");
-                    } board.append(topBottomBorderRev());}
-                else {board.append(topBottomBorder());
-                    for (int i = 8; i >= 1; i--) {
-                        board.append(String.format(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " %d ", i));
-                        for (int n = 8; n >= 1; n--) {getBackColor(start, i, n, moves, board, boardData, game);}
-                        board.append(String.format(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " %d ", i));
-                        board.append(RESET_BG_COLOR + RESET_TEXT_COLOR + "\n");
-                    } board.append(topBottomBorder());
-                } return String.format("%s", board);}
+                    iterateBoardBackwardsHigh(board, start, moves, boardData, game);}
+                else {iterateBoardForwardHigh(board, start, moves, boardData, game);}
+                return String.format("%s", board);}
         } throw new ClientException("Expected: <GameNumber>");}
+
+    public void iterateBoardForwardHigh(StringBuilder board, ChessPosition start, Collection<ChessMove> moves,
+                                    ChessBoard boardData, GameData game) {
+        board.append(topBottomBorder());
+        for (int i = 8; i >= 1; i--) {
+            board.append(String.format(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " %d ", i));
+            for (int n = 8; n >= 1; n--) {getBackColor(start, i, n, moves, board, boardData, game);}
+            board.append(String.format(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " %d ", i));
+            board.append(RESET_BG_COLOR + RESET_TEXT_COLOR + "\n");
+        } board.append(topBottomBorder());
+    }
+
+    public void iterateBoardBackwardsHigh(StringBuilder board, ChessPosition start, Collection<ChessMove> moves,
+                                      ChessBoard boardData, GameData game) {
+        board.append(topBottomBorderRev());
+        for (int i = 1; i <= 8; i++) {
+            board.append(String.format(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " %d ", i));
+            for (int n = 1; n <= 8; n++) {getBackColor(start, i, n, moves, board, boardData, game);}
+            board.append(String.format(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " %d ", i));
+            board.append(RESET_BG_COLOR + RESET_TEXT_COLOR + "\n");
+        } board.append(topBottomBorderRev());}
+
 
     public void getBackColor(ChessPosition start, Integer i, Integer n, Collection<ChessMove> moves,
                              StringBuilder board, ChessBoard boardData, GameData game) {
