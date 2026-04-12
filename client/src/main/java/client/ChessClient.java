@@ -303,8 +303,8 @@ public class ChessClient implements NotificationHandler {
         } board.append(topBottomBorderRev());}
 
     public void boardBack(Integer i, Integer n, StringBuilder board, ChessBoard boardData, GameData game) {
-        String bgColor = SET_BG_COLOR_LIGHT_GREY;
-        if ((i%2==0) == (n%2==0)) {bgColor = SET_BG_COLOR_DARK_GREY;}
+        String bgColor = SET_BG_COLOR_DARK_GREY;
+        if ((i%2==0) == (n%2==0)) {bgColor = SET_BG_COLOR_LIGHT_GREY;}
         board.append(addPiece(i, n, boardData, bgColor, game.game()));}
 
     public String highlightBoard(int id, Collection<ChessMove> moves, ChessPosition start) throws ClientException {
@@ -345,11 +345,11 @@ public class ChessClient implements NotificationHandler {
     public void getBackColor(ChessPosition start, Integer i, Integer n, Collection<ChessMove> moves,
                              StringBuilder board, ChessBoard boardData, GameData game) {
         ChessMove option = new ChessMove(start, new ChessPosition(i, n), null);
-        String bgColor = SET_BG_COLOR_LIGHT_GREY;
-        if (moves.contains(option)) {bgColor = SET_BG_COLOR_GREEN;}
-        if ((i%2==0) == (n%2==0)) {bgColor = SET_BG_COLOR_DARK_GREY;
+        String bgColor = SET_BG_COLOR_DARK_GREY;
+        if (moves.contains(option)) {bgColor = SET_BG_COLOR_DARK_GREEN;}
+        if ((i%2==0) == (n%2==0)) {bgColor = SET_BG_COLOR_LIGHT_GREY;
             if (moves.contains(option)) {
-                bgColor = SET_BG_COLOR_DARK_GREEN;}
+                bgColor = SET_BG_COLOR_GREEN;}
         } if (new ChessPosition(i, n).equals(start)) {bgColor = SET_BG_COLOR_YELLOW;
         } board.append(addPiece(i, n, boardData, bgColor, game.game()));}
 
