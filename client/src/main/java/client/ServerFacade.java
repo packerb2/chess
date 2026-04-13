@@ -6,8 +6,6 @@ import com.google.gson.Gson;
 //import io.javalin.http.Context;
 
 import model.*;
-import websocket.messages.LoadGame;
-import websocket.messages.ServerMessage;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -87,10 +85,10 @@ public class ServerFacade {
         return handleResponse(response, ErrorObject.class);
     }
 
-    public ErrorObject leaveGame(JoinGameData info) throws ClientException {
+    public void leaveGame(JoinGameData info) throws ClientException {
         var request = buildRequest("DELETE", "/game", info);
         var response = sendRequest(request);
-        return handleResponse(response, ErrorObject.class);
+        handleResponse(response, ErrorObject.class);
     }
 
     private HttpRequest buildRequest(String method, String path, Object body) {

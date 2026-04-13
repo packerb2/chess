@@ -19,6 +19,8 @@ public class ChessClient implements NotificationHandler {
     Map<Integer, Integer> ids = new HashMap<>();
     private final WebSocketFacade ws;
     private Integer playing;
+    private Integer observing;
+    // add functionality to save the game that is being observed. Check to see if playing is null and, if so, use observing instead
     private ChessGame.TeamColor color;
     Map<String, Integer> alphaOrder = new HashMap<>();
 
@@ -26,6 +28,7 @@ public class ChessClient implements NotificationHandler {
         server = new ServerFacade(serverUrl);
         ws = new WebSocketFacade(serverUrl, this);
         playing = null;
+        observing = null;
         alphaOrder.put("a", 8);
         alphaOrder.put("b", 7);
         alphaOrder.put("c", 6);
@@ -178,7 +181,9 @@ public class ChessClient implements NotificationHandler {
 
     public String leave() throws Exception {
         assertSignedIn();
-        assertPlaying();
+        assertPlayingOrObserving();
+        if (playing == null) {ws.leaveGame(authToken, observing);
+            return String.format("You have left game %d", observing);}
         GameList gamesList = server.listGames();
         for (GameData game : gamesList.games) {
             if (Objects.equals(game.gameID(), playing)) {
@@ -205,16 +210,18 @@ public class ChessClient implements NotificationHandler {
         if (gamesList.games.isEmpty()) {return "No games have been created...";}
         int num;
         try {num = Integer.parseInt(params[0]);
-        } catch (Exception e) {throw new ClientException("Error: please use Game Number");}
+        } catch (Exception e) {throw new ClientException("Error: Expected <gameID>");}
         var result = new StringBuilder();
         for (GameData game : gamesList.games) {
             if (game.gameID() == num) {
+                observing = num;
                 String black = game.blackUsername();
                 if (black == null) {black = "~empty~";}
                 String white = game.whiteUsername();
                 if (white == null) {white = "~empty~";}
-                ws.connectToGame(authToken, playing);
-                result.append(String.format("%20s\n%s" + SET_TEXT_COLOR_BLUE + "%20s\n", black, board(num), white));
+                ws.connectToGame(authToken, num);
+                result.append(String.format(SET_TEXT_COLOR_BLUE + "%20s\n%s" + SET_TEXT_COLOR_BLUE + "%20s\n",
+                        black, board(num), white));
                 return result.toString();}
         } return String.format("Error: Game Number: %d does not exist", num);}
 
@@ -225,50 +232,65 @@ public class ChessClient implements NotificationHandler {
 
     public String redraw() throws Exception {
         assertSignedIn();
-        assertPlaying();
+        assertPlayingOrObserving();
+        Integer id = playing;
+        if (playing == null) {id = observing;}
         GameList gamesList = server.listGames();
         var result = new StringBuilder();
         for (GameData game : gamesList.games) {
-            if (Objects.equals(game.gameID(), playing)) {
+            if (Objects.equals(game.gameID(), id)) {
                 String black = game.blackUsername();
                 if (black == null) {black = "~empty~";}
                 String white = game.whiteUsername();
                 if (white == null) {white = "~empty~";}
                 if (black.equals(userName)) {
                     result.append(String.format("%20s\n%s" + SET_TEXT_COLOR_BLUE + "%20s\n",
-                            white, board(playing), black));
+                            white, board(id), black));
                     return result.toString();}
                 result.append(String.format("%20s\n%s" + SET_TEXT_COLOR_BLUE + "%20s\n",
-                        black, board(playing), white));
+                        black, board(id), white));
                 return result.toString();}
-        } return String.format("Error: Game Number: %d does not exist", playing);}
+        } return "Error: Game not Found";}
 
     public String highlight(String... params) throws Exception {
         assertSignedIn();
-        assertPlaying();
+        assertPlayingOrObserving();
+        Integer id = playing;
+        if (playing == null) {id = observing;}
         if (params.length == 2) {
-            Integer id = playing;
-            Integer startRow = alphaOrder.get(params[0]);
-            ChessPosition start = new ChessPosition(Integer.parseInt(params[1]), startRow);
-            GameList gamesList = server.listGames();
-            if (gamesList.games.isEmpty()) {return "No games have been created...";}
-            var result = new StringBuilder();
-            for (GameData game : gamesList.games) {
-                if (Objects.equals(game.gameID(), id)) {
-                    Collection<ChessMove> moves = game.game().validMoves(start);
-                    if (moves == null) {throw new ClientException("There is no piece there");}
-                    String black = game.blackUsername();
-                    if (black == null) {black = "~empty~";}
-                    String white = game.whiteUsername();
-                    if (white == null) {white = "~empty~";}
-                    if (black.equals(userName)) {
+            try {Integer startRow = alphaOrder.get(params[0]);
+                ChessPosition start = new ChessPosition(Integer.parseInt(params[1]), startRow);
+                GameList gamesList = server.listGames();
+                if (gamesList.games.isEmpty()) {
+                    return "No games have been created...";
+                }
+                var result = new StringBuilder();
+                for (GameData game : gamesList.games) {
+                    if (Objects.equals(game.gameID(), id)) {
+                        Collection<ChessMove> moves = game.game().validMoves(start);
+                        if (moves == null) {
+                            throw new ClientException("There is no piece there");
+                        }
+                        String black = game.blackUsername();
+                        if (black == null) {
+                            black = "~empty~";
+                        }
+                        String white = game.whiteUsername();
+                        if (white == null) {
+                            white = "~empty~";
+                        }
+                        if (black.equals(userName)) {
+                            result.append(String.format("%20s\n%s" + SET_TEXT_COLOR_BLUE + "%20s\n",
+                                    white, highlightBoard(id, moves, start), black));
+                            return result.toString();
+                        }
                         result.append(String.format("%20s\n%s" + SET_TEXT_COLOR_BLUE + "%20s\n",
-                                white, highlightBoard(id, moves, start), black));
-                        return result.toString();}
-                    result.append(String.format("%20s\n%s" + SET_TEXT_COLOR_BLUE + "%20s\n",
-                            black, highlightBoard(id, moves, start), white));
-                    return result.toString();}
-            } return String.format("Error: Game Number: %d does not exist", id);
+                                black, highlightBoard(id, moves, start), white));
+                        return result.toString();
+                    }
+                }
+                return String.format("Error: Game Number: %d does not exist", id);
+            } catch (Exception e) {throw new ClientException("Error: expected <startInt> <startChar>");}
         } throw new ClientException("Error: expected <startInt> <startChar>");}
 
     public String board(int id) throws ClientException {
@@ -443,7 +465,11 @@ public class ChessClient implements NotificationHandler {
         if (state == State.SIGNEDOUT) {throw new ClientException("You must log in");}}
 
     private void assertPlaying() throws ClientException {
-        if (playing == null) {throw new ClientException("You must be in a game");}}
+        if (playing == null) {throw new ClientException("You must be playing a game");}}
+
+    private void assertPlayingOrObserving() throws ClientException {
+        if (playing == null && observing == null) {
+            throw new ClientException("You must be playing or observing a game");}}
 
     @Override
     public void notify(ServerMessage notification) {
@@ -457,7 +483,7 @@ public class ChessClient implements NotificationHandler {
             try {
                 System.out.println(redraw());
             } catch (Exception e) {
-                System.out.println("There was an error displaying updated game.");
+                System.out.println("There was an error displaying updated game: " + e.getMessage());
             }
         }
     }

@@ -96,9 +96,8 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                     }
                 }
             }
-
             if (inGame == null) {
-                var error = new Error("Error: game was not found");
+                var error = new Error("Error: could not connect, game not found");
                 session.getRemote().sendString(new Gson().toJson(error));
             } else {
                 connections.add(session, id);
