@@ -37,14 +37,14 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     public WebSocketHandler(Service service) {
         this.service = service;
-        alphaBack.put(8, "a");
-        alphaBack.put(7, "b");
-        alphaBack.put(6, "c");
-        alphaBack.put(5, "d");
-        alphaBack.put(4, "e");
-        alphaBack.put(3, "f");
-        alphaBack.put(2, "g");
-        alphaBack.put(1, "h");
+        alphaBack.put(1, "a");
+        alphaBack.put(2, "b");
+        alphaBack.put(3, "c");
+        alphaBack.put(4, "d");
+        alphaBack.put(5, "e");
+        alphaBack.put(6, "f");
+        alphaBack.put(7, "g");
+        alphaBack.put(8, "h");
     }
 
     @Override

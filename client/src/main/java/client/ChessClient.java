@@ -29,14 +29,14 @@ public class ChessClient implements NotificationHandler {
         ws = new WebSocketFacade(serverUrl, this);
         playing = null;
         observing = null;
-        alphaOrder.put("a", 8);
-        alphaOrder.put("b", 7);
-        alphaOrder.put("c", 6);
-        alphaOrder.put("d", 5);
-        alphaOrder.put("e", 4);
-        alphaOrder.put("f", 3);
-        alphaOrder.put("g", 2);
-        alphaOrder.put("h", 1);}
+        alphaOrder.put("a", 1);
+        alphaOrder.put("b", 2);
+        alphaOrder.put("c", 3);
+        alphaOrder.put("d", 4);
+        alphaOrder.put("e", 5);
+        alphaOrder.put("f", 6);
+        alphaOrder.put("g", 7);
+        alphaOrder.put("h", 8);}
 
     public void run() {
         System.out.println(SET_TEXT_BOLD + " Welcome to the chess game. Login to start.");
@@ -310,7 +310,7 @@ public class ChessClient implements NotificationHandler {
         board.append(topBottomBorder());
         for (int i = 8; i >= 1; i--) {
             board.append(String.format(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " %d ", i));
-            for (int n = 8; n >= 1; n--) {boardBack(i, n, board, boardData, game);}
+            for (int n = 1; n <= 8; n++) {boardBack(i, n, board, boardData, game);}
             board.append(String.format(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " %d ", i));
             board.append(RESET_BG_COLOR + RESET_TEXT_COLOR + "\n");
         } board.append(topBottomBorder());}
@@ -319,14 +319,14 @@ public class ChessClient implements NotificationHandler {
         board.append(topBottomBorderRev());
         for (int i = 1; i <= 8; i++) {
             board.append(String.format(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " %d ", i));
-            for (int n = 1; n <= 8; n++) {boardBack(i, n, board, boardData, game);}
+            for (int n = 8; n >= 1; n--) {boardBack(i, n, board, boardData, game);}
             board.append(String.format(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " %d ", i));
             board.append(RESET_BG_COLOR + RESET_TEXT_COLOR + "\n");
         } board.append(topBottomBorderRev());}
 
     public void boardBack(Integer i, Integer n, StringBuilder board, ChessBoard boardData, GameData game) {
-        String bgColor = SET_BG_COLOR_DARK_GREY;
-        if ((i%2==0) == (n%2==0)) {bgColor = SET_BG_COLOR_LIGHT_GREY;}
+        String bgColor = SET_BG_COLOR_LIGHT_GREY;
+        if ((i%2==0) == (n%2==0)) {bgColor = SET_BG_COLOR_DARK_GREY;}
         board.append(addPiece(i, n, boardData, bgColor, game.game()));}
 
     public String highlightBoard(int id, Collection<ChessMove> moves, ChessPosition start) throws ClientException {
@@ -347,7 +347,7 @@ public class ChessClient implements NotificationHandler {
         board.append(topBottomBorder());
         for (int i = 8; i >= 1; i--) {
             board.append(String.format(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " %d ", i));
-            for (int n = 8; n >= 1; n--) {getBackColor(start, i, n, moves, board, boardData, game);}
+            for (int n = 1; n <= 8; n++) {getBackColor(start, i, n, moves, board, boardData, game);}
             board.append(String.format(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " %d ", i));
             board.append(RESET_BG_COLOR + RESET_TEXT_COLOR + "\n");
         } board.append(topBottomBorder());
@@ -358,7 +358,7 @@ public class ChessClient implements NotificationHandler {
         board.append(topBottomBorderRev());
         for (int i = 1; i <= 8; i++) {
             board.append(String.format(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " %d ", i));
-            for (int n = 1; n <= 8; n++) {getBackColor(start, i, n, moves, board, boardData, game);}
+            for (int n = 8; n >= 1; n--) {getBackColor(start, i, n, moves, board, boardData, game);}
             board.append(String.format(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " %d ", i));
             board.append(RESET_BG_COLOR + RESET_TEXT_COLOR + "\n");
         } board.append(topBottomBorderRev());}
@@ -367,11 +367,11 @@ public class ChessClient implements NotificationHandler {
     public void getBackColor(ChessPosition start, Integer i, Integer n, Collection<ChessMove> moves,
                              StringBuilder board, ChessBoard boardData, GameData game) {
         ChessMove option = new ChessMove(start, new ChessPosition(i, n), null);
-        String bgColor = SET_BG_COLOR_DARK_GREY;
-        if (moves.contains(option)) {bgColor = SET_BG_COLOR_DARK_GREEN;}
-        if ((i%2==0) == (n%2==0)) {bgColor = SET_BG_COLOR_LIGHT_GREY;
+        String bgColor = SET_BG_COLOR_LIGHT_GREY;
+        if (moves.contains(option)) {bgColor = SET_BG_COLOR_GREEN;}
+        if ((i%2==0) == (n%2==0)) {bgColor = SET_BG_COLOR_DARK_GREY;
             if (moves.contains(option)) {
-                bgColor = SET_BG_COLOR_GREEN;}
+                bgColor = SET_BG_COLOR_DARK_GREEN;}
         } if (new ChessPosition(i, n).equals(start)) {bgColor = SET_BG_COLOR_YELLOW;
         } board.append(addPiece(i, n, boardData, bgColor, game.game()));}
 
